@@ -11,7 +11,7 @@ services:
       VIRTUAL_HOST: blogs.andrewkozinsky.ru
       LETSENCRYPT_HOST: blogs.andrewkozinsky.ru
     volumes:
-      - ./nginx/nginx.conf.dev:/etc/nginx/nginx.conf
+      - ./nginx/nginx.conf.server:/etc/nginx/nginx.conf
 
   mongo:
     image: mongo:4.4.6

@@ -7,7 +7,7 @@ export const client = new MongoClient(process.env.MONGO_URL as string)
 export const db = client.db(process.env.MONGO_DB_NAME)
 
 export const dbService = {
-	client: new MongoClient(process.env.MONGO_URL as string),
+	client: new MongoClient('mongodb://blogs-mongo:27017'),
 
 	async runDb() {
 		try {
