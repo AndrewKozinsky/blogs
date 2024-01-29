@@ -1,13 +1,17 @@
-import express, { Request, Response } from 'express'
+import { app } from './app'
+import { config } from './config/config'
+import { dbService } from './db/dbService'
 
-const app = express()
-app.use(express.json())
-const port = 3000
+async function startApp() {
+	try {
+		await dbService.runDb()
 
-app.get('/', (req, res) => {
-	res.send('Hello World! 2')
-})
+		app.listen(config.port, () => {
+			console.log(`App started in ${config.port} port 🔥`)
+		})
+	} catch (err: unknown) {
+		console.log('ERROR in startApp()')
+	}
+}
 
-app.listen(port, () => {
-	console.log(`Example app listening on port ${port}`)
-})
+startApp()

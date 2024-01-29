@@ -6,10 +6,20 @@ services:
     container_name: blogs-nginx
     depends_on:
       - api
+      - mongo
     ports:
       - "80:80"
     volumes:
       - ./nginx/nginx.conf.dev:/etc/nginx/nginx.conf
+
+  mongo:
+    image: mongo:6.0.13
+    restart: unless-stopped
+    container_name: blogs-mongo
+    ports:
+      - '27017:27017'
+    volumes:
+      - dbdata6:/data/db
 
   api:
     image: node:20.11.0-alpine3.19
@@ -25,3 +35,5 @@ services:
       VIRTUAL_HOST: blogs.andrewkozinsky.ru
       LETSENCRYPT_HOST: blogs.andrewkozinsky.ru
 
+volumes:
+  dbdata6:
