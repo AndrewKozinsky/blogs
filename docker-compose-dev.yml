@@ -13,7 +13,7 @@ services:
       - ./nginx/nginx.conf.dev:/etc/nginx/nginx.conf
 
   mongo:
-    image: mongo:4.4.6
+    image: mongo:6.0.13
     restart: unless-stopped
     container_name: blogs-mongo
     ports:

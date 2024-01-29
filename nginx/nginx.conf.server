@@ -12,7 +12,7 @@ http {
             proxy_pass http://api:3000;
         }
 
-        location /test {
+        location /nginxtest {
             return 200 'Hello from Test';
         }
     }

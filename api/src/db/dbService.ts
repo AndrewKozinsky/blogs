@@ -14,10 +14,10 @@ export const dbService = {
 			await this.client.connect()
 			// Проверка, что соединение произошло успешно сделав запрос на несуществующую БД products.
 			await this.client.db('products').command({ ping: 1 })
-			console.log('Connected to DB 🦁')
+			console.log('Connected to DB 🔥')
 		} catch {
 			await this.close()
-			console.log('Cannot connect to DB 🐲')
+			console.log('Cannot connect to DB 🦁')
 		}
 	},
 
