@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  nginx:
+    image: nginx:1.19.7-alpine
+    container_name: blogs-nginx
+    depends_on:
+      - api
+      - mongo
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf.dev:/etc/nginx/nginx.conf
+
+  mongo:
+    image: mongo:6.0.13
+    restart: unless-stopped
+    container_name: blogs-mongo
+    ports:
+      - '27017:27017'
+    volumes:
+      - dbdata6:/data/db
+
+  api:
+    image: node:20.11.0-alpine3.19
+    build:
+      context: api/
+      dockerfile: Dockerfile
+    volumes:
+      - ./api/src:/app/src
+    container_name: blogs-api
+    command: yarn run start
+    restart: unless-stopped
+    environment:
+      VIRTUAL_HOST: blogs.andrewkozinsky.ru
+      LETSENCRYPT_HOST: blogs.andrewkozinsky.ru
+
+volumes:
+  dbdata6:
+
+networks:
+  default:
+    external:
+      name: nginx-proxy
