@@ -31,9 +31,6 @@ services:
     container_name: blogs-api
     command: yarn run start
     restart: unless-stopped
-    environment:
-      VIRTUAL_HOST: blogs.andrewkozinsky.ru
-      LETSENCRYPT_HOST: blogs.andrewkozinsky.ru
 
 volumes:
   dbdata6:

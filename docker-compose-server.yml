@@ -7,8 +7,9 @@ services:
     depends_on:
       - api
       - mongo
-    ports:
-      - "80:80"
+    environment:
+      VIRTUAL_HOST: blogs.andrewkozinsky.ru
+      LETSENCRYPT_HOST: blogs.andrewkozinsky.ru
     volumes:
       - ./nginx/nginx.conf.dev:/etc/nginx/nginx.conf
 
@@ -31,9 +32,6 @@ services:
     container_name: blogs-api
     command: yarn run start
     restart: unless-stopped
-    environment:
-      VIRTUAL_HOST: blogs.andrewkozinsky.ru
-      LETSENCRYPT_HOST: blogs.andrewkozinsky.ru
 
 volumes:
   dbdata6:
