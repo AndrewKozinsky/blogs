@@ -32,6 +32,12 @@ services:
     container_name: blogs-api
     command: yarn run start
     restart: unless-stopped
+    environment:
+      AUTH_LOGIN: admin
+      AUTH_PASSWORD: qwerty
+      MONGO_URL: mongodb://blogs-mongo:27017
+      MONGO_DB_NAME: blogs
+      JWT_SECRET: 123
 
 volumes:
   dbdata6:
