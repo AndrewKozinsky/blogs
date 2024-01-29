@@ -90,23 +90,25 @@ export const authService = {
 
 		let confirmationCode = user.emailConfirmation.confirmationCode
 
-		if (user.emailConfirmation.expirationDate < new Date()) {
+		// if (user.emailConfirmation.expirationDate < new Date()) {
 			// Set new email confirmation code
 			confirmationCode = await authRepository.setNewEmailConfirmationCode(user.id)
-		}
+		// }
 
 		try {
-			await emailManager.sendEmailConfirmationMessage(email, confirmationCode)
+			emailManager.sendEmailConfirmationMessage(email, confirmationCode)
 
-			return {
-				status: 'success',
-			}
+
 		} catch (err: unknown) {
 			console.log(err)
 
 			return {
 				status: 'fail',
 			}
+		}
+
+		return {
+			status: 'success',
 		}
 	},
 
