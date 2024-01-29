@@ -1,0 +1,18 @@
+events {}
+
+http {
+    include mime.types;
+
+    server {
+        listen 80;
+        server_name blogs.local;
+
+        location / {
+            proxy_pass http://api:3000;
+        }
+
+        location /test {
+            return 200 'Hello from Test';
+        }
+    }
+}
