@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express'
-import { HTTP_STATUSES } from '../config/config'
+import { config, HTTP_STATUSES } from '../config/config'
 import { userAuthMiddleware } from '../middlewares/userAuth.middleware'
 import { AuthLoginDtoModel } from '../models/input/authLogin.input.model'
 import { ReqWithBody } from '../models/common'
@@ -21,18 +21,45 @@ function getAuthRouter() {
 		'/login',
 		authLoginValidation(),
 		async (req: ReqWithBody<AuthLoginDtoModel>, res: Response) => {
-			const user = await authService.getUserByLoginOrEmailAndPassword(req.body)
+			const loginServiceRes = await authService.login(req.body)
 
-			if (!user) {
+			if (loginServiceRes.status === 'fail') {
 				res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401)
 				return
 			}
 
+			res.cookie(config.refreshToken.name, loginServiceRes.refreshToken, {
+				maxAge: config.refreshToken.lifeDurationInMs,
+				httpOnly: true,
+			})
+
 			res.status(HTTP_STATUSES.OK_200).send({
-				accessToken: jwtService.createJWT(user),
+				accessToken: jwtService.createJWT(loginServiceRes.user.id),
 			})
 		},
 	)
+
+	// Generate the new pair of access and refresh tokens (in cookie client must send correct refreshToken that will be revoked after refreshing)
+	router.post('/refresh-token', async (req: Request, res: Response) => {
+		const refreshTokenFromCookie = req.cookies(config.refreshToken.name)
+
+		const { newAccessToken, newRefreshToken } =
+			await authService.generateAccessAndRefreshTokens(refreshTokenFromCookie)
+
+		if (!newAccessToken || newRefreshToken) {
+			res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401)
+			return
+		}
+
+		res.cookie(config.refreshToken.name, newRefreshToken, {
+			maxAge: config.refreshToken.lifeDurationInMs,
+			httpOnly: true,
+		})
+
+		res.status(HTTP_STATUSES.OK_200).send({
+			accessToken: newAccessToken,
+		})
+	})
 
 	// Registration in the system.
 	// Email with confirmation code will be send to passed email address.
@@ -87,6 +114,20 @@ function getAuthRouter() {
 	router.get('/me', userAuthMiddleware, async (req: Request, res: Response) => {
 		const user = authService.getCurrentUser(req.user!)
 		res.status(HTTP_STATUSES.OK_200).send(user)
+	})
+
+	// In cookie client must send correct refreshToken that will be revoked
+	router.post('/logout', async (req: Request, res: Response) => {
+		const refreshTokenFromCookie = req.cookies(config.refreshToken.name)
+		const logoutServiceRes = await authService.logout(refreshTokenFromCookie)
+
+		if (logoutServiceRes.status === 'refreshTokenNoValid') {
+			res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401)
+			return
+		}
+
+		res.clearCookie(config.refreshToken.name)
+		res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
 	})
 
 	return router

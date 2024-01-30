@@ -1,5 +1,6 @@
 import { ObjectId, WithId } from 'mongodb'
 import { hashService } from '../adapters/hash.adapter'
+import { config } from '../config/config'
 import DbNames from '../config/dbNames'
 import { emailManager } from '../managers/email.manager'
 import { DBTypes } from '../models/db'
@@ -7,6 +8,7 @@ import { AuthLoginDtoModel } from '../models/input/authLogin.input.model'
 import { UserServiceModel } from '../models/service/users.service.model'
 import { db, dbService } from '../db/dbService'
 import { commonService } from '../services/common'
+import { createUniqString } from '../utils/stringUtils'
 
 export const authRepository = {
 	async getUserByEmail(loginOrEmail: string) {
@@ -85,7 +87,7 @@ export const authRepository = {
 	},
 
 	async setNewEmailConfirmationCode(userId: string) {
-		const confirmationCode = emailManager.createEmailConfirmationCode()
+		const confirmationCode = createUniqString()
 
 		await db
 			.collection(DbNames.users)
@@ -99,6 +101,22 @@ export const authRepository = {
 
 	async deleteUser(userId: string): Promise<boolean> {
 		return commonService.deleteUser(userId)
+	},
+
+	async setNewRefreshToken(data: DBTypes.RefreshToken) {
+		await db.collection(DbNames.refreshTokens).insertOne(data)
+	},
+
+	async deleteRefreshToken(refreshToken: string): Promise<boolean> {
+		const result = await db.collection(DbNames.refreshTokens).deleteOne({ refreshToken })
+
+		return result.deletedCount === 1
+	},
+
+	async getRefreshTokenByValue(refreshToken: string) {
+		return await db.collection<DBTypes.RefreshToken>(DbNames.refreshTokens).findOne({
+			refreshToken,
+		})
 	},
 
 	mapDbUserToServiceUser(dbUser: WithId<DBTypes.User>): UserServiceModel {

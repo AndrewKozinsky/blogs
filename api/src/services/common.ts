@@ -6,6 +6,7 @@ import { db } from '../db/dbService'
 import { emailManager } from '../managers/email.manager'
 import { DBTypes } from '../models/db'
 import { UserServiceModel } from '../models/service/users.service.model'
+import {createUniqString} from '../utils/stringUtils'
 
 export const commonService = {
 	// Return object which can be save in DB to create a new user
@@ -24,7 +25,7 @@ export const commonService = {
 				createdAt: new Date().toISOString(),
 			},
 			emailConfirmation: {
-				confirmationCode: emailManager.createEmailConfirmationCode(),
+				confirmationCode: createUniqString(),
 				expirationDate: add(new Date(), { hours: 0, minutes: 5 }),
 				isConfirmed: isEmailConfirmed,
 			},

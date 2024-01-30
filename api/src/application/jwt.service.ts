@@ -1,10 +1,12 @@
 import jwt from 'jsonwebtoken'
-import { UserServiceModel } from '../models/service/users.service.model'
+import { config } from '../config/config'
 import { settings } from '../settings'
 
 export const jwtService = {
-	createJWT(user: UserServiceModel) {
-		const token = jwt.sign({ userId: user.id }, settings.JWT_SECRET, { expiresIn: '1h' })
+	createJWT(userId: string) {
+		const token = jwt.sign({ userId }, settings.JWT_SECRET, {
+			expiresIn: config.accessToken.lifeDurationInMs / 1000 + 's',
+		})
 
 		return token
 	},

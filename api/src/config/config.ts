@@ -1,5 +1,13 @@
 export const config = {
 	port: 3000,
+	refreshToken: {
+		name: 'refreshToken',
+		lifeDurationInMs: 1000 * 20, // 20 seconds
+	},
+	accessToken: {
+		name: 'accessToken',
+		lifeDurationInMs: 1000 * 10, // 10 seconds
+	},
 }
 
 export const HTTP_STATUSES = {

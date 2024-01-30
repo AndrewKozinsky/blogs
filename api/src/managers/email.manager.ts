@@ -17,7 +17,4 @@ export const emailManager = {
 		// Send an email
 		await emailAdapter.sendEmail(userEmail, subject, textMessage, htmlMessage)
 	},
-	createEmailConfirmationCode() {
-		return uuid()
-	},
 }

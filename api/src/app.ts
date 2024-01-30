@@ -1,4 +1,5 @@
-import express, { Request, Response } from 'express'
+import express from 'express'
+import cookieParser from 'cookie-parser'
 import RouteNames from './config/routeNames'
 import getAuthRouter from './routes/auth.routes'
 import getBlogsRouter from './routes/blogs.routes'
@@ -9,6 +10,7 @@ import getUsersRouter from './routes/users.routes'
 
 export const app = express()
 app.use(express.json())
+app.use(cookieParser())
 
 app.use(RouteNames.blogs, getBlogsRouter())
 app.use(RouteNames.posts, getPostsRouter())
