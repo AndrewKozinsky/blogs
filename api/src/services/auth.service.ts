@@ -1,6 +1,6 @@
-import { add, addMilliseconds } from 'date-fns'
+import { addMilliseconds } from 'date-fns'
 import { jwtService } from '../application/jwt.service'
-import { config, HTTP_STATUSES } from '../config/config'
+import { config } from '../config/config'
 import { emailManager } from '../managers/email.manager'
 import { DBTypes } from '../models/db'
 import { AuthLoginDtoModel } from '../models/input/authLogin.input.model'
@@ -9,7 +9,6 @@ import { AuthRegistrationEmailResendingDtoModel } from '../models/input/authRegi
 import { MeOutModel } from '../models/output/auth.output.model'
 import { UserServiceModel } from '../models/service/users.service.model'
 import { authRepository } from '../repositories/auth.repository'
-import { createUniqString } from '../utils/stringUtils'
 import { commonService } from './common'
 import { usersService } from './users.service'
 
@@ -65,11 +64,14 @@ export const authService = {
 		}
 
 		await authRepository.deleteRefreshToken(refreshToken)
+		const { userId } = jwtService.getPayload(refreshTokenInDb.refreshToken) as {
+			userId: string
+		}
 
-		const newRefreshToken = await this.createRefreshTokenAndSetToDb(refreshTokenInDb.userId)
+		const newRefreshToken = await this.createRefreshTokenAndSetToDb(userId)
 
 		return {
-			newAccessToken: jwtService.createJWT(refreshTokenInDb.userId),
+			newAccessToken: jwtService.createAccessToken(userId),
 			newRefreshToken: newRefreshToken,
 		}
 	},
@@ -184,8 +186,7 @@ export const authService = {
 
 	async createRefreshTokenAndSetToDb(userId: string) {
 		const refreshTokenForDB: DBTypes.RefreshToken = {
-			userId,
-			refreshToken: createUniqString(),
+			refreshToken: jwtService.createRefreshToken(userId),
 			expirationDate: addMilliseconds(new Date(), config.refreshToken.lifeDurationInMs),
 		}
 

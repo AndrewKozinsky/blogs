@@ -1,17 +1,12 @@
-import jwt from 'jsonwebtoken'
-import request from 'supertest'
+import * as jwt from 'jsonwebtoken'
+import * as request from 'supertest'
 import { app } from '../../src/app'
 import { HTTP_STATUSES } from '../../src/config/config'
 import RouteNames from '../../src/config/routeNames'
 import { usersRepository } from '../../src/repositories/users.repository'
 import { settings } from '../../src/settings'
 import { resetDbEveryTest } from './utils/common'
-import {
-	addUserByAdminRequest,
-	adminAuthorizationValue,
-	createDtoAddPostComment,
-	loginRequest,
-} from './utils/utils'
+import { addUserByAdminRequest, adminAuthorizationValue, loginRequest } from './utils/utils'
 
 resetDbEveryTest()
 

@@ -31,10 +31,11 @@ function getAuthRouter() {
 			res.cookie(config.refreshToken.name, loginServiceRes.refreshToken, {
 				maxAge: config.refreshToken.lifeDurationInMs,
 				httpOnly: true,
+				secure: true,
 			})
 
 			res.status(HTTP_STATUSES.OK_200).send({
-				accessToken: jwtService.createJWT(loginServiceRes.user.id),
+				accessToken: jwtService.createAccessToken(loginServiceRes.user.id),
 			})
 		},
 	)
@@ -54,6 +55,7 @@ function getAuthRouter() {
 		res.cookie(config.refreshToken.name, newRefreshToken, {
 			maxAge: config.refreshToken.lifeDurationInMs,
 			httpOnly: true,
+			secure: true,
 		})
 
 		res.status(HTTP_STATUSES.OK_200).send({

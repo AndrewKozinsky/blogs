@@ -46,7 +46,6 @@ export namespace DBTypes {
 
 	export type RefreshToken = {
 		// _id: ObjectId
-		userId: string
 		refreshToken: string
 		expirationDate: Date
 	}
