@@ -8,7 +8,6 @@ import { resetDbEveryTest } from './utils/common'
 import { addUserByAdminRequest, adminAuthorizationValue, checkUserObj } from './utils/utils'
 
 resetDbEveryTest()
-
 it.skip('123', () => {
 	expect(2).toBe(2)
 })
