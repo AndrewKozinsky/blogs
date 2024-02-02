@@ -32,6 +32,8 @@ services:
     container_name: blogs-api
     command: yarn run start
     restart: unless-stopped
+    ports:
+      - "9229:9229"
     environment:
       AUTH_LOGIN: admin
       AUTH_PASSWORD: qwerty

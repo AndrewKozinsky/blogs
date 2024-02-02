@@ -1,10 +1,16 @@
+import { addMilliseconds } from 'date-fns'
 import * as jwt from 'jsonwebtoken'
-import * as request from 'supertest'
+// @ts-ignore
+import request from 'supertest'
 import { app } from '../../src/app'
-import { HTTP_STATUSES } from '../../src/config/config'
+import { jwtService } from '../../src/application/jwt.service'
+import { HTTP_STATUSES, config } from '../../src/config/config'
 import RouteNames from '../../src/config/routeNames'
+import { DBTypes } from '../../src/models/db'
+import { authRepository } from '../../src/repositories/auth.repository'
 import { usersRepository } from '../../src/repositories/users.repository'
 import { settings } from '../../src/settings'
+import { parseCookieStringToObj } from '../../src/utils/stringUtils'
 import { resetDbEveryTest } from './utils/common'
 import { addUserByAdminRequest, adminAuthorizationValue, loginRequest } from './utils/utils'
 
@@ -16,10 +22,14 @@ it.skip('123', async () => {
 
 describe('Login user', () => {
 	it.skip('should return 400 if to pass wrong dto', async () => {
-		await request(app)
+		const loginRes = await request(app)
 			.post(RouteNames.authLogin)
 			.send({ loginOrEmail: '', password: 'password' })
 			.expect(HTTP_STATUSES.BAD_REQUEST_400)
+
+		expect({}.toString.call(loginRes.body.errorsMessages)).toBe('[object Array]')
+		expect(loginRes.body.errorsMessages.length).toBe(1)
+		expect(loginRes.body.errorsMessages[0].field).toBe('loginOrEmail')
 	})
 
 	it.skip('should return 401 if the login is wrong', async () => {
@@ -63,7 +73,7 @@ describe('Login user', () => {
 		await loginRequest(app, login, password).expect(HTTP_STATUSES.UNAUTHORIZED_401)
 	})
 
-	it.skip('should return 200 and object with token if the DTO is correct and user has verified email', async () => {
+	it.skip('should return 200 and object with token and JWT refreshToken in cookie if the DTO is correct and user has verified email', async () => {
 		const login = 'login'
 		const password = 'password'
 		const email = 'email@email.ru'
@@ -73,10 +83,70 @@ describe('Login user', () => {
 
 		const loginRes = await loginRequest(app, login, password).expect(HTTP_STATUSES.OK_200)
 
-		const rightToken = jwt.sign({ userId: createdUserRes.body.id }, settings.JWT_SECRET, {
-			expiresIn: '1h',
+		// --- AccessToken
+
+		const rightAccessToken = jwt.sign({ userId: createdUserRes.body.id }, settings.JWT_SECRET, {
+			expiresIn: config.accessToken.lifeDurationInMs / 1000 + 's',
 		})
-		expect(loginRes.body.accessToken).toBe(rightToken)
+		expect(loginRes.body.accessToken).toBe(rightAccessToken)
+
+		// --- RefreshToken
+
+		const refreshTokenStr = loginRes.headers['set-cookie'][0]
+		const refreshToken = parseCookieStringToObj(refreshTokenStr)
+
+		expect(refreshToken.cookieName).toBe('refreshToken')
+		expect(refreshToken.HttpOnly).toBe(true)
+		expect(refreshToken.Secure).toBe(true)
+		expect(refreshToken['Max-Age']).toBe(20)
+	})
+})
+
+describe('Refresh token', () => {
+	it.skip('should return 401 if the JWT refreshToken inside cookie is missing, expired or incorrect', async () => {
+		const login = 'login'
+		const password = 'password'
+		const email = 'email@email.ru'
+
+		const createdUserRes = await addUserByAdminRequest(app, { login, password, email })
+		expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
+		const userId = createdUserRes.body.id
+
+		// Create expired token
+		const expiredRefreshToken: DBTypes.RefreshToken = {
+			refreshToken: jwtService.createRefreshToken(userId),
+			expirationDate: addMilliseconds(new Date(), -1000),
+		}
+		await authRepository.setNewRefreshToken(expiredRefreshToken)
+
+		await request(app)
+			.post(RouteNames.authRefreshToken)
+			.set('Cookie', config.refreshToken.name + '=' + expiredRefreshToken.refreshToken)
+			.expect(HTTP_STATUSES.UNAUTHORIZED_401)
+	})
+
+	it.skip('should return 200 if the JWT refreshToken inside cookie is valid', async () => {
+		const login = 'login'
+		const password = 'password'
+		const email = 'email@email.ru'
+
+		const createdUserRes = await addUserByAdminRequest(app, { login, password, email })
+		expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
+
+		const loginRes = await loginRequest(app, login, password).expect(HTTP_STATUSES.OK_200)
+		const refreshTokenStr = loginRes.headers['set-cookie'][0]
+		const refreshTokenValue = parseCookieStringToObj(refreshTokenStr).cookieValue
+
+		const refreshTokenRes = await request(app)
+			.post(RouteNames.authRefreshToken)
+			.set('Cookie', config.refreshToken.name + '=' + refreshTokenValue)
+			.expect(HTTP_STATUSES.OK_200)
+
+		const newRefreshTokenStr = refreshTokenRes.headers['set-cookie'][0]
+		const newRefreshTokenObj = parseCookieStringToObj(newRefreshTokenStr)
+		expect(newRefreshTokenObj['Max-Age']).toBe(20)
+		expect(newRefreshTokenObj.Secure).toBe(true)
+		expect(newRefreshTokenObj.HttpOnly).toBe(true)
 	})
 })
 
@@ -220,5 +290,47 @@ describe('Get current user', () => {
 		expect(authMeRes.body.email).toBe(email)
 		expect(authMeRes.body.login).toBe(login)
 		expect(authMeRes.body.userId).toBe(createdUserRes.body.id)
+	})
+})
+
+describe('Logout', () => {
+	it.skip('should return 401 if the JWT refreshToken inside cookie is missing, expired or incorrect', async () => {
+		const login = 'login'
+		const password = 'password'
+		const email = 'email@email.ru'
+
+		const createdUserRes = await addUserByAdminRequest(app, { login, password, email })
+		expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
+		const userId = createdUserRes.body.id
+
+		// Create expired token
+		const expiredRefreshToken: DBTypes.RefreshToken = {
+			refreshToken: jwtService.createRefreshToken(userId),
+			expirationDate: addMilliseconds(new Date(), -1000),
+		}
+		await authRepository.setNewRefreshToken(expiredRefreshToken)
+
+		await request(app)
+			.post(RouteNames.authLogout)
+			.set('Cookie', config.refreshToken.name + '=' + expiredRefreshToken.refreshToken)
+			.expect(HTTP_STATUSES.UNAUTHORIZED_401)
+	})
+
+	it.skip('should return 200 if the JWT refreshToken inside cookie is valid', async () => {
+		const login = 'login'
+		const password = 'password'
+		const email = 'email@email.ru'
+
+		const createdUserRes = await addUserByAdminRequest(app, { login, password, email })
+		expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
+
+		const loginRes = await loginRequest(app, login, password).expect(HTTP_STATUSES.OK_200)
+		const refreshTokenStr = loginRes.headers['set-cookie'][0]
+		const refreshTokenValue = parseCookieStringToObj(refreshTokenStr).cookieValue
+
+		await request(app)
+			.post(RouteNames.authLogout)
+			.set('Cookie', config.refreshToken.name + '=' + refreshTokenValue)
+			.expect(HTTP_STATUSES.NO_CONTENT_204)
 	})
 })

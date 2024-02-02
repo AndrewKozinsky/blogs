@@ -42,12 +42,12 @@ function getAuthRouter() {
 
 	// Generate the new pair of access and refresh tokens (in cookie client must send correct refreshToken that will be revoked after refreshing)
 	router.post('/refresh-token', async (req: Request, res: Response) => {
-		const refreshTokenFromCookie = req.cookies(config.refreshToken.name)
+		const refreshTokenFromCookie = req.cookies[config.refreshToken.name]
 
 		const { newAccessToken, newRefreshToken } =
 			await authService.generateAccessAndRefreshTokens(refreshTokenFromCookie)
 
-		if (!newAccessToken || newRefreshToken) {
+		if (!newAccessToken || !newRefreshToken) {
 			res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401)
 			return
 		}
@@ -120,7 +120,7 @@ function getAuthRouter() {
 
 	// In cookie client must send correct refreshToken that will be revoked
 	router.post('/logout', async (req: Request, res: Response) => {
-		const refreshTokenFromCookie = req.cookies(config.refreshToken.name)
+		const refreshTokenFromCookie = req.cookies[config.refreshToken.name]
 		const logoutServiceRes = await authService.logout(refreshTokenFromCookie)
 
 		if (logoutServiceRes.status === 'refreshTokenNoValid') {

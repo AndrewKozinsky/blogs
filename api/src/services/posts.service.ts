@@ -11,7 +11,7 @@ import { commentsRepository } from '../repositories/comments.repository'
 import { postsRepository } from '../repositories/posts.repository'
 
 export const postsService = {
-	async createPost(dto: CreatePostDtoModel) {
+	async createPost(dto: CreatePostDtoModel): Promise<string> {
 		const blog = await blogsRepository.getBlogById(dto.blogId)
 
 		const newPostDto: PostOutModel = {

@@ -179,7 +179,7 @@ export const authService = {
 			return { status: 'refreshTokenNoValid' }
 		}
 
-		await authRepository.deleteRefreshToken(refreshTokenInDb.refreshToken)
+		await authRepository.deleteRefreshToken(refreshTokenInDb!.refreshToken)
 
 		return { status: 'refreshTokenValid' }
 	},

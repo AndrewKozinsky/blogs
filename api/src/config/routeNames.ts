@@ -20,9 +20,11 @@ const RouteNames = {
 
 	auth: '/auth',
 	authLogin: '/auth/login',
+	authRefreshToken: '/auth/refresh-token',
 	authRegistration: '/auth/registration',
 	authRegistrationEmailResending: '/auth/registration-email-resending',
 	authRegistrationConfirmation: '/auth/registration-confirmation',
+	authLogout: '/auth/logout',
 	authMe: '/auth/me',
 
 	comments: '/comments',
