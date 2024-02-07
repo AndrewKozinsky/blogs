@@ -64,7 +64,7 @@ function getAuthRouter() {
 	})
 
 	// Registration in the system.
-	// Email with confirmation code will be send to passed email address.
+	// Email with confirmation code will be sent to passed email address.
 	router.post(
 		'/registration',
 		authRegistrationValidation(),

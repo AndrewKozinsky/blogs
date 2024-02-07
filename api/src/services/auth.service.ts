@@ -1,8 +1,5 @@
-import { addMilliseconds } from 'date-fns'
 import { jwtService } from '../application/jwt.service'
-import { config } from '../config/config'
 import { emailManager } from '../managers/email.manager'
-import { DBTypes } from '../models/db'
 import { AuthLoginDtoModel } from '../models/input/authLogin.input.model'
 import { AuthRegistrationDtoModel } from '../models/input/authRegistration.input.model'
 import { AuthRegistrationEmailResendingDtoModel } from '../models/input/authRegistrationEmailResending.input.model'
@@ -42,7 +39,7 @@ export const authService = {
 			}
 		}
 
-		const refreshToken = await authService.createRefreshTokenAndSetToDb(user.id)
+		const refreshToken = await jwtService.createRefreshTokenAndSetToDb(user.id)
 
 		return {
 			status: 'success',
@@ -54,24 +51,23 @@ export const authService = {
 	async generateAccessAndRefreshTokens(
 		refreshToken: string,
 	): Promise<GenAccessAndRefreshTokensServiceRes> {
-		const refreshTokenInDb = await authRepository.getRefreshTokenByValue(refreshToken)
+		const refreshTokenInDb = await authRepository.getRefreshTokenByTokenStr(refreshToken)
 
-		if (!refreshTokenInDb || refreshTokenInDb.expirationDate < new Date()) {
+		if (!refreshTokenInDb || !jwtService.isRefreshTokenInDbValid(refreshTokenInDb)) {
 			return {
 				newAccessToken: '',
 				newRefreshToken: '',
 			}
 		}
 
-		await authRepository.deleteRefreshToken(refreshToken)
-		const { userId } = jwtService.getPayload(refreshTokenInDb.refreshToken) as {
-			userId: string
-		}
+		await authRepository.updateRefreshTokenDate(refreshTokenInDb.deviceId)
 
-		const newRefreshToken = await this.createRefreshTokenAndSetToDb(userId)
+		const newRefreshToken = await jwtService.createRefreshTokenAndSetToDb(
+			refreshTokenInDb.userId,
+		)
 
 		return {
-			newAccessToken: jwtService.createAccessToken(userId),
+			newAccessToken: jwtService.createAccessToken(refreshTokenInDb.userId),
 			newRefreshToken: newRefreshToken,
 		}
 	},
@@ -171,27 +167,14 @@ export const authService = {
 	},
 
 	async logout(refreshToken: string): Promise<LogoutServiceRes> {
-		const refreshTokenInDb = await authRepository.getRefreshTokenByValue(refreshToken)
+		const refreshTokenInDb = await authRepository.getRefreshTokenByTokenStr(refreshToken)
 
-		const isRefreshTokenValid = refreshTokenInDb && refreshTokenInDb.expirationDate > new Date()
-
-		if (!isRefreshTokenValid) {
+		if (!refreshTokenInDb || !jwtService.isRefreshTokenInDbValid(refreshTokenInDb)) {
 			return { status: 'refreshTokenNoValid' }
 		}
 
-		await authRepository.deleteRefreshToken(refreshTokenInDb!.refreshToken)
+		await authRepository.deleteRefreshTokenByDeviceId(refreshTokenInDb.deviceId)
 
 		return { status: 'refreshTokenValid' }
-	},
-
-	async createRefreshTokenAndSetToDb(userId: string) {
-		const refreshTokenForDB: DBTypes.RefreshToken = {
-			refreshToken: jwtService.createRefreshToken(userId),
-			expirationDate: addMilliseconds(new Date(), config.refreshToken.lifeDurationInMs),
-		}
-
-		await authRepository.setNewRefreshToken(refreshTokenForDB)
-
-		return refreshTokenForDB.refreshToken
 	},
 }

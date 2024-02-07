@@ -1,4 +1,3 @@
-import { uuid } from 'uuidv4'
 import { emailAdapter } from '../adapters/email.adapter'
 
 export const emailManager = {

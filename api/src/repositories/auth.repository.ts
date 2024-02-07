@@ -1,13 +1,13 @@
+import jwt from 'jsonwebtoken'
 import { ObjectId, WithId } from 'mongodb'
 import { hashService } from '../adapters/hash.adapter'
-import { config } from '../config/config'
 import DbNames from '../config/dbNames'
-import { emailManager } from '../managers/email.manager'
 import { DBTypes } from '../models/db'
 import { AuthLoginDtoModel } from '../models/input/authLogin.input.model'
 import { UserServiceModel } from '../models/service/users.service.model'
-import { db, dbService } from '../db/dbService'
+import { db } from '../db/dbService'
 import { commonService } from '../services/common'
+import { settings } from '../settings'
 import { createUniqString } from '../utils/stringUtils'
 
 export const authRepository = {
@@ -107,16 +107,42 @@ export const authRepository = {
 		await db.collection(DbNames.refreshTokens).insertOne(data)
 	},
 
-	async deleteRefreshToken(refreshToken: string): Promise<boolean> {
-		const result = await db.collection(DbNames.refreshTokens).deleteOne({ refreshToken })
+	async getRefreshTokenByDeviceId(deviceId: string): Promise<null | DBTypes.RefreshToken> {
+		const getTokenRes = await db
+			.collection<DBTypes.RefreshToken>(DbNames.refreshTokens)
+			.findOne({
+				deviceId,
+			})
+
+		if (!getTokenRes) return null
+
+		return {
+			issuedAt: getTokenRes.issuedAt,
+			deviceIP: '',
+			deviceId: getTokenRes.deviceId,
+			deviceName: '',
+			userId: getTokenRes.userId,
+		}
+	},
+
+	async deleteRefreshTokenByDeviceId(deviceId: string): Promise<boolean> {
+		const result = await db.collection(DbNames.refreshTokens).deleteOne({ deviceId })
 
 		return result.deletedCount === 1
 	},
 
-	async getRefreshTokenByValue(refreshToken: string) {
-		return await db.collection<DBTypes.RefreshToken>(DbNames.refreshTokens).findOne({
-			refreshToken,
-		})
+	async updateRefreshTokenDate(deviceId: string): Promise<boolean> {
+		const result = await db
+			.collection(DbNames.refreshTokens)
+			.updateOne({ deviceId }, { $set: { issuedAt: new Date() } })
+
+		return result.modifiedCount === 1
+	},
+
+	async getRefreshTokenByTokenStr(tokenStr: string): Promise<null | DBTypes.RefreshToken> {
+		const { deviceId } = jwt.verify(tokenStr, settings.JWT_SECRET) as { deviceId: string }
+
+		return this.getRefreshTokenByDeviceId(deviceId)
 	},
 
 	mapDbUserToServiceUser(dbUser: WithId<DBTypes.User>): UserServiceModel {

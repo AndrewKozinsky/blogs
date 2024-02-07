@@ -10,7 +10,7 @@ import { DBTypes } from '../../src/models/db'
 import { authRepository } from '../../src/repositories/auth.repository'
 import { usersRepository } from '../../src/repositories/users.repository'
 import { settings } from '../../src/settings'
-import { parseCookieStringToObj } from '../../src/utils/stringUtils'
+import { createUniqString, parseCookieStringToObj } from '../../src/utils/stringUtils'
 import { resetDbEveryTest } from './utils/common'
 import { addUserByAdminRequest, adminAuthorizationValue, loginRequest } from './utils/utils'
 
@@ -84,7 +84,6 @@ describe('Login user', () => {
 		const loginRes = await loginRequest(app, login, password).expect(HTTP_STATUSES.OK_200)
 
 		// --- AccessToken
-
 		const rightAccessToken = jwt.sign({ userId: createdUserRes.body.id }, settings.JWT_SECRET, {
 			expiresIn: config.accessToken.lifeDurationInMs / 1000 + 's',
 		})
@@ -113,15 +112,20 @@ describe('Refresh token', () => {
 		const userId = createdUserRes.body.id
 
 		// Create expired token
+		const deviceId = createUniqString()
 		const expiredRefreshToken: DBTypes.RefreshToken = {
-			refreshToken: jwtService.createRefreshToken(userId),
-			expirationDate: addMilliseconds(new Date(), -1000),
+			issuedAt: addMilliseconds(new Date(), -config.refreshToken.lifeDurationInMs - 10000),
+			deviceId,
+			userId,
 		}
 		await authRepository.setNewRefreshToken(expiredRefreshToken)
 
+		// Get created expired token
+		const refreshToken = jwtService.createRefreshToken(deviceId)
+
 		await request(app)
 			.post(RouteNames.authRefreshToken)
-			.set('Cookie', config.refreshToken.name + '=' + expiredRefreshToken.refreshToken)
+			.set('Cookie', config.refreshToken.name + '=' + refreshToken)
 			.expect(HTTP_STATUSES.UNAUTHORIZED_401)
 	})
 
@@ -304,15 +308,20 @@ describe('Logout', () => {
 		const userId = createdUserRes.body.id
 
 		// Create expired token
+		const deviceId = createUniqString()
 		const expiredRefreshToken: DBTypes.RefreshToken = {
-			refreshToken: jwtService.createRefreshToken(userId),
-			expirationDate: addMilliseconds(new Date(), -1000),
+			issuedAt: addMilliseconds(new Date(), -config.refreshToken.lifeDurationInMs - 10000),
+			deviceId,
+			userId,
 		}
 		await authRepository.setNewRefreshToken(expiredRefreshToken)
 
+		// Get created expired token
+		const refreshToken = jwtService.createRefreshToken(deviceId)
+
 		await request(app)
 			.post(RouteNames.authLogout)
-			.set('Cookie', config.refreshToken.name + '=' + expiredRefreshToken.refreshToken)
+			.set('Cookie', config.refreshToken.name + '=' + refreshToken)
 			.expect(HTTP_STATUSES.UNAUTHORIZED_401)
 	})
 
