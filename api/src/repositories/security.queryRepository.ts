@@ -6,7 +6,7 @@ import { GetUserDevicesOutModel, UserDeviceOutModel } from '../models/output/sec
 
 export const securityQueryRepository = {
 	async getUserDevices(): Promise<GetUserDevicesOutModel> {
-		const userDevices = await db.collection(DbNames.refreshTokens).toArray()
+		const userDevices = await db.collection(DbNames.refreshTokens).find().toArray()
 
 		return userDevices.map(this.mapDbUserDeviceToOutputUserDevice)
 	},

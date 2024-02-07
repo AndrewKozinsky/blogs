@@ -1,3 +1,4 @@
+import { Request } from 'express'
 import { addMilliseconds } from 'date-fns'
 import jwt from 'jsonwebtoken'
 import { config } from '../config/config'
@@ -7,6 +8,9 @@ import { settings } from '../settings'
 import { createUniqString } from '../utils/stringUtils'
 
 export const jwtService = {
+	async getRefreshTokenFromReqCookie(req: Request): string {
+		return req.cookies[config.refreshToken.name]
+	},
 	createAccessToken(userId: string) {
 		const token = jwt.sign({ userId }, settings.JWT_SECRET, {
 			expiresIn: config.accessToken.lifeDurationInMs / 1000 + 's',
