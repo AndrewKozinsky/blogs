@@ -70,8 +70,12 @@ export const authService = {
 
 		await authRepository.updateRefreshTokenDate(refreshTokenInDb.deviceId)
 
+		const clientIP = browserService.getClientIP(req)
+		const clientName = browserService.getClientName(req)
 		const newRefreshToken = await jwtService.createRefreshTokenAndSetToDb(
 			refreshTokenInDb.userId,
+			clientIP,
+			clientName,
 		)
 
 		return {
