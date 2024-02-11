@@ -6,7 +6,7 @@ import { authRepository } from './auth.repository'
 type TerminateSpecifiedDeviceRefreshTokenStatus = 'tokenNotFound' | 'success' | 'fail'
 
 export const securityRepository = {
-	async terminateAllDeviceRefreshTokensApartThis(currentDeviceId) {
+	async terminateAllDeviceRefreshTokensApartThis(currentDeviceId: string) {
 		const result = await db
 			.collection(DbNames.refreshTokens)
 			.deleteMany({ deviceId: { $ne: currentDeviceId } })

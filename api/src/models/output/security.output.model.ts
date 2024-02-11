@@ -1,5 +1,3 @@
-import { ItemsOutModel } from './common'
-
 export type UserDeviceOutModel = {
 	ip: string
 	title: string

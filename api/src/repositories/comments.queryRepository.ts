@@ -2,11 +2,26 @@ import { ObjectId, WithId } from 'mongodb'
 import DbNames from '../config/dbNames'
 import { DBTypes } from '../models/db'
 import { GetPostCommentsQueries } from '../models/input/posts.input.model'
-import {
-	CommentOutModel,
-	GetCommentOutModel,
-} from '../models/output/comments.output.model'
+import { CommentOutModel, GetCommentOutModel } from '../models/output/comments.output.model'
 import { db } from '../db/dbService'
+
+type GetPostCommentsResult =
+	| {
+			status: 'postNotValid'
+	  }
+	| {
+			status: 'postNotFound'
+	  }
+	| {
+			status: 'success'
+			data: {
+				pagesCount: number
+				page: number
+				pageSize: number
+				totalCount: number
+				items: CommentOutModel[]
+			}
+	  }
 
 export const commentsQueryRepository = {
 	async getComment(commentId: string): Promise<null | GetCommentOutModel> {
@@ -20,7 +35,10 @@ export const commentsQueryRepository = {
 
 		return getCommentRes ? this.mapDbCommentToOutputComment(getCommentRes) : null
 	},
-	async getPostComments(postId: string, queries: GetPostCommentsQueries) {
+	async getPostComments(
+		postId: string,
+		queries: GetPostCommentsQueries,
+	): Promise<GetPostCommentsResult> {
 		const sortBy = queries.sortBy ?? 'createdAt'
 		const sortDirection = queries.sortDirection ?? 'desc'
 

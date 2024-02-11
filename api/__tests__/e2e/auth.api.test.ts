@@ -115,9 +115,12 @@ describe('Refresh token', () => {
 		const deviceId = createUniqString()
 		const expiredRefreshToken: DBTypes.RefreshToken = {
 			issuedAt: addMilliseconds(new Date(), -config.refreshToken.lifeDurationInMs - 10000),
+			deviceIP: '123',
 			deviceId,
+			deviceName: 'Unknown',
 			userId,
 		}
+
 		await authRepository.setNewRefreshToken(expiredRefreshToken)
 
 		// Get created expired token
@@ -311,7 +314,9 @@ describe('Logout', () => {
 		const deviceId = createUniqString()
 		const expiredRefreshToken: DBTypes.RefreshToken = {
 			issuedAt: addMilliseconds(new Date(), -config.refreshToken.lifeDurationInMs - 10000),
+			deviceIP: '123',
 			deviceId,
+			deviceName: 'Unknown',
 			userId,
 		}
 		await authRepository.setNewRefreshToken(expiredRefreshToken)

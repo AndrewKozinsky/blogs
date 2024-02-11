@@ -45,7 +45,7 @@ function getAuthRouter() {
 		const refreshTokenFromCookie = jwtService.getRefreshTokenFromReqCookie(req)
 
 		const { newAccessToken, newRefreshToken } =
-			await authService.generateAccessAndRefreshTokens(refreshTokenFromCookie)
+			await authService.generateAccessAndRefreshTokens(req, refreshTokenFromCookie)
 
 		if (!newAccessToken || !newRefreshToken) {
 			res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401)

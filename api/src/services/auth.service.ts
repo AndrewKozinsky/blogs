@@ -1,3 +1,4 @@
+import { Request } from 'express'
 import { browserService } from '../application/browser.service'
 import { jwtService } from '../application/jwt.service'
 import { emailManager } from '../managers/email.manager'
@@ -57,6 +58,7 @@ export const authService = {
 	},
 
 	async generateAccessAndRefreshTokens(
+		req: Request,
 		refreshToken: string,
 	): Promise<GenAccessAndRefreshTokensServiceRes> {
 		const refreshTokenInDb = await authRepository.getRefreshTokenByTokenStr(refreshToken)

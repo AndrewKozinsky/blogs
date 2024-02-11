@@ -6,7 +6,7 @@ import { db } from '../db/dbService'
 import { emailManager } from '../managers/email.manager'
 import { DBTypes } from '../models/db'
 import { UserServiceModel } from '../models/service/users.service.model'
-import {createUniqString} from '../utils/stringUtils'
+import { createUniqString } from '../utils/stringUtils'
 
 export const commonService = {
 	// Return object which can be save in DB to create a new user
