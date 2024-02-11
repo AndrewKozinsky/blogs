@@ -8,23 +8,19 @@ import { settings } from '../settings'
 import { createUniqString } from '../utils/stringUtils'
 
 export const jwtService = {
-	async getRefreshTokenFromReqCookie(req: Request): string {
+	getRefreshTokenFromReqCookie(req: Request): string {
 		return req.cookies[config.refreshToken.name]
 	},
 	createAccessToken(userId: string) {
-		const token = jwt.sign({ userId }, settings.JWT_SECRET, {
+		return jwt.sign({ userId }, settings.JWT_SECRET, {
 			expiresIn: config.accessToken.lifeDurationInMs / 1000 + 's',
 		})
-
-		return token
 	},
 
 	createRefreshToken(deviceId: string): string {
-		const token = jwt.sign({ deviceId }, settings.JWT_SECRET, {
+		return jwt.sign({ deviceId }, settings.JWT_SECRET, {
 			expiresIn: config.refreshToken.lifeDurationInMs / 1000 + 's',
 		})
-
-		return token
 	},
 
 	isRefreshTokenInDbValid(refreshTokenInDb: undefined | null | DBTypes.RefreshToken) {
