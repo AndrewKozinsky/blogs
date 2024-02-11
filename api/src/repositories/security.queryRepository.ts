@@ -21,7 +21,7 @@ export const securityQueryRepository = {
 			ip: DbUserRefreshToken.deviceIP, // IP address of device
 			title: DbUserRefreshToken.deviceName, // Chrome 105
 			lastActiveDate: DbUserRefreshToken.issuedAt.toString(), // Date of the last generating of refresh/access tokens
-			deviceId: DbUserRefreshToken.deviceId, // Id of connected device session
+			deviceId: DbUserRefreshToken.deviceId, // Id of the connected device session
 		}
 	},
 }
