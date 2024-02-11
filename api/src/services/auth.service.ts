@@ -1,5 +1,7 @@
+import { browserService } from '../application/browser.service'
 import { jwtService } from '../application/jwt.service'
 import { emailManager } from '../managers/email.manager'
+import { ReqWithBody } from '../models/common'
 import { AuthLoginDtoModel } from '../models/input/authLogin.input.model'
 import { AuthRegistrationDtoModel } from '../models/input/authRegistration.input.model'
 import { AuthRegistrationEmailResendingDtoModel } from '../models/input/authRegistrationEmailResending.input.model'
@@ -30,8 +32,8 @@ export const authService = {
 		return user
 	},
 
-	async login(loginDto: AuthLoginDtoModel): Promise<LoginServiceRes> {
-		const user = await this.getUserByLoginOrEmailAndPassword(loginDto)
+	async login(req: ReqWithBody<AuthLoginDtoModel>): Promise<LoginServiceRes> {
+		const user = await this.getUserByLoginOrEmailAndPassword(req.body)
 
 		if (!user) {
 			return {
@@ -39,7 +41,13 @@ export const authService = {
 			}
 		}
 
-		const refreshToken = await jwtService.createRefreshTokenAndSetToDb(user.id)
+		const clientIP = browserService.getClientIP(req)
+		const clientName = browserService.getClientName(req)
+		const refreshToken = await jwtService.createRefreshTokenAndSetToDb(
+			user.id,
+			clientIP,
+			clientName,
+		)
 
 		return {
 			status: 'success',

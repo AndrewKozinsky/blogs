@@ -21,7 +21,7 @@ function getAuthRouter() {
 		'/login',
 		authLoginValidation(),
 		async (req: ReqWithBody<AuthLoginDtoModel>, res: Response) => {
-			const loginServiceRes = await authService.login(req.body)
+			const loginServiceRes = await authService.login(req)
 
 			if (loginServiceRes.status === 'fail') {
 				res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401)

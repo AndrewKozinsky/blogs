@@ -38,14 +38,18 @@ export const jwtService = {
 		)
 	},
 
-	async createRefreshTokenAndSetToDb(userId: string): Promise<string> {
+	async createRefreshTokenAndSetToDb(
+		userId: string,
+		deviceIP: string,
+		deviceName: string,
+	): Promise<string> {
 		const deviceId = createUniqString()
 
 		const refreshTokenForDB: DBTypes.RefreshToken = {
 			issuedAt: new Date(),
-			deviceIP: '',
+			deviceIP,
 			deviceId,
-			deviceName: '',
+			deviceName,
 			userId,
 		}
 
