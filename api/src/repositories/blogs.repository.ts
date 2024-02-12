@@ -12,6 +12,7 @@ export const blogsRepository = {
 
 		return getBlogsRes.map(this.mapDbBlogToServiceBlog)
 	},
+
 	async getBlogById(blogId: string) {
 		if (!ObjectId.isValid(blogId)) {
 			return null

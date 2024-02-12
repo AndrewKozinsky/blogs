@@ -7,10 +7,10 @@ import { PostServiceModel } from '../models/service/posts.service.model'
 import { db } from '../db/dbService'
 
 export const postsRepository = {
-	async getPosts() {
+	/*async getPosts() {
 		const getPostsRes = await db.collection<DBTypes.Post>(DbNames.posts).find({}).toArray()
 		return getPostsRes.map(this.mapDbPostToClientPost)
-	},
+	},*/
 
 	async getPostById(postId: string) {
 		if (!ObjectId.isValid(postId)) {

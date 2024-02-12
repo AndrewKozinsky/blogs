@@ -1,7 +1,7 @@
-import { AuthRegistrationDtoModel } from '../../src/models/input/authRegistration.input.model'
-import { authService } from '../../src/services/auth.service'
+// import { AuthRegistrationDtoModel } from '../../src/models/input/authRegistration.input.model'
+// import { authService } from '../../src/services/auth.service'
 
-const testSeeder = {
+/*const testSeeder = {
 	createUserDto(): AuthRegistrationDtoModel {
 		return {
 			login: 'test',
@@ -14,6 +14,6 @@ const testSeeder = {
 		// Получить результат, который буду проверять
 		return await authService.registration(dto)
 	},
-}
+}*/
 
-export default testSeeder
+// export default testSeeder

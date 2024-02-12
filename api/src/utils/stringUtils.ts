@@ -4,7 +4,7 @@ export function createUniqString() {
 	return uuid()
 }
 
-type CookieObj = {
+/*type CookieObj = {
 	cookieName: string
 	cookieValue: string
 	'Max-Age': number
@@ -12,7 +12,7 @@ type CookieObj = {
 	Expires: string
 	HttpOnly: boolean
 	Secure: boolean
-}
+}*/
 /**
  * Get string like
  * 'refreshToken=eyJhbGciOiJIU; Max-Age=20; Path=/; Expires=Thu, 01 Feb 2024 09:59:53 GMT; HttpOnly; Secure'
@@ -28,7 +28,7 @@ type CookieObj = {
  * 	}
  * @param cookieString
  */
-export function parseCookieStringToObj(cookieString: string) {
+/*export function parseCookieStringToObj(cookieString: string) {
 	const cookieParts = cookieString.split('; ')
 
 	const resultObj: CookieObj = {
@@ -62,4 +62,4 @@ export function parseCookieStringToObj(cookieString: string) {
 	}
 
 	return resultObj
-}
+}*/

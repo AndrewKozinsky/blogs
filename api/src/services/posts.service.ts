@@ -26,15 +26,12 @@ export const postsService = {
 
 		return await postsRepository.createPost(newPostDto)
 	},
-
 	async updatePost(postId: string, updatePostDto: UpdatePostDtoModel) {
 		return postsRepository.updatePost(postId, updatePostDto)
 	},
-
 	async deletePost(postId: string): Promise<boolean> {
 		return postsRepository.deletePost(postId)
 	},
-
 	async createPostComment(
 		postId: string,
 		commentDto: CreatePostCommentDtoModel,

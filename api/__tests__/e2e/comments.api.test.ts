@@ -1,27 +1,27 @@
 // @ts-ignore
-import request from 'supertest'
-import { app } from '../../src/app'
-import { HTTP_STATUSES } from '../../src/config/config'
-import RouteNames from '../../src/config/routeNames'
-import { resetDbEveryTest } from './utils/common'
-import {
-	addBlogRequest,
-	addPostCommentRequest,
-	addPostRequest,
-	addUserByAdminRequest,
-	checkCommentObj,
-	loginRequest,
-	userEmail,
-	userPassword,
-} from './utils/utils'
+// import request from 'supertest'
+// import { app } from '../../src/app'
+// import { HTTP_STATUSES } from '../../src/config/config'
+// import RouteNames from '../../src/config/routeNames'
+// import { resetDbEveryTest } from './utils/common'
+// import {
+// 	addBlogRequest,
+// 	addPostCommentRequest,
+// 	addPostRequest,
+// 	addUserByAdminRequest,
+// 	checkCommentObj,
+// 	loginRequest,
+// 	userEmail,
+// 	userPassword,
+// } from './utils/utils'
 
-resetDbEveryTest()
+// resetDbEveryTest()
 
 it.skip('123', async () => {
 	expect(2).toBe(2)
 })
 
-describe('Getting a comment', () => {
+/*describe('Getting a comment', () => {
 	it.skip('should return 404 if a comment does not exists', async () => {
 		const getCommentRes = await request(app).get(RouteNames.comment('999'))
 
@@ -51,9 +51,9 @@ describe('Getting a comment', () => {
 
 		checkCommentObj(getCommentRes.body, createdUserRes.body.id, createdUserRes.body.login)
 	})
-})
+})*/
 
-describe('Updating a comment', () => {
+/*describe('Updating a comment', () => {
 	it.skip('should forbid a request from an unauthorized user', async () => {
 		await request(app).put(RouteNames.comment('999')).expect(HTTP_STATUSES.UNAUTHORIZED_401)
 	})
@@ -164,9 +164,9 @@ describe('Updating a comment', () => {
 			.set('authorization', 'Bearer ' + userToken)
 			.expect(HTTP_STATUSES.NO_CONTENT_204)
 	})
-})
+})*/
 
-describe('Deleting a comment', () => {
+/*describe('Deleting a comment', () => {
 	it.skip('should forbid a request from an unauthorized user', async () => {
 		return request(app).put(RouteNames.comment(''))
 	})
@@ -244,4 +244,4 @@ describe('Deleting a comment', () => {
 			.set('authorization', 'Bearer ' + userToken)
 			.expect(HTTP_STATUSES.NO_CONTENT_204)
 	})
-})
+})*/

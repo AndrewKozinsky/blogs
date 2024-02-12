@@ -11,6 +11,7 @@ export const jwtService = {
 	getRefreshTokenFromReqCookie(req: Request): string {
 		return req.cookies[config.refreshToken.name]
 	},
+
 	createAccessToken(userId: string) {
 		return jwt.sign({ userId }, settings.JWT_SECRET, {
 			expiresIn: config.accessToken.lifeDurationInMs / 1000 + 's',

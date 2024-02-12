@@ -1,5 +1,5 @@
 import { Request } from 'express'
-import browser from 'browser-detect'
+import useragent from 'express-useragent'
 
 export const browserService = {
 	// Returns client's device IP
@@ -9,8 +9,9 @@ export const browserService = {
 
 	// Returns client's device name
 	getClientName(req: Request): string {
-		const browserInfo = browser(req.headers['user-agent'])
+		const source = req.headers['user-agent'] || ''
+		const browserInfo = useragent.parse(source)
 
-		return browserInfo.name + ' ' + browserInfo.version
+		return browserInfo.browser + ' ' + browserInfo.version
 	},
 }

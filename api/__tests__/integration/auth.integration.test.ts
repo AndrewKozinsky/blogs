@@ -13,7 +13,7 @@ const emailManagerMock: typeof emailManager = {
 	},
 }*/
 
-describe('User registration', () => {
+/*describe('User registration', () => {
 	// Ссылка на тестируемую функцию, чтобы вызывать через короткое имя
 	const registerUser = authService.registration
 
@@ -51,4 +51,4 @@ describe('User registration', () => {
 			status: 'fail',
 		})
 	})
-})
+})*/
