@@ -1,6 +1,6 @@
 import { ObjectId, WithId } from 'mongodb'
-import DbNames from '../config/dbNames'
-import { DBTypes } from '../models/db'
+import DbNames from '../db/dbNames'
+import { DBTypes } from '../db/dbTypes'
 import { GetPostCommentsQueries } from '../models/input/posts.input.model'
 import { CommentOutModel, GetCommentOutModel } from '../models/output/comments.output.model'
 import { db } from '../db/dbService'

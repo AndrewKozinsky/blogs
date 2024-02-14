@@ -1,6 +1,6 @@
 import { Filter, ObjectId, WithId } from 'mongodb'
-import DbNames from '../config/dbNames'
-import { DBTypes } from '../models/db'
+import DbNames from '../db/dbNames'
+import { DBTypes } from '../db/dbTypes'
 import { GetUsersQueries } from '../models/input/users.input.model'
 import {
 	GetUserOutModel,

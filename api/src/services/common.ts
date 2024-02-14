@@ -1,9 +1,9 @@
 import { add } from 'date-fns'
 import { ObjectId, WithId } from 'mongodb'
 import { hashService } from '../adapters/hash.adapter'
-import DbNames from '../config/dbNames'
+import DbNames from '../db/dbNames'
 import { db } from '../db/dbService'
-import { DBTypes } from '../models/db'
+import { DBTypes } from '../db/dbTypes'
 import { UserServiceModel } from '../models/service/users.service.model'
 import { createUniqString } from '../utils/stringUtils'
 

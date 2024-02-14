@@ -12,6 +12,7 @@ import getUsersRouter from './routes/users.routes'
 export const app = express()
 app.use(express.json())
 app.use(cookieParser())
+app.set('trust proxy', true)
 
 app.use(RouteNames.blogs, getBlogsRouter())
 app.use(RouteNames.posts, getPostsRouter())

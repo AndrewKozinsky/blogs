@@ -1,6 +1,6 @@
 import { Filter, ObjectId, WithId } from 'mongodb'
-import DbNames from '../config/dbNames'
-import { DBTypes } from '../models/db'
+import DbNames from '../db/dbNames'
+import { DBTypes } from '../db/dbTypes'
 import { GetBlogPostsQueries, GetBlogsQueries } from '../models/input/blogs.input.model'
 import {
 	BlogOutModel,

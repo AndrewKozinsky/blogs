@@ -1,6 +1,5 @@
 export namespace DBTypes {
 	export type Blog = {
-		// _id: ObjectId
 		name: string
 		description: string
 		websiteUrl: string
@@ -9,7 +8,6 @@ export namespace DBTypes {
 	}
 
 	export type Post = {
-		// _id: ObjectId
 		title: string
 		shortDescription: string
 		content: string
@@ -19,7 +17,6 @@ export namespace DBTypes {
 	}
 
 	export type User = {
-		// _id: ObjectId
 		account: {
 			login: string
 			email: string
@@ -34,7 +31,6 @@ export namespace DBTypes {
 	}
 
 	export type Comment = {
-		// _id: ObjectId
 		postId: string
 		content: string
 		commentatorInfo: {
@@ -45,8 +41,8 @@ export namespace DBTypes {
 	}
 
 	export type RefreshToken = {
-		// _id: ObjectId
 		issuedAt: Date
+		expirationDate: Date
 		deviceIP: string
 		deviceId: string
 		deviceName: string

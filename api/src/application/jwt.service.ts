@@ -2,7 +2,7 @@ import { Request } from 'express'
 import { addMilliseconds } from 'date-fns'
 import jwt from 'jsonwebtoken'
 import { config } from '../config/config'
-import { DBTypes } from '../models/db'
+import { DBTypes } from '../db/dbTypes'
 import { authRepository } from '../repositories/auth.repository'
 import { settings } from '../settings'
 import { createUniqString } from '../utils/stringUtils'
@@ -44,6 +44,7 @@ export const jwtService = {
 
 		const refreshTokenForDB: DBTypes.RefreshToken = {
 			issuedAt: new Date(),
+			expirationDate: addMilliseconds(new Date(), config.refreshToken.lifeDurationInMs),
 			deviceIP,
 			deviceId,
 			deviceName,

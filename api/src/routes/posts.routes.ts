@@ -3,7 +3,7 @@ import { HTTP_STATUSES } from '../config/config'
 import { adminAuthMiddleware } from '../middlewares/adminAuth.middleware'
 import { commentsQueryRepository } from '../repositories/comments.queryRepository'
 import { postsService } from '../services/posts.service'
-import { userAuthMiddleware } from '../middlewares/userAuth.middleware'
+import { checkAccessTokenMiddleware } from '../middlewares/checkAccessTokenMiddleware'
 import {
 	ReqWithBody,
 	ReqWithParams,
@@ -129,7 +129,7 @@ function getPostsRouter() {
 	// Create new comment
 	router.post(
 		'/:postId/comments',
-		userAuthMiddleware,
+		checkAccessTokenMiddleware,
 		createPostCommentValidation(),
 		async (
 			req: ReqWithParamsAndBody<{ postId: string }, CreatePostCommentDtoModel>,

@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express'
 import { config, HTTP_STATUSES } from '../config/config'
-import { userAuthMiddleware } from '../middlewares/userAuth.middleware'
+import { checkAccessTokenMiddleware } from '../middlewares/checkAccessTokenMiddleware'
 import { AuthLoginDtoModel } from '../models/input/authLogin.input.model'
 import { ReqWithBody } from '../models/common'
 import { AuthRegistrationDtoModel } from '../models/input/authRegistration.input.model'
@@ -115,7 +115,7 @@ function getAuthRouter() {
 	)
 
 	// Get information about current user
-	router.get('/me', userAuthMiddleware, async (req: Request, res: Response) => {
+	router.get('/me', checkAccessTokenMiddleware, async (req: Request, res: Response) => {
 		const user = authService.getCurrentUser(req.user!)
 		res.status(HTTP_STATUSES.OK_200).send(user)
 	})

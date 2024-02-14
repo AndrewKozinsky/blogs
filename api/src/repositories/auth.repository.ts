@@ -1,8 +1,10 @@
+import { addMilliseconds } from 'date-fns'
 import jwt from 'jsonwebtoken'
 import { ObjectId, WithId } from 'mongodb'
 import { hashService } from '../adapters/hash.adapter'
-import DbNames from '../config/dbNames'
-import { DBTypes } from '../models/db'
+import { config } from '../config/config'
+import DbNames from '../db/dbNames'
+import { DBTypes } from '../db/dbTypes'
 import { AuthLoginDtoModel } from '../models/input/authLogin.input.model'
 import { UserServiceModel } from '../models/service/users.service.model'
 import { db } from '../db/dbService'
@@ -116,13 +118,7 @@ export const authRepository = {
 
 		if (!getTokenRes) return null
 
-		return {
-			issuedAt: getTokenRes.issuedAt,
-			deviceIP: '',
-			deviceId: getTokenRes.deviceId,
-			deviceName: '',
-			userId: getTokenRes.userId,
-		}
+		return getTokenRes
 	},
 
 	async deleteRefreshTokenByDeviceId(deviceId: string): Promise<boolean> {

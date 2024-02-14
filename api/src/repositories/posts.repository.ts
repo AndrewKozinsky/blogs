@@ -1,6 +1,6 @@
 import { ObjectId, WithId } from 'mongodb'
-import DbNames from '../config/dbNames'
-import { DBTypes } from '../models/db'
+import DbNames from '../db/dbNames'
+import { DBTypes } from '../db/dbTypes'
 import { UpdatePostDtoModel } from '../models/input/posts.input.model'
 import { CreatePostOutModel } from '../models/output/posts.output.model'
 import { PostServiceModel } from '../models/service/posts.service.model'

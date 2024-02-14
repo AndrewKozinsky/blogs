@@ -3,7 +3,7 @@ import { HTTP_STATUSES } from '../config/config'
 import { UpdateCommentDtoModel } from '../models/input/comments.input.model'
 import { commentsQueryRepository } from '../repositories/comments.queryRepository'
 import { commentsService } from '../services/comments.service'
-import { userAuthMiddleware } from '../middlewares/userAuth.middleware'
+import { checkAccessTokenMiddleware } from '../middlewares/checkAccessTokenMiddleware'
 import { ReqWithParams, ReqWithParamsAndBody } from '../models/common'
 import { updateCommentValidation } from '../validators/comments/updateComment.validator'
 
@@ -27,7 +27,7 @@ function getCommentsRouter() {
 	// Update existing comment by id with InputModel
 	router.put(
 		'/:commentId',
-		userAuthMiddleware,
+		checkAccessTokenMiddleware,
 		updateCommentValidation(),
 		async (
 			req: ReqWithParamsAndBody<{ commentId: string }, UpdateCommentDtoModel>,
@@ -58,7 +58,7 @@ function getCommentsRouter() {
 	// Delete comment specified by id
 	router.delete(
 		'/:commentId',
-		userAuthMiddleware,
+		checkAccessTokenMiddleware,
 		async (req: ReqWithParams<{ commentId: string }>, res: Response) => {
 			const commentId = req.params.commentId
 
