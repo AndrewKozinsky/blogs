@@ -3,12 +3,15 @@ import DbNames from '../db/dbNames'
 import { db } from '../db/dbService'
 import { DBTypes } from '../db/dbTypes'
 import { GetUserDevicesOutModel, UserDeviceOutModel } from '../models/output/security.output.model'
+import { authRepository } from './auth.repository'
 
 export const securityQueryRepository = {
-	async getUserDevices(userId: string): Promise<GetUserDevicesOutModel> {
+	async getUserDevices(refreshToken: string): Promise<GetUserDevicesOutModel> {
+		const user = await authRepository.getUserByRefreshToken(refreshToken)
+
 		const userDevices = await db
 			.collection<DBTypes.RefreshToken>(DbNames.refreshTokens)
-			.find({ userId })
+			.find({ userId: user!.id })
 			.toArray()
 
 		return userDevices.map(this.mapDbUserDeviceToOutputUserDevice)

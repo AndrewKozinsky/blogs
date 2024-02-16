@@ -2,6 +2,7 @@ import { addMilliseconds } from 'date-fns'
 import jwt from 'jsonwebtoken'
 import { ObjectId, WithId } from 'mongodb'
 import { hashService } from '../adapters/hash.adapter'
+import { jwtService } from '../application/jwt.service'
 import { config } from '../config/config'
 import DbNames from '../db/dbNames'
 import { DBTypes } from '../db/dbTypes'
@@ -13,6 +14,30 @@ import { settings } from '../settings'
 import { createUniqString } from '../utils/stringUtils'
 
 export const authRepository = {
+	async getUserByRefreshToken(refreshTokenStr: string) {
+		const refreshTokenData = jwtService.getRefreshTokenDataFromTokenStr(refreshTokenStr)
+
+		const getDeviceRes = await db
+			.collection<DBTypes.RefreshToken>(DbNames.refreshTokens)
+			.findOne({
+				deviceId: refreshTokenData!.deviceId,
+			})
+
+		if (!getDeviceRes) {
+			return null
+		}
+
+		const getUserRes = await db.collection<DBTypes.User>(DbNames.users).findOne({
+			_id: new ObjectId(getDeviceRes.userId),
+		})
+
+		if (!getUserRes) {
+			return null
+		}
+
+		return this.mapDbUserToServiceUser(getUserRes)
+	},
+
 	async getUserByEmail(loginOrEmail: string) {
 		const getUserRes = await db.collection<DBTypes.User>(DbNames.users).findOne({
 			'account.email': loginOrEmail,
@@ -136,9 +161,9 @@ export const authRepository = {
 	},
 
 	async getRefreshTokenByTokenStr(tokenStr: string): Promise<null | DBTypes.RefreshToken> {
-		const { deviceId } = jwt.verify(tokenStr, settings.JWT_SECRET) as { deviceId: string }
+		const refreshToken = jwtService.getRefreshTokenDataFromTokenStr(tokenStr)
 
-		return this.getRefreshTokenByDeviceId(deviceId)
+		return this.getRefreshTokenByDeviceId(refreshToken!.deviceId)
 	},
 
 	mapDbUserToServiceUser(dbUser: WithId<DBTypes.User>): UserServiceModel {

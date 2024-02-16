@@ -60,10 +60,18 @@ export const jwtService = {
 		return jwt.decode(token, { complete: true })!.payload
 	},
 
-	getUserIdByToken(token: string): null | string {
+	getUserIdByAccessToken(accessToken: string): null | string {
 		try {
-			const result: any = jwt.verify(token, settings.JWT_SECRET)
+			const result: any = jwt.verify(accessToken, settings.JWT_SECRET)
 			return result.userId
+		} catch (error) {
+			return null
+		}
+	},
+
+	getRefreshTokenDataFromTokenStr(refreshTokenStr: string) {
+		try {
+			return jwt.verify(refreshTokenStr, settings.JWT_SECRET) as { deviceId: string }
 		} catch (error) {
 			return null
 		}

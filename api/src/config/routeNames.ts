@@ -31,7 +31,8 @@ const RouteNames = {
 	comment(commentId: string) {
 		return '/comments/' + commentId
 	},
-	security: 'security',
+	security: '/security',
+	securityDevices: '/security/devices',
 	testing: '/testing',
 	testingAllData: '/testing/all-data',
 }

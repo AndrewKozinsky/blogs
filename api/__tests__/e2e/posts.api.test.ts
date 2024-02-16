@@ -7,22 +7,22 @@ import { CreatePostDtoModel } from '../../src/models/input/posts.input.model'
 import { GetPostCommentsOutModel } from '../../src/models/output/comments.output.model'
 import { GetPostsOutModel } from '../../src/models/output/posts.output.model'
 import { resetDbEveryTest } from './utils/common'
-import {
-	addBlogRequest,
-	addPostCommentRequest,
-	addPostRequest,
-	addUserByAdminRequest,
-	adminAuthorizationValue,
-	checkCommentObj,
-	checkPostObj,
-	loginRequest,
-	userEmail,
-	userPassword,
-} from './utils/utils'
+// import {
+// 	addBlogRequest,
+// 	addPostCommentRequest,
+// 	addPostRequest,
+// 	addUserByAdminRequest,
+// 	adminAuthorizationValue,
+// 	checkCommentObj,
+// 	checkPostObj,
+// 	loginRequest,
+// 	userEmail,
+// 	userPassword,
+// } from './utils/utils'
 
 // resetDbEveryTest()
 
-it.skip('123', async () => {
+it('123', async () => {
 	expect(2).toBe(2)
 })
 

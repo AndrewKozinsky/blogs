@@ -1,9 +1,9 @@
-// import dotenv from 'dotenv'
-// import { Express } from 'express'
-// import request from 'supertest'
+import dotenv from 'dotenv'
+import { Express } from 'express'
+import request from 'supertest'
 // import { app } from '../../../src/app'
 // import { HTTP_STATUSES } from '../../../src/config/config'
-// import RouteNames from '../../../src/config/routeNames'
+import RouteNames from '../../../src/config/routeNames'
 // import {
 // 	CreateBlogDtoModel,
 // 	CreateBlogPostDtoModel,
@@ -12,14 +12,14 @@
 // 	CreatePostCommentDtoModel,
 // 	CreatePostDtoModel,
 // } from '../../../src/models/input/posts.input.model'
-// import { CreateUserDtoModel } from '../../../src/models/input/users.input.model'
+import { CreateUserDtoModel } from '../../../src/models/input/users.input.model'
 
-// dotenv.config()
+dotenv.config()
 
-// export const adminAuthorizationValue = 'Basic YWRtaW46cXdlcnR5'
-// export const userLogin = 'my-login'
-// export const userEmail = 'mail@email.com'
-// export const userPassword = 'password'
+export const adminAuthorizationValue = 'Basic YWRtaW46cXdlcnR5'
+export const userLogin = 'my-login'
+export const userEmail = 'mail@email.com'
+export const userPassword = 'password'
 
 /*export async function addBlogRequest(app: Express, blogDto: Partial<CreateBlogDtoModel> = {}) {
 	return request(app)
@@ -111,7 +111,7 @@
 	)
 }*/
 
-/*export async function addUserByAdminRequest(
+export async function addUserByAdminRequest(
 	app: Express,
 	userDto: Partial<CreateUserDtoModel> = {},
 ) {
@@ -122,9 +122,9 @@
 		.set('Content-Type', 'application/json')
 		.set('Accept', 'application/json')
 		.set('authorization', adminAuthorizationValue)
-}*/
+}
 
-/*export function createDtoAddUser(newUserObj: Partial<CreateUserDtoModel> = {}): CreateUserDtoModel {
+export function createDtoAddUser(newUserObj: Partial<CreateUserDtoModel> = {}): CreateUserDtoModel {
 	return Object.assign(
 		{
 			login: userLogin,
@@ -133,9 +133,9 @@
 		},
 		newUserObj,
 	)
-}*/
+}
 
-/*export function checkUserObj(userObj: any) {
+export function checkUserObj(userObj: any) {
 	expect(userObj._id).toBe(undefined)
 	expect(typeof userObj.id).toBe('string')
 	expect(userObj.login).toMatch(/^[a-zA-Z0-9_-]*$/)
@@ -144,11 +144,11 @@
 	expect(userObj.createdAt).toMatch(
 		/\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/,
 	)
-}*/
+}
 
-/*export function loginRequest(app: Express, loginOrEmail: string, password: string) {
+export function loginRequest(app: Express, loginOrEmail: string, password: string) {
 	return request(app).post(RouteNames.authLogin).send({ loginOrEmail, password })
-}*/
+}
 
 /*export async function addPostCommentRequest(
 	app: Express,

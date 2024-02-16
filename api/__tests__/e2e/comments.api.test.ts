@@ -17,7 +17,7 @@
 
 // resetDbEveryTest()
 
-it.skip('123', async () => {
+it('123', async () => {
 	expect(2).toBe(2)
 })
 

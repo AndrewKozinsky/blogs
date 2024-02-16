@@ -37,8 +37,6 @@ function getAuthRouter() {
 			res.status(HTTP_STATUSES.OK_200).send({
 				accessToken: jwtService.createAccessToken(loginServiceRes.user.id),
 			})
-
-			res.sendStatus(200)
 		},
 	)
 

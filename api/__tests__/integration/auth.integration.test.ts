@@ -1,9 +1,13 @@
 import { emailManager } from '../../src/managers/email.manager'
 import { authService } from '../../src/services/auth.service'
 import { resetDbEveryTest } from '../e2e/utils/common'
-import testSeeder from './testSeeder'
+// import testSeeder from './testSeeder'
 
 resetDbEveryTest()
+
+it.skip('123', () => {
+	expect(2).toBe(2)
+})
 
 // Второй вариант вместо использования jest.fn() сделать полноценный макет
 /*// с простой реализацией метод sendEmailConfirmationMessage

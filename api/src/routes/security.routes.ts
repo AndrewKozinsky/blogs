@@ -4,7 +4,6 @@ import { HTTP_STATUSES } from '../config/config'
 import { checkRefreshTokenMiddleware } from '../middlewares/checkRefreshTokenMiddleware'
 import { ReqWithParams } from '../models/common'
 import { securityQueryRepository } from '../repositories/security.queryRepository'
-import { securityRepository } from '../repositories/security.repository'
 import { securityService } from '../services/security.service'
 
 function getSecurityRouter() {
@@ -12,8 +11,11 @@ function getSecurityRouter() {
 
 	// Returns all devices with active sessions for current user
 	router.get('/devices', checkRefreshTokenMiddleware, async (req: Request, res: Response) => {
-		const userDevices = await securityQueryRepository.getUserDevices(req.user!.id)
+		const refreshTokenFromCookie = jwtService.getRefreshTokenFromReqCookie(req)
+
+		const userDevices = await securityQueryRepository.getUserDevices(refreshTokenFromCookie)
 		res.status(HTTP_STATUSES.OK_200).send(userDevices)
+		// res.sendStatus(HTTP_STATUSES.OK_200)
 	})
 
 	// Terminate all other (exclude current) device's sessions

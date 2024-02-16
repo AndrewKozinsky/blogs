@@ -7,17 +7,17 @@ import { CreateBlogDtoModel } from '../../src/models/input/blogs.input.model'
 import { GetBlogsOutModel } from '../../src/models/output/blogs.output.model'
 import { GetPostsOutModel } from '../../src/models/output/posts.output.model'
 import { resetDbEveryTest } from './utils/common'
-import {
-	addBlogPostRequest,
-	addBlogRequest,
-	adminAuthorizationValue,
-	checkPostObj,
-	createDtoAddBlogPost,
-} from './utils/utils'
+// import {
+// 	addBlogPostRequest,
+// 	addBlogRequest,
+// 	adminAuthorizationValue,
+// 	checkPostObj,
+// 	createDtoAddBlogPost,
+// } from './utils/utils'
 
 // resetDbEveryTest()
 
-it.skip('123', async () => {
+it('123', async () => {
 	expect(2).toBe(2)
 })
 

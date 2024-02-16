@@ -1,39 +1,51 @@
 // @ts-ignore
 import request from 'supertest'
 import { app } from '../../src/app'
-import { HTTP_STATUSES } from '../../src/config/config'
+import { HTTP_STATUSES, config } from '../../src/config/config'
 import RouteNames from '../../src/config/routeNames'
-import { GetUsersOutModel } from '../../src/models/output/users.output.model'
+import { settings } from '../../src/settings'
+// import { GetUsersOutModel } from '../../src/models/output/users.output.model'
 import { resetDbEveryTest } from './utils/common'
-// import { addUserByAdminRequest, adminAuthorizationValue, checkUserObj } from './utils/utils'
+import {
+	addUserByAdminRequest,
+	adminAuthorizationValue,
+	checkUserObj,
+	loginRequest,
+} from './utils/utils'
+import * as jwt from 'jsonwebtoken'
 
-// resetDbEveryTest()
+resetDbEveryTest()
 
-it('123', () => {
+it.skip('123', () => {
 	expect(2).toBe(2)
 })
 
-/*describe('Getting all users', () => {
-	it.skip('should forbid a request from an unauthorized user', async () => {
-		await request(app).get(RouteNames.users).expect(HTTP_STATUSES.UNAUTHORIZED_401)
+describe('Getting all user devices', () => {
+	it.skip('should forbid a request if there is not refresh token', async () => {
+		await request(app).get(RouteNames.securityDevices).expect(HTTP_STATUSES.UNAUTHORIZED_401)
 	})
 
-	it.skip('should return an object with property items contains an empty array', async () => {
-		const successAnswer: GetUsersOutModel = {
-			pagesCount: 0,
-			page: 1,
-			pageSize: 10,
-			totalCount: 0,
-			items: [],
-		}
+	it('should return an array of devices data if a refreshToken inside cookie is valid', async () => {
+		const login = 'login'
+		const password = 'password'
+		const email = 'email@email.ru'
 
-		await request(app)
-			.get(RouteNames.users)
-			.set('authorization', adminAuthorizationValue)
-			.expect(HTTP_STATUSES.OK_200, successAnswer)
+		const createdUserRes = await addUserByAdminRequest(app, { login, password, email })
+		expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
+
+		const loginRes = await loginRequest(app, login, password).expect(HTTP_STATUSES.OK_200)
+		const refreshTokenStr = loginRes.headers['set-cookie'][0]
+		// УДАЛИТЬ ПОТОМ
+		const refreshToken = refreshTokenStr.split('=')[1]
+
+		const getUserDevicesRes = await request(app)
+			.get(RouteNames.securityDevices)
+			.set('Cookie', config.refreshToken.name + '=' + refreshToken)
+			.expect(HTTP_STATUSES.OK_200)
+		console.log(getUserDevicesRes.body)
 	})
 
-	it.skip('should return an object with property items contains array with 2 items after creating 2 users', async () => {
+	/*it.skip('should return an object with property items contains array with 2 items after creating 2 users', async () => {
 		await addUserByAdminRequest(app)
 		await addUserByAdminRequest(app)
 
@@ -50,9 +62,9 @@ it('123', () => {
 
 		checkUserObj(getUsersRes.body.items[0])
 		checkUserObj(getUsersRes.body.items[1])
-	})
+	})*/
 
-	it.skip('should return an array of objects matching the queries scheme', async () => {
+	/*it.skip('should return an array of objects matching the queries scheme', async () => {
 		await addUserByAdminRequest(app)
 		await addUserByAdminRequest(app)
 		await addUserByAdminRequest(app)
@@ -69,9 +81,9 @@ it('123', () => {
 		expect(getUsersRes.body.pagesCount).toBe(4)
 		expect(getUsersRes.body.totalCount).toBe(7)
 		expect(getUsersRes.body.items.length).toBe(2)
-	})
+	})*/
 
-	it.skip('should return filtered an array of objects', async () => {
+	/*it.skip('should return filtered an array of objects', async () => {
 		await addUserByAdminRequest(app, { login: 'in-one-1', email: 'email-1@email.com' }) //
 		await addUserByAdminRequest(app, { login: 'in-two-1', email: 'email-1@email.com' }) //
 		await addUserByAdminRequest(app, { login: 'in-one-1', email: 'email-1@email.com' }) //
@@ -94,8 +106,8 @@ it('123', () => {
 		expect(getUsersRes.body.pagesCount).toBe(5)
 		expect(getUsersRes.body.totalCount).toBe(9)
 		expect(getUsersRes.body.items.length).toBe(2)
-	})
-})*/
+	})*/
+})
 
 /*describe('Creating an user', () => {
 	it.skip('should forbid a request from an unauthorized user', async () => {
