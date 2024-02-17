@@ -1,16 +1,12 @@
-import { addMilliseconds } from 'date-fns'
-import jwt from 'jsonwebtoken'
 import { ObjectId, WithId } from 'mongodb'
 import { hashService } from '../adapters/hash.adapter'
 import { jwtService } from '../application/jwt.service'
-import { config } from '../config/config'
 import DbNames from '../db/dbNames'
 import { DBTypes } from '../db/dbTypes'
 import { AuthLoginDtoModel } from '../models/input/authLogin.input.model'
 import { UserServiceModel } from '../models/service/users.service.model'
 import { db } from '../db/dbService'
 import { commonService } from '../services/common'
-import { settings } from '../settings'
 import { createUniqString } from '../utils/stringUtils'
 
 export const authRepository = {
@@ -164,6 +160,10 @@ export const authRepository = {
 		const refreshToken = jwtService.getRefreshTokenDataFromTokenStr(tokenStr)
 
 		return this.getRefreshTokenByDeviceId(refreshToken!.deviceId)
+	},
+
+	async findRefreshTokenInDb(deviceId: string) {
+		return await db.collection(DbNames.refreshTokens).findOne({ deviceId })
 	},
 
 	mapDbUserToServiceUser(dbUser: WithId<DBTypes.User>): UserServiceModel {

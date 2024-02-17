@@ -1,10 +1,12 @@
-/*enum ResultCode {
-	Success = 0,
-	NotFound = 1,
-}*/
-
-/*export type Result<T> = {
-	resultCode: ResultCode
+export type LayerResult<T> = {
+	code: LayerResultCode
 	errorMessage?: string
 	data?: T
-}*/
+}
+
+export enum LayerResultCode {
+	Success = 0,
+	NotFound = 1,
+	Unauthorized = 2,
+	BadRequest = 3,
+}

@@ -8,6 +8,7 @@ import { AuthRegistrationConfirmationDtoModel } from '../models/input/authRegist
 import { AuthRegistrationEmailResendingDtoModel } from '../models/input/authRegistrationEmailResending.input.model'
 import { authService } from '../services/auth.service'
 import { jwtService } from '../application/jwt.service'
+import { LayerResultCode } from '../types/resultCodes'
 import { authLoginValidation } from '../validators/auth/authLogin.validator'
 import { authRegistrationValidation } from '../validators/auth/authRegistration.validator'
 import { authRegistrationConfirmationValidation } from '../validators/auth/authRegistrationConfirmation.validator'
@@ -23,29 +24,27 @@ function getAuthRouter() {
 		async (req: ReqWithBody<AuthLoginDtoModel>, res: Response) => {
 			const loginServiceRes = await authService.login(req)
 
-			if (loginServiceRes.status === 'fail') {
+			if (loginServiceRes.code === LayerResultCode.Unauthorized || !loginServiceRes.data) {
 				res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401)
 				return
 			}
 
-			res.cookie(config.refreshToken.name, loginServiceRes.refreshToken, {
+			res.cookie(config.refreshToken.name, loginServiceRes.data.refreshToken, {
 				maxAge: config.refreshToken.lifeDurationInMs,
 				httpOnly: true,
 				secure: true,
 			})
 
 			res.status(HTTP_STATUSES.OK_200).send({
-				accessToken: jwtService.createAccessToken(loginServiceRes.user.id),
+				accessToken: jwtService.createAccessToken(loginServiceRes.data.user.id),
 			})
 		},
 	)
 
 	// Generate the new pair of access and refresh tokens (in cookie client must send correct refreshToken that will be revoked after refreshing)
 	router.post('/refresh-token', async (req: Request, res: Response) => {
-		const refreshTokenFromCookie = jwtService.getRefreshTokenFromReqCookie(req)
-
 		const { newAccessToken, newRefreshToken } =
-			await authService.generateAccessAndRefreshTokens(req, refreshTokenFromCookie)
+			await authService.generateAccessAndRefreshTokens(req)
 
 		if (!newAccessToken || !newRefreshToken) {
 			res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401)
@@ -87,7 +86,7 @@ function getAuthRouter() {
 		async (req: ReqWithBody<AuthRegistrationEmailResendingDtoModel>, res: Response) => {
 			const resendingStatus = await authService.resendEmailConfirmationCode(req.body)
 
-			if (resendingStatus.status === 'fail') {
+			if (resendingStatus.code === LayerResultCode.BadRequest) {
 				res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400)
 				return
 			}
@@ -123,7 +122,7 @@ function getAuthRouter() {
 		const refreshTokenFromCookie = jwtService.getRefreshTokenFromReqCookie(req)
 		const logoutServiceRes = await authService.logout(refreshTokenFromCookie)
 
-		if (logoutServiceRes.status === 'refreshTokenNoValid') {
+		if (logoutServiceRes.code === LayerResultCode.Unauthorized) {
 			res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401)
 			return
 		}

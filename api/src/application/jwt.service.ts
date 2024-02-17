@@ -35,14 +35,14 @@ export const jwtService = {
 		)
 	},
 
-	async createRefreshTokenAndSetToDb(
+	createRefreshTokenForDb(
 		userId: string,
 		deviceIP: string,
 		deviceName: string,
-	): Promise<string> {
+	): DBTypes.RefreshToken {
 		const deviceId = createUniqString()
 
-		const refreshTokenForDB: DBTypes.RefreshToken = {
+		return {
 			issuedAt: new Date(),
 			expirationDate: addMilliseconds(new Date(), config.refreshToken.lifeDurationInMs),
 			deviceIP,
@@ -50,10 +50,12 @@ export const jwtService = {
 			deviceName,
 			userId,
 		}
+	},
 
-		await authRepository.setNewRefreshToken(refreshTokenForDB)
+	async setRefreshTokenForDb(refreshTokenForDb: DBTypes.RefreshToken): Promise<string> {
+		await authRepository.setNewRefreshToken(refreshTokenForDb)
 
-		return jwtService.createRefreshToken(deviceId)
+		return jwtService.createRefreshToken(refreshTokenForDb.deviceId)
 	},
 
 	getPayload(token: string) {
@@ -71,7 +73,8 @@ export const jwtService = {
 
 	getRefreshTokenDataFromTokenStr(refreshTokenStr: string) {
 		try {
-			return jwt.verify(refreshTokenStr, settings.JWT_SECRET) as { deviceId: string }
+			const payload = jwt.verify(refreshTokenStr, settings.JWT_SECRET)
+			return payload as { deviceId: string }
 		} catch (error) {
 			return null
 		}

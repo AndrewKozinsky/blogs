@@ -3,7 +3,7 @@
 // import { app } from '../../src/app'
 // import { HTTP_STATUSES } from '../../src/config/config'
 // import RouteNames from '../../src/config/routeNames'
-// import { resetDbEveryTest } from './utils/common'
+import { resetDbEveryTest } from './utils/common'
 // import {
 // 	addBlogRequest,
 // 	addPostCommentRequest,
@@ -15,7 +15,7 @@
 // 	userPassword,
 // } from './utils/utils'
 
-// resetDbEveryTest()
+resetDbEveryTest()
 
 it('123', async () => {
 	expect(2).toBe(2)

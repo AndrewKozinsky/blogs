@@ -9,7 +9,8 @@ type TerminateSpecifiedDeviceRefreshTokenStatus = 'tokenNotFound' | 'success' | 
 
 export const securityService = {
 	async terminateAllDeviceRefreshTokensApartThis(refreshTokenStr: string) {
-		const { deviceId } = jwtService.getPayload(refreshTokenStr) as { deviceId: string }
+		const refreshToken = jwtService.getRefreshTokenDataFromTokenStr(refreshTokenStr)
+		const { deviceId } = refreshToken!
 
 		await securityRepository.terminateAllDeviceRefreshTokensApartThis(deviceId)
 	},
