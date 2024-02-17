@@ -144,8 +144,8 @@ export const authRepository = {
 		return commonService.deleteUser(userId)
 	},
 
-	async setNewRefreshToken(data: DBTypes.DeviceToken) {
-		await db.collection(DbNames.refreshTokens).insertOne(data)
+	async insertDeviceRefreshToken(deviceRefreshToken: DBTypes.DeviceToken) {
+		await db.collection(DbNames.refreshTokens).insertOne(deviceRefreshToken)
 	},
 
 	async getDeviceRefreshTokenByDeviceId(deviceId: string): Promise<null | DBTypes.DeviceToken> {

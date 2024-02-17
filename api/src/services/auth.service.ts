@@ -13,17 +13,13 @@ import { LayerResult, LayerResultCode } from '../types/resultCodes'
 import { commonService } from './common'
 import { usersService } from './users.service'
 
-type GenAccessAndRefreshTokensServiceRes = { newAccessToken: string; newRefreshToken: string }
-
-type RegistrationServiceRes = { status: 'fail' | 'success' }
-
 export const authService = {
 	async login(
 		req: ReqWithBody<AuthLoginDtoModel>,
-	): Promise<LayerResult<{ refreshToken: string; user: UserServiceModel }>> {
-		const userRes = await authRepository.getConfirmedUserByLoginOrEmailAndPassword(req.body)
+	): Promise<LayerResult<{ refreshTokenStr: string; user: UserServiceModel }>> {
+		const getUserRes = await authRepository.getConfirmedUserByLoginOrEmailAndPassword(req.body)
 
-		if (userRes.code !== LayerResultCode.Success || !userRes.data) {
+		if (getUserRes.code !== LayerResultCode.Success || !getUserRes.data) {
 			return {
 				code: LayerResultCode.Unauthorized,
 			}
@@ -32,34 +28,33 @@ export const authService = {
 		const clientIP = browserService.getClientIP(req)
 		const clientName = browserService.getClientName(req)
 
-		const refreshTokenForDb = jwtService.createRefreshTokenForDb(
-			userRes.data.id,
+		const newDeviceRefreshToken = jwtService.createDeviceRefreshToken(
+			getUserRes.data.id,
 			clientIP,
 			clientName,
 		)
-		await jwtService.setRefreshTokenForDb(refreshTokenForDb)
+		await authRepository.insertDeviceRefreshToken(newDeviceRefreshToken)
 
-		const refreshTokenStr = jwtService.createRefreshTokenStr(refreshTokenForDb.deviceId)
+		const refreshTokenStr = jwtService.createRefreshTokenStr(newDeviceRefreshToken.deviceId)
 
 		return {
 			code: LayerResultCode.Success,
 			data: {
-				refreshToken: refreshTokenStr,
-				user: userRes.data,
+				refreshTokenStr,
+				user: getUserRes.data,
 			},
 		}
 	},
 
 	async generateAccessAndRefreshTokens(
 		req: Request,
-	): Promise<GenAccessAndRefreshTokensServiceRes> {
+	): Promise<LayerResult<{ newAccessToken: string; newRefreshToken: string }>> {
 		const refreshTokenStr = jwtService.getDeviceRefreshTokenFromReq(req)
 		const deviceToken = await authRepository.getDeviceRefreshTokenByTokenStr(refreshTokenStr)
 
-		if (!deviceToken || !jwtService.isRefreshTokenInDbValid(deviceToken)) {
+		if (!deviceToken || !jwtService.isDeviceRefreshTokenValid(deviceToken)) {
 			return {
-				newAccessToken: '',
-				newRefreshToken: '',
+				code: LayerResultCode.Unauthorized,
 			}
 		}
 
@@ -67,8 +62,7 @@ export const authService = {
 
 		if (userRes.code !== LayerResultCode.Success || !userRes.data) {
 			return {
-				newAccessToken: '',
-				newRefreshToken: '',
+				code: LayerResultCode.Unauthorized,
 			}
 		}
 
@@ -77,24 +71,28 @@ export const authService = {
 		const clientIP = browserService.getClientIP(req)
 		const clientName = browserService.getClientName(req)
 
-		const newDeviceRefreshToken = jwtService.createRefreshTokenForDb(
+		const newDeviceRefreshToken = jwtService.createDeviceRefreshToken(
 			userRes.data.id,
 			clientIP,
 			clientName,
 		)
 
-		const newRefreshToken = await jwtService.setRefreshTokenForDb(newDeviceRefreshToken)
+		await authRepository.insertDeviceRefreshToken(newDeviceRefreshToken)
+		const newRefreshToken = jwtService.createRefreshTokenStr(newDeviceRefreshToken.deviceId)
 
 		return {
-			newAccessToken: jwtService.createAccessToken(deviceToken.userId),
-			newRefreshToken: newRefreshToken,
+			code: LayerResultCode.Success,
+			data: {
+				newAccessToken: jwtService.createAccessTokenStr(deviceToken.userId),
+				newRefreshToken: newRefreshToken,
+			},
 		}
 	},
 
-	async registration(dto: AuthRegistrationDtoModel): Promise<RegistrationServiceRes> {
+	async registration(dto: AuthRegistrationDtoModel): Promise<LayerResult<null>> {
 		const userByEmail = await authRepository.getUserByLoginOrEmail(dto.email)
 		if (userByEmail) {
-			return { status: 'fail' }
+			return { code: LayerResultCode.BadRequest }
 		}
 
 		const newUserDto = await commonService.getCreateUserDto(dto, false)
@@ -103,7 +101,7 @@ export const authService = {
 
 		const user = await usersService.getUser(userId)
 		if (!user) {
-			return { status: 'fail' }
+			return { code: LayerResultCode.BadRequest }
 		}
 
 		try {
@@ -113,13 +111,15 @@ export const authService = {
 			)
 
 			return {
-				status: 'success',
+				code: LayerResultCode.Success,
 			}
 		} catch (err: unknown) {
 			console.log(err)
 			await authRepository.deleteUser(userId)
 
-			return { status: 'fail' }
+			return {
+				code: LayerResultCode.BadRequest,
+			}
 		}
 	},
 
@@ -188,7 +188,7 @@ export const authService = {
 	async logout(refreshToken: string): Promise<LayerResult<null>> {
 		const refreshTokenInDb = await authRepository.getDeviceRefreshTokenByTokenStr(refreshToken)
 
-		if (!refreshTokenInDb || !jwtService.isRefreshTokenInDbValid(refreshTokenInDb)) {
+		if (!refreshTokenInDb || !jwtService.isDeviceRefreshTokenValid(refreshTokenInDb)) {
 			return { code: LayerResultCode.Unauthorized }
 		}
 

@@ -17,7 +17,7 @@ export async function checkAccessTokenMiddleware(req: Request, res: Response, ne
 		return
 	}
 
-	const userId = jwtService.getUserIdByAccessToken(token)
+	const userId = jwtService.getUserIdByAccessTokenStr(token)
 	if (!userId) {
 		res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401)
 		return

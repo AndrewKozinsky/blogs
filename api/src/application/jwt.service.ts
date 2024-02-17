@@ -12,7 +12,7 @@ export const jwtService = {
 		return req.cookies[config.refreshToken.name]
 	},
 
-	createAccessToken(userId: string) {
+	createAccessTokenStr(userId: string) {
 		return jwt.sign({ userId }, settings.JWT_SECRET, {
 			expiresIn: config.accessToken.lifeDurationInMs / 1000 + 's',
 		})
@@ -24,7 +24,7 @@ export const jwtService = {
 		})
 	},
 
-	isRefreshTokenInDbValid(refreshTokenInDb: undefined | null | DBTypes.DeviceToken) {
+	isDeviceRefreshTokenValid(refreshTokenInDb: undefined | null | DBTypes.DeviceToken) {
 		if (!refreshTokenInDb) {
 			return false
 		}
@@ -35,7 +35,7 @@ export const jwtService = {
 		)
 	},
 
-	createRefreshTokenForDb(
+	createDeviceRefreshToken(
 		userId: string,
 		deviceIP: string,
 		deviceName: string,
@@ -52,17 +52,11 @@ export const jwtService = {
 		}
 	},
 
-	async setRefreshTokenForDb(refreshTokenForDb: DBTypes.DeviceToken): Promise<string> {
-		await authRepository.setNewRefreshToken(refreshTokenForDb)
-
-		return jwtService.createRefreshTokenStr(refreshTokenForDb.deviceId)
+	getPayload(tokenStr: string) {
+		return jwt.decode(tokenStr, { complete: true })!.payload
 	},
 
-	getPayload(token: string) {
-		return jwt.decode(token, { complete: true })!.payload
-	},
-
-	getUserIdByAccessToken(accessToken: string): null | string {
+	getUserIdByAccessTokenStr(accessToken: string): null | string {
 		try {
 			const result: any = jwt.verify(accessToken, settings.JWT_SECRET)
 			return result.userId

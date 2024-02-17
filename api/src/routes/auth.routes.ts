@@ -29,27 +29,28 @@ function getAuthRouter() {
 				return
 			}
 
-			res.cookie(config.refreshToken.name, loginServiceRes.data.refreshToken, {
+			res.cookie(config.refreshToken.name, loginServiceRes.data.refreshTokenStr, {
 				maxAge: config.refreshToken.lifeDurationInMs,
 				httpOnly: true,
 				secure: true,
 			})
 
 			res.status(HTTP_STATUSES.OK_200).send({
-				accessToken: jwtService.createAccessToken(loginServiceRes.data.user.id),
+				accessToken: jwtService.createAccessTokenStr(loginServiceRes.data.user.id),
 			})
 		},
 	)
 
 	// Generate the new pair of access and refresh tokens (in cookie client must send correct refreshToken that will be revoked after refreshing)
 	router.post('/refresh-token', async (req: Request, res: Response) => {
-		const { newAccessToken, newRefreshToken } =
-			await authService.generateAccessAndRefreshTokens(req)
+		const generateTokensRes = await authService.generateAccessAndRefreshTokens(req)
 
-		if (!newAccessToken || !newRefreshToken) {
+		if (generateTokensRes.code === LayerResultCode.Unauthorized) {
 			res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401)
 			return
 		}
+
+		const { newAccessToken, newRefreshToken } = generateTokensRes.data!
 
 		res.cookie(config.refreshToken.name, newRefreshToken, {
 			maxAge: config.refreshToken.lifeDurationInMs,
@@ -70,7 +71,7 @@ function getAuthRouter() {
 		async (req: ReqWithBody<AuthRegistrationDtoModel>, res: Response) => {
 			const regStatus = await authService.registration(req.body)
 
-			if (regStatus.status === 'fail') {
+			if (regStatus.code === LayerResultCode.BadRequest) {
 				res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400)
 				return
 			}

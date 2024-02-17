@@ -16,7 +16,7 @@ export async function checkRefreshTokenMiddleware(req: Request, res: Response, n
 
 		const refreshTokenInDb = await authRepository.getDeviceRefreshTokenByTokenStr(refreshToken)
 
-		if (!jwtService.isRefreshTokenInDbValid(refreshTokenInDb)) {
+		if (!jwtService.isDeviceRefreshTokenValid(refreshTokenInDb)) {
 			throwError()
 			return
 		}
