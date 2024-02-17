@@ -17,90 +17,17 @@ type GenAccessAndRefreshTokensServiceRes = { newAccessToken: string; newRefreshT
 
 type RegistrationServiceRes = { status: 'fail' | 'success' }
 
-type LogoutServiceRes = { status: 'refreshTokenNoValid' | 'refreshTokenValid' }
-
 export const authService = {
-	async getUserByLoginOrEmailAndPassword(
-		dto: AuthLoginDtoModel,
-	): Promise<LayerResult<UserServiceModel>> {
-		const user = await authRepository.getUserByLoginOrEmailAndPassword(dto)
-
-		if (!user || !user.emailConfirmation.isConfirmed) {
-			return {
-				code: LayerResultCode.NotFound,
-			}
-		}
-
-		return {
-			code: LayerResultCode.Success,
-			data: user,
-		}
-	},
-
 	async login(
 		req: ReqWithBody<AuthLoginDtoModel>,
 	): Promise<LayerResult<{ refreshToken: string; user: UserServiceModel }>> {
-		const userRes = await this.getUserByLoginOrEmailAndPassword(req.body)
+		const userRes = await authRepository.getConfirmedUserByLoginOrEmailAndPassword(req.body)
 
 		if (userRes.code !== LayerResultCode.Success || !userRes.data) {
 			return {
 				code: LayerResultCode.Unauthorized,
 			}
 		}
-
-		let refreshToken = jwtService.getRefreshTokenFromReqCookie(req)
-		const deviceId = jwtService.getRefreshTokenDataFromTokenStr(refreshToken)!.deviceId
-
-		const thisDeviceRefreshToken = await authRepository.findRefreshTokenInDb(deviceId)
-
-		if (thisDeviceRefreshToken) {
-			await authRepository.updateRefreshTokenDate(deviceId)
-		} else {
-			const clientIP = browserService.getClientIP(req)
-			const clientName = browserService.getClientName(req)
-
-			const refreshTokenForDb = jwtService.createRefreshTokenForDb(
-				userRes.data.id,
-				clientIP,
-				clientName,
-			)
-			await jwtService.setRefreshTokenForDb(refreshTokenForDb)
-
-			refreshToken = jwtService.createRefreshToken(refreshTokenForDb.deviceId)
-		}
-
-		return {
-			code: LayerResultCode.Success,
-			data: {
-				refreshToken,
-				user: userRes.data,
-			},
-		}
-	},
-
-	async generateAccessAndRefreshTokens(
-		req: Request,
-	): Promise<GenAccessAndRefreshTokensServiceRes> {
-		const refreshToken = jwtService.getRefreshTokenFromReqCookie(req)
-		const refreshTokenInDb = await authRepository.getRefreshTokenByTokenStr(refreshToken)
-
-		if (!refreshTokenInDb || !jwtService.isRefreshTokenInDbValid(refreshTokenInDb)) {
-			return {
-				newAccessToken: '',
-				newRefreshToken: '',
-			}
-		}
-
-		const userRes = await this.getUserByLoginOrEmailAndPassword(req.body)
-
-		if (userRes.code !== LayerResultCode.Success || !userRes.data) {
-			return {
-				newAccessToken: '',
-				newRefreshToken: '',
-			}
-		}
-
-		await authRepository.updateRefreshTokenDate(refreshTokenInDb.deviceId)
 
 		const clientIP = browserService.getClientIP(req)
 		const clientName = browserService.getClientName(req)
@@ -110,11 +37,56 @@ export const authService = {
 			clientIP,
 			clientName,
 		)
+		await jwtService.setRefreshTokenForDb(refreshTokenForDb)
 
-		const newRefreshToken = await jwtService.setRefreshTokenForDb(refreshTokenForDb)
+		const refreshTokenStr = jwtService.createRefreshTokenStr(refreshTokenForDb.deviceId)
 
 		return {
-			newAccessToken: jwtService.createAccessToken(refreshTokenInDb.userId),
+			code: LayerResultCode.Success,
+			data: {
+				refreshToken: refreshTokenStr,
+				user: userRes.data,
+			},
+		}
+	},
+
+	async generateAccessAndRefreshTokens(
+		req: Request,
+	): Promise<GenAccessAndRefreshTokensServiceRes> {
+		const refreshTokenStr = jwtService.getDeviceRefreshTokenFromReq(req)
+		const deviceToken = await authRepository.getDeviceRefreshTokenByTokenStr(refreshTokenStr)
+
+		if (!deviceToken || !jwtService.isRefreshTokenInDbValid(deviceToken)) {
+			return {
+				newAccessToken: '',
+				newRefreshToken: '',
+			}
+		}
+
+		const userRes = await authRepository.getConfirmedUserByLoginOrEmailAndPassword(req.body)
+
+		if (userRes.code !== LayerResultCode.Success || !userRes.data) {
+			return {
+				newAccessToken: '',
+				newRefreshToken: '',
+			}
+		}
+
+		await authRepository.updateDeviceRefreshTokenDate(deviceToken.deviceId)
+
+		const clientIP = browserService.getClientIP(req)
+		const clientName = browserService.getClientName(req)
+
+		const newDeviceRefreshToken = jwtService.createRefreshTokenForDb(
+			userRes.data.id,
+			clientIP,
+			clientName,
+		)
+
+		const newRefreshToken = await jwtService.setRefreshTokenForDb(newDeviceRefreshToken)
+
+		return {
+			newAccessToken: jwtService.createAccessToken(deviceToken.userId),
 			newRefreshToken: newRefreshToken,
 		}
 	},
@@ -214,13 +186,13 @@ export const authService = {
 	},
 
 	async logout(refreshToken: string): Promise<LayerResult<null>> {
-		const refreshTokenInDb = await authRepository.getRefreshTokenByTokenStr(refreshToken)
+		const refreshTokenInDb = await authRepository.getDeviceRefreshTokenByTokenStr(refreshToken)
 
 		if (!refreshTokenInDb || !jwtService.isRefreshTokenInDbValid(refreshTokenInDb)) {
 			return { code: LayerResultCode.Unauthorized }
 		}
 
-		await authRepository.deleteRefreshTokenByDeviceId(refreshTokenInDb.deviceId)
+		await authRepository.deleteDeviceRefreshTokenByDeviceId(refreshTokenInDb.deviceId)
 
 		return { code: LayerResultCode.Success }
 	},

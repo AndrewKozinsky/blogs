@@ -7,14 +7,14 @@ import { usersRepository } from '../repositories/users.repository'
 
 export async function checkRefreshTokenMiddleware(req: Request, res: Response, next: NextFunction) {
 	try {
-		const refreshToken = jwtService.getRefreshTokenFromReqCookie(req)
+		const refreshToken = jwtService.getDeviceRefreshTokenFromReq(req)
 
 		if (!refreshToken) {
 			throwError()
 			return
 		}
 
-		const refreshTokenInDb = await authRepository.getRefreshTokenByTokenStr(refreshToken)
+		const refreshTokenInDb = await authRepository.getDeviceRefreshTokenByTokenStr(refreshToken)
 
 		if (!jwtService.isRefreshTokenInDbValid(refreshTokenInDb)) {
 			throwError()

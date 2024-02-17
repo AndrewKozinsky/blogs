@@ -40,7 +40,7 @@ export namespace DBTypes {
 		createdAt: string
 	}
 
-	export type RefreshToken = {
+	export type DeviceToken = {
 		issuedAt: Date
 		expirationDate: Date
 		deviceIP: string

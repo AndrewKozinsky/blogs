@@ -119,7 +119,7 @@ function getAuthRouter() {
 
 	// In cookie client must send correct refreshToken that will be revoked
 	router.post('/logout', async (req: Request, res: Response) => {
-		const refreshTokenFromCookie = jwtService.getRefreshTokenFromReqCookie(req)
+		const refreshTokenFromCookie = jwtService.getDeviceRefreshTokenFromReq(req)
 		const logoutServiceRes = await authService.logout(refreshTokenFromCookie)
 
 		if (logoutServiceRes.code === LayerResultCode.Unauthorized) {

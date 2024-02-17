@@ -8,7 +8,7 @@ import { settings } from '../settings'
 import { createUniqString } from '../utils/stringUtils'
 
 export const jwtService = {
-	getRefreshTokenFromReqCookie(req: Request): string {
+	getDeviceRefreshTokenFromReq(req: Request): string {
 		return req.cookies[config.refreshToken.name]
 	},
 
@@ -18,13 +18,13 @@ export const jwtService = {
 		})
 	},
 
-	createRefreshToken(deviceId: string): string {
+	createRefreshTokenStr(deviceId: string): string {
 		return jwt.sign({ deviceId }, settings.JWT_SECRET, {
 			expiresIn: config.refreshToken.lifeDurationInMs / 1000 + 's',
 		})
 	},
 
-	isRefreshTokenInDbValid(refreshTokenInDb: undefined | null | DBTypes.RefreshToken) {
+	isRefreshTokenInDbValid(refreshTokenInDb: undefined | null | DBTypes.DeviceToken) {
 		if (!refreshTokenInDb) {
 			return false
 		}
@@ -39,7 +39,7 @@ export const jwtService = {
 		userId: string,
 		deviceIP: string,
 		deviceName: string,
-	): DBTypes.RefreshToken {
+	): DBTypes.DeviceToken {
 		const deviceId = createUniqString()
 
 		return {
@@ -52,10 +52,10 @@ export const jwtService = {
 		}
 	},
 
-	async setRefreshTokenForDb(refreshTokenForDb: DBTypes.RefreshToken): Promise<string> {
+	async setRefreshTokenForDb(refreshTokenForDb: DBTypes.DeviceToken): Promise<string> {
 		await authRepository.setNewRefreshToken(refreshTokenForDb)
 
-		return jwtService.createRefreshToken(refreshTokenForDb.deviceId)
+		return jwtService.createRefreshTokenStr(refreshTokenForDb.deviceId)
 	},
 
 	getPayload(token: string) {

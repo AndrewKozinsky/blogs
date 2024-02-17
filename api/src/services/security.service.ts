@@ -1,9 +1,7 @@
 import { jwtService } from '../application/jwt.service'
-import DbNames from '../db/dbNames'
 import { authRepository } from '../repositories/auth.repository'
 import { securityRepository } from '../repositories/security.repository'
 import { UserServiceModel } from '../models/service/users.service.model'
-import { db } from '../db/dbService'
 
 type TerminateSpecifiedDeviceRefreshTokenStatus = 'tokenNotFound' | 'success' | 'fail'
 
@@ -19,7 +17,7 @@ export const securityService = {
 		deviceId: string,
 		user: UserServiceModel,
 	): Promise<TerminateSpecifiedDeviceRefreshTokenStatus> {
-		const refreshTokenInDb = await authRepository.getRefreshTokenByDeviceId(deviceId)
+		const refreshTokenInDb = await authRepository.getDeviceRefreshTokenByDeviceId(deviceId)
 
 		if (!refreshTokenInDb) {
 			return 'tokenNotFound'

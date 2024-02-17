@@ -3,10 +3,10 @@ import { hashService } from '../adapters/hash.adapter'
 import { jwtService } from '../application/jwt.service'
 import DbNames from '../db/dbNames'
 import { DBTypes } from '../db/dbTypes'
-import { AuthLoginDtoModel } from '../models/input/authLogin.input.model'
 import { UserServiceModel } from '../models/service/users.service.model'
 import { db } from '../db/dbService'
 import { commonService } from '../services/common'
+import { LayerResult, LayerResultCode } from '../types/resultCodes'
 import { createUniqString } from '../utils/stringUtils'
 
 export const authRepository = {
@@ -14,7 +14,7 @@ export const authRepository = {
 		const refreshTokenData = jwtService.getRefreshTokenDataFromTokenStr(refreshTokenStr)
 
 		const getDeviceRes = await db
-			.collection<DBTypes.RefreshToken>(DbNames.refreshTokens)
+			.collection<DBTypes.DeviceToken>(DbNames.refreshTokens)
 			.findOne({
 				deviceId: refreshTokenData!.deviceId,
 			})
@@ -58,7 +58,7 @@ export const authRepository = {
 		return this.mapDbUserToServiceUser(getUserRes)
 	},
 
-	async getUserByLoginOrEmailAndPassword(loginDto: AuthLoginDtoModel) {
+	async getUserByLoginOrEmailAndPassword(loginDto: { loginOrEmail: string; password: string }) {
 		const getUserRes = await db.collection<DBTypes.User>(DbNames.users).findOne({
 			$or: [
 				{ 'account.login': loginDto.loginOrEmail },
@@ -80,6 +80,24 @@ export const authRepository = {
 		}
 
 		return this.mapDbUserToServiceUser(getUserRes)
+	},
+
+	async getConfirmedUserByLoginOrEmailAndPassword(loginDto: {
+		loginOrEmail: string
+		password: string
+	}): Promise<LayerResult<UserServiceModel>> {
+		const user = await this.getUserByLoginOrEmailAndPassword(loginDto)
+
+		if (!user || !user.emailConfirmation.isConfirmed) {
+			return {
+				code: LayerResultCode.NotFound,
+			}
+		}
+
+		return {
+			code: LayerResultCode.Success,
+			data: user,
+		}
 	},
 
 	async getUserByConfirmationCode(confirmationCode: string) {
@@ -126,13 +144,13 @@ export const authRepository = {
 		return commonService.deleteUser(userId)
 	},
 
-	async setNewRefreshToken(data: DBTypes.RefreshToken) {
+	async setNewRefreshToken(data: DBTypes.DeviceToken) {
 		await db.collection(DbNames.refreshTokens).insertOne(data)
 	},
 
-	async getRefreshTokenByDeviceId(deviceId: string): Promise<null | DBTypes.RefreshToken> {
+	async getDeviceRefreshTokenByDeviceId(deviceId: string): Promise<null | DBTypes.DeviceToken> {
 		const getTokenRes = await db
-			.collection<DBTypes.RefreshToken>(DbNames.refreshTokens)
+			.collection<DBTypes.DeviceToken>(DbNames.refreshTokens)
 			.findOne({
 				deviceId,
 			})
@@ -142,13 +160,13 @@ export const authRepository = {
 		return getTokenRes
 	},
 
-	async deleteRefreshTokenByDeviceId(deviceId: string): Promise<boolean> {
+	async deleteDeviceRefreshTokenByDeviceId(deviceId: string): Promise<boolean> {
 		const result = await db.collection(DbNames.refreshTokens).deleteOne({ deviceId })
 
 		return result.deletedCount === 1
 	},
 
-	async updateRefreshTokenDate(deviceId: string): Promise<boolean> {
+	async updateDeviceRefreshTokenDate(deviceId: string): Promise<boolean> {
 		const result = await db
 			.collection(DbNames.refreshTokens)
 			.updateOne({ deviceId }, { $set: { issuedAt: new Date() } })
@@ -156,13 +174,13 @@ export const authRepository = {
 		return result.modifiedCount === 1
 	},
 
-	async getRefreshTokenByTokenStr(tokenStr: string): Promise<null | DBTypes.RefreshToken> {
+	async getDeviceRefreshTokenByTokenStr(tokenStr: string): Promise<null | DBTypes.DeviceToken> {
 		const refreshToken = jwtService.getRefreshTokenDataFromTokenStr(tokenStr)
 
-		return this.getRefreshTokenByDeviceId(refreshToken!.deviceId)
+		return this.getDeviceRefreshTokenByDeviceId(refreshToken!.deviceId)
 	},
 
-	async findRefreshTokenInDb(deviceId: string) {
+	async findDeviceRefreshTokenInDb(deviceId: string) {
 		return await db.collection(DbNames.refreshTokens).findOne({ deviceId })
 	},
 

@@ -10,7 +10,7 @@ export const securityQueryRepository = {
 		const user = await authRepository.getUserByRefreshToken(refreshToken)
 
 		const userDevices = await db
-			.collection<DBTypes.RefreshToken>(DbNames.refreshTokens)
+			.collection<DBTypes.DeviceToken>(DbNames.refreshTokens)
 			.find({ userId: user!.id })
 			.toArray()
 
@@ -18,7 +18,7 @@ export const securityQueryRepository = {
 	},
 
 	mapDbUserDeviceToOutputUserDevice(
-		DbUserRefreshToken: WithId<DBTypes.RefreshToken>,
+		DbUserRefreshToken: WithId<DBTypes.DeviceToken>,
 	): UserDeviceOutModel {
 		return {
 			ip: DbUserRefreshToken.deviceIP, // IP address of device
