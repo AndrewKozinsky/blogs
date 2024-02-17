@@ -9,6 +9,7 @@ import { resetDbEveryTest } from './utils/common'
 import {
 	addUserByAdminRequest,
 	adminAuthorizationValue,
+	checkUserDeviceObj,
 	checkUserObj,
 	loginRequest,
 } from './utils/utils'
@@ -35,14 +36,14 @@ describe('Getting all user devices', () => {
 
 		const loginRes = await loginRequest(app, login, password).expect(HTTP_STATUSES.OK_200)
 		const refreshTokenStr = loginRes.headers['set-cookie'][0]
-		// УДАЛИТЬ ПОТОМ
 		const refreshToken = refreshTokenStr.split('=')[1]
 
 		const getUserDevicesRes = await request(app)
 			.get(RouteNames.securityDevices)
 			.set('Cookie', config.refreshToken.name + '=' + refreshToken)
 			.expect(HTTP_STATUSES.OK_200)
-		console.log(getUserDevicesRes.body)
+
+		checkUserDeviceObj(getUserDevicesRes.body[0])
 	})
 
 	/*it.skip('should return an object with property items contains array with 2 items after creating 2 users', async () => {

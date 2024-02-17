@@ -15,7 +15,6 @@ function getSecurityRouter() {
 
 		const userDevices = await securityQueryRepository.getUserDevices(refreshTokenFromCookie)
 		res.status(HTTP_STATUSES.OK_200).send(userDevices)
-		// res.sendStatus(HTTP_STATUSES.OK_200)
 	})
 
 	// Terminate all other (exclude current) device's sessions

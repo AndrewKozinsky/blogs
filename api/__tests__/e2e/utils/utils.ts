@@ -13,6 +13,7 @@ import RouteNames from '../../../src/config/routeNames'
 // 	CreatePostDtoModel,
 // } from '../../../src/models/input/posts.input.model'
 import { CreateUserDtoModel } from '../../../src/models/input/users.input.model'
+import any = jasmine.any
 
 dotenv.config()
 
@@ -142,6 +143,19 @@ export function checkUserObj(userObj: any) {
 	expect(typeof userObj.email).toBe('string')
 	expect(userObj.email).toMatch(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/)
 	expect(userObj.createdAt).toMatch(
+		/\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/,
+	)
+}
+
+export function checkUserDeviceObj(userDeviceObj: any) {
+	expect(userDeviceObj).toEqual({
+		ip: expect.any(String),
+		title: expect.any(String),
+		lastActiveDate: expect.any(String),
+		deviceId: expect.any(String),
+	})
+
+	expect(userDeviceObj.lastActiveDate).toMatch(
 		/\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/,
 	)
 }
