@@ -33,6 +33,9 @@ const RouteNames = {
 	},
 	security: '/security',
 	securityDevices: '/security/devices',
+	securityDevice(deviceId: string) {
+		return '/security/devices/' + deviceId
+	},
 	testing: '/testing',
 	testingAllData: '/testing/all-data',
 }

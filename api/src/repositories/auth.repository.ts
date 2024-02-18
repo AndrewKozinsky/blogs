@@ -4,6 +4,7 @@ import { jwtService } from '../application/jwt.service'
 import DbNames from '../db/dbNames'
 import { db } from '../db/dbService'
 import { DBTypes } from '../db/dbTypes'
+import { DeviceRefreshTokenServiceModel } from '../models/service/auth.service.model'
 import { UserServiceModel } from '../models/service/users.service.model'
 import { commonService } from '../services/common'
 import { LayerResult, LayerResultCode } from '../types/resultCodes'
@@ -157,7 +158,7 @@ export const authRepository = {
 
 		if (!getTokenRes) return null
 
-		return getTokenRes
+		return this.mapDbDeviceRefreshTokenToServiceDeviceRefreshToken(getTokenRes)
 	},
 
 	async deleteDeviceRefreshTokenByDeviceId(deviceId: string): Promise<boolean> {
@@ -206,20 +207,25 @@ export const authRepository = {
 
 		return {
 			code: LayerResultCode.Success,
-			data: userDevices.map((userDevice) => {
-				return {
-					issuedAt: userDevice.issuedAt,
-					expirationDate: userDevice.expirationDate,
-					deviceIP: userDevice.deviceIP,
-					deviceId: userDevice.deviceId,
-					deviceName: userDevice.deviceName,
-					userId: userDevice.userId,
-				}
-			}),
+			data: userDevices.map(this.mapDbDeviceRefreshTokenToServiceDeviceRefreshToken),
 		}
 	},
 
 	mapDbUserToServiceUser(dbUser: WithId<DBTypes.User>): UserServiceModel {
 		return commonService.mapDbUserToServiceUser(dbUser)
+	},
+
+	mapDbDeviceRefreshTokenToServiceDeviceRefreshToken(
+		dbDevice: WithId<DBTypes.DeviceToken>,
+	): DeviceRefreshTokenServiceModel {
+		return {
+			id: dbDevice._id.toString(),
+			issuedAt: dbDevice.issuedAt,
+			expirationDate: dbDevice.expirationDate,
+			deviceIP: dbDevice.deviceIP,
+			deviceId: dbDevice.deviceId,
+			deviceName: dbDevice.deviceName,
+			userId: dbDevice.userId,
+		}
 	},
 }

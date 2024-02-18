@@ -38,6 +38,7 @@ export const securityService = {
 		}
 
 		const userDevices = await authRepository.getUserDevicesByDeviceId(currentUserDeviceId)
+		// console.log(userDevices)
 
 		if (userDevices.code !== LayerResultCode.Success || !userDevices.data) {
 			return {
@@ -46,7 +47,7 @@ export const securityService = {
 		}
 
 		const deletionDeviceInUserDevices = userDevices.data.find((userDevice) => {
-			return userDevice.deviceId === currentUserDeviceId
+			return userDevice.deviceId === deletionDeviceId
 		})
 
 		if (!deletionDeviceInUserDevices) {

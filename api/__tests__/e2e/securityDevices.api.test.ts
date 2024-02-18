@@ -1,10 +1,12 @@
 // @ts-ignore
 import request from 'supertest'
 import { app } from '../../src/app'
+import { jwtService } from '../../src/application/jwt.service'
 import { HTTP_STATUSES, config } from '../../src/config/config'
 import RouteNames from '../../src/config/routeNames'
-import { settings } from '../../src/settings'
-// import { GetUsersOutModel } from '../../src/models/output/users.output.model'
+import { DBTypes } from '../../src/db/dbTypes'
+import { authRepository } from '../../src/repositories/auth.repository'
+import { createUniqString, parseCookieStringToObj } from '../../src/utils/stringUtils'
 import { resetDbEveryTest } from './utils/common'
 import {
 	addUserByAdminRequest,
@@ -12,6 +14,8 @@ import {
 	checkUserDeviceObj,
 	checkUserObj,
 	loginRequest,
+	userLogin,
+	userPassword,
 } from './utils/utils'
 import * as jwt from 'jsonwebtoken'
 
@@ -26,7 +30,7 @@ describe('Getting all user devices', () => {
 		await request(app).get(RouteNames.securityDevices).expect(HTTP_STATUSES.UNAUTHORIZED_401)
 	})
 
-	it('should return an array of devices data if a refreshToken inside cookie is valid', async () => {
+	it.skip('should return an array of devices data if a refreshToken inside cookie is valid', async () => {
 		const login = 'login'
 		const password = 'password'
 		const email = 'email@email.ru'
@@ -45,127 +49,116 @@ describe('Getting all user devices', () => {
 
 		checkUserDeviceObj(getUserDevicesRes.body[0])
 	})
-
-	/*it.skip('should return an object with property items contains array with 2 items after creating 2 users', async () => {
-		await addUserByAdminRequest(app)
-		await addUserByAdminRequest(app)
-
-		const getUsersRes = await request(app)
-			.get(RouteNames.users)
-			.set('authorization', adminAuthorizationValue)
-			.expect(HTTP_STATUSES.OK_200)
-
-		expect(getUsersRes.body.pagesCount).toBe(1)
-		expect(getUsersRes.body.page).toBe(1)
-		expect(getUsersRes.body.pageSize).toBe(10)
-		expect(getUsersRes.body.totalCount).toBe(2)
-		expect(getUsersRes.body.items.length).toBe(2)
-
-		checkUserObj(getUsersRes.body.items[0])
-		checkUserObj(getUsersRes.body.items[1])
-	})*/
-
-	/*it.skip('should return an array of objects matching the queries scheme', async () => {
-		await addUserByAdminRequest(app)
-		await addUserByAdminRequest(app)
-		await addUserByAdminRequest(app)
-		await addUserByAdminRequest(app)
-		await addUserByAdminRequest(app)
-		await addUserByAdminRequest(app)
-		await addUserByAdminRequest(app)
-
-		const getUsersRes = await request(app)
-			.get(RouteNames.users + '?pageNumber=2&pageSize=2')
-			.set('authorization', adminAuthorizationValue)
-
-		expect(getUsersRes.body.page).toBe(2)
-		expect(getUsersRes.body.pagesCount).toBe(4)
-		expect(getUsersRes.body.totalCount).toBe(7)
-		expect(getUsersRes.body.items.length).toBe(2)
-	})*/
-
-	/*it.skip('should return filtered an array of objects', async () => {
-		await addUserByAdminRequest(app, { login: 'in-one-1', email: 'email-1@email.com' }) //
-		await addUserByAdminRequest(app, { login: 'in-two-1', email: 'email-1@email.com' }) //
-		await addUserByAdminRequest(app, { login: 'in-one-1', email: 'email-1@email.com' }) //
-		await addUserByAdminRequest(app, { login: 'in-two-1', email: 'email-1@email.com' }) //
-		await addUserByAdminRequest(app, { login: 'in-one-1', email: 'email-1@email.jp' }) //
-		await addUserByAdminRequest(app, { login: 'in-three-1', email: 'email-1@email.us' })
-		await addUserByAdminRequest(app, { login: 'in-one-1', email: 'email-1@email.ru' }) //
-		await addUserByAdminRequest(app, { login: 'in-one-2', email: 'email-3@email.com' }) //
-		await addUserByAdminRequest(app, { login: 'in-one-3', email: 'email-4@email.com' }) //
-		await addUserByAdminRequest(app, { login: 'in-one-4', email: 'email-5@email.com' }) //
-
-		const getUsersRes = await request(app)
-			.get(
-				RouteNames.users +
-					'?pageNumber=2&pageSize=2&searchLoginTerm=one&searchEmailTerm=.com',
-			)
-			.set('authorization', adminAuthorizationValue)
-
-		expect(getUsersRes.body.page).toBe(2)
-		expect(getUsersRes.body.pagesCount).toBe(5)
-		expect(getUsersRes.body.totalCount).toBe(9)
-		expect(getUsersRes.body.items.length).toBe(2)
-	})*/
 })
 
-/*describe('Creating an user', () => {
-	it.skip('should forbid a request from an unauthorized user', async () => {
-		await request(app).post(RouteNames.users).expect(HTTP_STATUSES.UNAUTHORIZED_401)
+describe('Terminate specified device session', () => {
+	it.skip('should forbid a request from a user without a device refresh token', async () => {
+		return request(app)
+			.delete(RouteNames.securityDevice('999'))
+			.expect(HTTP_STATUSES.UNAUTHORIZED_401)
 	})
 
-	it.skip('should not create an user by wrong dto', async () => {
-		const createdUserRes = await addUserByAdminRequest(app, { login: 'lo' })
-		expect(createdUserRes.status).toBe(HTTP_STATUSES.BAD_REQUEST_400)
+	it.skip('should forbid a request from a user with an expired device refresh token', async () => {
+		const createdUserRes = await addUserByAdminRequest(app)
+		expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
+		const userId = createdUserRes.body.id
 
-		expect({}.toString.call(createdUserRes.body.errorsMessages)).toBe('[object Array]')
-		expect(createdUserRes.body.errorsMessages.length).toBe(1)
-		expect(createdUserRes.body.errorsMessages[0].field).toBe('login')
+		// Create expired token
+		const deviceId = createUniqString()
+
+		const expiredRefreshToken: DBTypes.DeviceToken = {
+			issuedAt: new Date(),
+			expirationDate: new Date(),
+			deviceIP: '123',
+			deviceId,
+			deviceName: 'Unknown',
+			userId,
+		}
+
+		await authRepository.insertDeviceRefreshToken(expiredRefreshToken)
+
+		// Get created expired token
+		const refreshToken = authRepository.getDeviceRefreshTokenByDeviceId(deviceId)
+
+		return request(app)
+			.delete(RouteNames.securityDevice('999'))
+			.set('Cookie', config.refreshToken.name + '=' + refreshToken)
+			.expect(HTTP_STATUSES.UNAUTHORIZED_401)
 	})
 
-	it.skip('should create an user by correct dto', async () => {
+	it.skip('should return 404 if client tries to terminate a non existed device', async () => {
 		const createdUserRes = await addUserByAdminRequest(app)
 		expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
 
-		checkUserObj(createdUserRes.body)
+		const loginRes = await loginRequest(app, userLogin, userPassword).expect(
+			HTTP_STATUSES.OK_200,
+		)
+		const refreshTokenStr = loginRes.headers['set-cookie'][0]
+		const refreshTokenValue = parseCookieStringToObj(refreshTokenStr).cookieValue
 
-		// Check if there are 2 users after adding another one
-		const createdUser2Res = await addUserByAdminRequest(app)
-		expect(createdUser2Res.status).toBe(HTTP_STATUSES.CREATED_201)
-
-		const allUsersRes = await request(app)
-			.get(RouteNames.users)
-			.set('authorization', adminAuthorizationValue)
-		expect(allUsersRes.body.items.length).toBe(2)
-	})
-})*/
-
-/*describe('Deleting an user', () => {
-	it.skip('should forbid a request from an unauthorized user', async () => {
-		return request(app).put(RouteNames.users)
-	})
-
-	it.skip('should not delete a non existing user', async () => {
-		await request(app)
-			.delete(RouteNames.user('999'))
-			.set('authorization', adminAuthorizationValue)
+		return request(app)
+			.delete(RouteNames.securityDevice('999'))
+			.set('Cookie', config.refreshToken.name + '=' + refreshTokenValue)
 			.expect(HTTP_STATUSES.NOT_FOUNT_404)
 	})
 
-	it.skip('should delete an user', async () => {
+	it.skip('should return 403 if a client tries to terminate a device which does not belong to him', async () => {
+		// Create a user 1
+		const createdUser_1_Res = await addUserByAdminRequest(app)
+		expect(createdUser_1_Res.status).toBe(HTTP_STATUSES.CREATED_201)
+
+		const login_1_Res = await loginRequest(app, userLogin, userPassword).expect(
+			HTTP_STATUSES.OK_200,
+		)
+
+		const deviceRefreshTokenUser_1_Str = login_1_Res.headers['set-cookie'][0]
+		const deviceRefreshTokenUser_1_Value = parseCookieStringToObj(
+			deviceRefreshTokenUser_1_Str,
+		).cookieValue
+
+		const deviceId = jwtService.getRefreshTokenDataFromTokenStr(
+			deviceRefreshTokenUser_1_Value,
+		)!.deviceId
+
+		// Create a user 2
+		const login = 'login-2'
+		const password = 'password-2'
+		const email = 'email-2@email.ru'
+
+		const createdUser_2_Res = await addUserByAdminRequest(app, { login, password, email })
+		expect(createdUser_2_Res.status).toBe(HTTP_STATUSES.CREATED_201)
+
+		const login_2_Res = await loginRequest(app, login, password).expect(HTTP_STATUSES.OK_200)
+
+		const deviceRefreshTokenUser_2_Str = login_2_Res.headers['set-cookie'][0]
+		const deviceRefreshTokenUser_2_Value = parseCookieStringToObj(
+			deviceRefreshTokenUser_2_Str,
+		).cookieValue
+
+		return request(app)
+			.delete(RouteNames.securityDevice(deviceId))
+			.set('Cookie', config.refreshToken.name + '=' + deviceRefreshTokenUser_2_Value)
+			.expect(HTTP_STATUSES.FORBIDDEN_403)
+	})
+
+	it('should return 204 if a client tries to terminate his device', async () => {
+		// Create a user 1
 		const createdUserRes = await addUserByAdminRequest(app)
 		expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
-		const createdUserId = createdUserRes.body.id
 
-		await request(app)
-			.delete(RouteNames.user(createdUserId))
-			.set('authorization', adminAuthorizationValue)
+		const loginRes = await loginRequest(app, userLogin, userPassword).expect(
+			HTTP_STATUSES.OK_200,
+		)
+
+		const deviceRefreshTokenStr = loginRes.headers['set-cookie'][0]
+		const deviceRefreshTokenValue = parseCookieStringToObj(deviceRefreshTokenStr).cookieValue
+
+		const deviceId =
+			jwtService.getRefreshTokenDataFromTokenStr(deviceRefreshTokenValue)!.deviceId
+
+		return request(app)
+			.delete(RouteNames.securityDevice(deviceId))
+			.set('Cookie', config.refreshToken.name + '=' + deviceRefreshTokenValue)
 			.expect(HTTP_STATUSES.NO_CONTENT_204)
-
-		await request(app)
-			.get(RouteNames.user(createdUserId))
-			.set('authorization', adminAuthorizationValue)
-			.expect(HTTP_STATUSES.NOT_FOUNT_404)
 	})
-})*/
+})

@@ -1,18 +1,15 @@
-// import { addMilliseconds } from 'date-fns'
-// import * as jwt from 'jsonwebtoken'
+import * as jwt from 'jsonwebtoken'
 // @ts-ignore
-// import request from 'supertest'
-// import { app } from '../../src/app'
-// import { jwtService } from '../../src/application/jwt.service'
-// import { HTTP_STATUSES, config } from '../../src/config/config'
-// import RouteNames from '../../src/config/routeNames'
-// import { DBTypes } from '../../src/models/db'
-// import { authRepository } from '../../src/repositories/auth.repository'
-// import { usersRepository } from '../../src/repositories/users.repository'
-// import { settings } from '../../src/settings'
-// import { createUniqString, parseCookieStringToObj } from '../../src/utils/stringUtils'
-// import { resetDbEveryTest } from './utils/common'
-// import { addUserByAdminRequest, adminAuthorizationValue, loginRequest } from './utils/utils'
+import request from 'supertest'
+import { app } from '../../src/app'
+import { HTTP_STATUSES, config } from '../../src/config/config'
+import { DBTypes } from '../../src/db/dbTypes'
+import { authRepository } from '../../src/repositories/auth.repository'
+import RouteNames from '../../src/config/routeNames'
+import { usersRepository } from '../../src/repositories/users.repository'
+import { settings } from '../../src/settings'
+import { createUniqString, parseCookieStringToObj } from '../../src/utils/stringUtils'
+import { addUserByAdminRequest, adminAuthorizationValue, loginRequest } from './utils/utils'
 
 // resetDbEveryTest()
 
@@ -113,18 +110,20 @@ it('123', async () => {
 
 		// Create expired token
 		const deviceId = createUniqString()
-		const expiredRefreshToken: DBTypes.RefreshToken = {
-			issuedAt: addMilliseconds(new Date(), -config.refreshToken.lifeDurationInMs - 10000),
+
+		const expiredRefreshToken: DBTypes.DeviceToken = {
+			issuedAt: new Date(),
+			expirationDate: new Date(),
 			deviceIP: '123',
 			deviceId,
 			deviceName: 'Unknown',
 			userId,
 		}
 
-		await authRepository.setNewRefreshToken(expiredRefreshToken)
+		await authRepository.insertDeviceRefreshToken(expiredRefreshToken)
 
 		// Get created expired token
-		const refreshToken = jwtService.createRefreshToken(deviceId)
+		const refreshToken = authRepository.getDeviceRefreshTokenByDeviceId(deviceId)
 
 		await request(app)
 			.post(RouteNames.authRefreshToken)
@@ -312,17 +311,20 @@ it('123', async () => {
 
 		// Create expired token
 		const deviceId = createUniqString()
-		const expiredRefreshToken: DBTypes.RefreshToken = {
-			issuedAt: addMilliseconds(new Date(), -config.refreshToken.lifeDurationInMs - 10000),
+
+		const expiredRefreshToken: DBTypes.DeviceToken = {
+			issuedAt: new Date(),
+			expirationDate: new Date(),
 			deviceIP: '123',
 			deviceId,
 			deviceName: 'Unknown',
 			userId,
 		}
-		await authRepository.setNewRefreshToken(expiredRefreshToken)
+
+		await authRepository.insertDeviceRefreshToken(expiredRefreshToken)
 
 		// Get created expired token
-		const refreshToken = jwtService.createRefreshToken(deviceId)
+		const refreshToken = authRepository.getDeviceRefreshTokenByDeviceId(deviceId)
 
 		await request(app)
 			.post(RouteNames.authLogout)
