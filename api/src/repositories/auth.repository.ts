@@ -2,9 +2,9 @@ import { ObjectId, WithId } from 'mongodb'
 import { hashService } from '../adapters/hash.adapter'
 import { jwtService } from '../application/jwt.service'
 import DbNames from '../db/dbNames'
+import { db } from '../db/dbService'
 import { DBTypes } from '../db/dbTypes'
 import { UserServiceModel } from '../models/service/users.service.model'
-import { db } from '../db/dbService'
 import { commonService } from '../services/common'
 import { LayerResult, LayerResultCode } from '../types/resultCodes'
 import { createUniqString } from '../utils/stringUtils'
@@ -182,6 +182,41 @@ export const authRepository = {
 
 	async findDeviceRefreshTokenInDb(deviceId: string) {
 		return await db.collection(DbNames.refreshTokens).findOne({ deviceId })
+	},
+
+	async getUserDevicesByDeviceId(deviceId: string): Promise<LayerResult<DBTypes.DeviceToken[]>> {
+		const userDevice = await db.collection(DbNames.refreshTokens).findOne({ deviceId })
+
+		if (!userDevice) {
+			return {
+				code: LayerResultCode.NotFound,
+			}
+		}
+
+		const userDevices = await db
+			.collection<DBTypes.DeviceToken>(DbNames.refreshTokens)
+			.find({ userId: userDevice.userId })
+			.toArray()
+
+		if (!userDevices) {
+			return {
+				code: LayerResultCode.NotFound,
+			}
+		}
+
+		return {
+			code: LayerResultCode.Success,
+			data: userDevices.map((userDevice) => {
+				return {
+					issuedAt: userDevice.issuedAt,
+					expirationDate: userDevice.expirationDate,
+					deviceIP: userDevice.deviceIP,
+					deviceId: userDevice.deviceId,
+					deviceName: userDevice.deviceName,
+					userId: userDevice.userId,
+				}
+			}),
+		}
 	},
 
 	mapDbUserToServiceUser(dbUser: WithId<DBTypes.User>): UserServiceModel {

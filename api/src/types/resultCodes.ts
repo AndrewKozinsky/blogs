@@ -9,4 +9,5 @@ export enum LayerResultCode {
 	NotFound = 1,
 	Unauthorized = 2,
 	BadRequest = 3,
+	Forbidden = 4,
 }

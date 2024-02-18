@@ -2,8 +2,7 @@ import { jwtService } from '../application/jwt.service'
 import { authRepository } from '../repositories/auth.repository'
 import { securityRepository } from '../repositories/security.repository'
 import { UserServiceModel } from '../models/service/users.service.model'
-
-type TerminateSpecifiedDeviceRefreshTokenStatus = 'tokenNotFound' | 'success' | 'fail'
+import { LayerResult, LayerResultCode } from '../types/resultCodes'
 
 export const securityService = {
 	async terminateAllDeviceRefreshTokensApartThis(refreshTokenStr: string) {
@@ -14,21 +13,53 @@ export const securityService = {
 	},
 
 	async terminateSpecifiedDeviceRefreshToken(
-		deviceId: string,
-		user: UserServiceModel,
-	): Promise<TerminateSpecifiedDeviceRefreshTokenStatus> {
-		const refreshTokenInDb = await authRepository.getDeviceRefreshTokenByDeviceId(deviceId)
+		currentUserTokenStr: string,
+		deletionDeviceId: string,
+	): Promise<LayerResult<null>> {
+		// Is device for deletion is not exist give NotFound code
+		const deviceRefreshToken =
+			await authRepository.getDeviceRefreshTokenByDeviceId(deletionDeviceId)
 
-		if (!refreshTokenInDb) {
-			return 'tokenNotFound'
+		if (!deviceRefreshToken) {
+			return {
+				code: LayerResultCode.NotFound,
+			}
 		}
 
-		if (refreshTokenInDb.userId !== user.id) {
-			return 'fail'
+		// Device for deletion exists. Check if current user belongs the device for deletion
+
+		const currentUserDeviceId =
+			jwtService.getRefreshTokenDataFromTokenStr(currentUserTokenStr)?.deviceId
+
+		if (!currentUserDeviceId) {
+			return {
+				code: LayerResultCode.Forbidden,
+			}
 		}
 
-		const isDeleted = await securityRepository.deleteRefreshTokenByDeviceId(deviceId)
+		const userDevices = await authRepository.getUserDevicesByDeviceId(currentUserDeviceId)
 
-		return isDeleted ? 'success' : 'fail'
+		if (userDevices.code !== LayerResultCode.Success || !userDevices.data) {
+			return {
+				code: LayerResultCode.Forbidden,
+			}
+		}
+
+		const deletionDeviceInUserDevices = userDevices.data.find((userDevice) => {
+			return userDevice.deviceId === currentUserDeviceId
+		})
+
+		if (!deletionDeviceInUserDevices) {
+			return {
+				code: LayerResultCode.Forbidden,
+			}
+		}
+
+		const isDeviceDeleted =
+			await securityRepository.deleteRefreshTokenByDeviceId(deletionDeviceId)
+
+		return {
+			code: isDeviceDeleted ? LayerResultCode.Success : LayerResultCode.Forbidden,
+		}
 	},
 }

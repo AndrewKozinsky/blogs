@@ -5,7 +5,11 @@ import { HTTP_STATUSES } from '../config/config'
 import { authRepository } from '../repositories/auth.repository'
 import { usersRepository } from '../repositories/users.repository'
 
-export async function checkRefreshTokenMiddleware(req: Request, res: Response, next: NextFunction) {
+export async function checkDeviceRefreshTokenMiddleware(
+	req: Request,
+	res: Response,
+	next: NextFunction,
+) {
 	try {
 		const refreshToken = jwtService.getDeviceRefreshTokenFromReq(req)
 
@@ -14,9 +18,10 @@ export async function checkRefreshTokenMiddleware(req: Request, res: Response, n
 			return
 		}
 
-		const refreshTokenInDb = await authRepository.getDeviceRefreshTokenByTokenStr(refreshToken)
+		const deviceRefreshToken =
+			await authRepository.getDeviceRefreshTokenByTokenStr(refreshToken)
 
-		if (!jwtService.isDeviceRefreshTokenValid(refreshTokenInDb)) {
+		if (!jwtService.isDeviceRefreshTokenValid(deviceRefreshToken)) {
 			throwError()
 			return
 		}
