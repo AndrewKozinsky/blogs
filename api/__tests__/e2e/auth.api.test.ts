@@ -8,6 +8,7 @@ import { authRepository } from '../../src/repositories/auth.repository'
 import RouteNames from '../../src/config/routeNames'
 import { usersRepository } from '../../src/repositories/users.repository'
 import { settings } from '../../src/settings'
+import { wait } from '../../src/utils/promise'
 import { createUniqString, parseCookieStringToObj } from '../../src/utils/stringUtils'
 import { resetDbEveryTest } from './utils/common'
 import { addUserByAdminRequest, adminAuthorizationValue, loginRequest } from './utils/utils'
@@ -96,6 +97,24 @@ describe('Login user', () => {
 		expect(refreshToken.HttpOnly).toBe(true)
 		expect(refreshToken.Secure).toBe(true)
 		expect(refreshToken['Max-Age']).toBe(20)
+	})
+
+	it.skip('should return 429 if too many requests were made', async () => {
+		for (let i = 1; i <= 5; i++) {
+			await request(app)
+				.post(RouteNames.authLogin)
+				.send({ loginOrEmail: '', password: '' })
+				.expect(HTTP_STATUSES.BAD_REQUEST_400)
+		}
+
+		await request(app).post(RouteNames.authLogin).expect(HTTP_STATUSES.TOO_MANY_REQUESTS_429)
+
+		await wait(10000)
+
+		await request(app)
+			.post(RouteNames.authLogin)
+			.send({ loginOrEmail: '', password: '' })
+			.expect(HTTP_STATUSES.BAD_REQUEST_400)
 	})
 })
 
@@ -199,6 +218,27 @@ describe('Register user', () => {
 
 		expect(allUsers.body.items.length).toBe(1)
 	})
+
+	it.skip('should return 429 if too many requests were made', async () => {
+		for (let i = 1; i <= 5; i++) {
+			await request(app)
+				.post(RouteNames.authRegistration)
+				.send({ login: '', password: '', email: '' })
+				.expect(HTTP_STATUSES.BAD_REQUEST_400)
+		}
+
+		await request(app)
+			.post(RouteNames.authRegistration)
+			.send({ login: '', password: '', email: '' })
+			.expect(HTTP_STATUSES.TOO_MANY_REQUESTS_429)
+
+		await wait(10000)
+
+		await request(app)
+			.post(RouteNames.authRegistration)
+			.send({ login: '', password: '', email: '' })
+			.expect(HTTP_STATUSES.BAD_REQUEST_400)
+	})
 })
 
 describe('Registration confirmation', () => {
@@ -239,6 +279,24 @@ describe('Registration confirmation', () => {
 			.send({ code: confirmationCode })
 			.expect(HTTP_STATUSES.NO_CONTENT_204)
 	})
+
+	it.skip('should return 429 if too many requests were made', async () => {
+		for (let i = 1; i <= 5; i++) {
+			await request(app)
+				.post(RouteNames.authRegistrationConfirmation)
+				.expect(HTTP_STATUSES.BAD_REQUEST_400)
+		}
+
+		await request(app)
+			.post(RouteNames.authRegistrationConfirmation)
+			.expect(HTTP_STATUSES.TOO_MANY_REQUESTS_429)
+
+		await wait(10000)
+
+		await request(app)
+			.post(RouteNames.authRegistrationConfirmation)
+			.expect(HTTP_STATUSES.BAD_REQUEST_400)
+	})
 })
 
 describe('Resending email confirmation code', () => {
@@ -271,6 +329,27 @@ describe('Resending email confirmation code', () => {
 			.post(RouteNames.authRegistrationEmailResending)
 			.send({ email })
 			.expect(HTTP_STATUSES.NO_CONTENT_204)
+	})
+
+	it.skip('should return 429 if too many requests were made', async () => {
+		for (let i = 1; i <= 5; i++) {
+			await request(app)
+				.post(RouteNames.authRegistrationEmailResending)
+				.send({ email: '' })
+				.expect(HTTP_STATUSES.BAD_REQUEST_400)
+		}
+
+		await request(app)
+			.post(RouteNames.authRegistrationEmailResending)
+			.send({ email: '' })
+			.expect(HTTP_STATUSES.TOO_MANY_REQUESTS_429)
+
+		await wait(10000)
+
+		await request(app)
+			.post(RouteNames.authRegistrationEmailResending)
+			.send({ email: '' })
+			.expect(HTTP_STATUSES.BAD_REQUEST_400)
 	})
 })
 
