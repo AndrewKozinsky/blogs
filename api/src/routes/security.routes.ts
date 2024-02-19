@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express'
 import { jwtService } from '../application/jwt.service'
 import { HTTP_STATUSES } from '../config/config'
 import { checkDeviceRefreshTokenMiddleware } from '../middlewares/checkDeviceRefreshTokenMiddleware'
+import requestsLimiter from '../middlewares/requestsLimitter'
 import { ReqWithParams } from '../models/common'
 import { securityQueryRepository } from '../repositories/security.queryRepository'
 import { securityService } from '../services/security.service'
@@ -13,6 +14,7 @@ function getSecurityRouter() {
 	// Returns all devices with active sessions for current user
 	router.get(
 		'/devices',
+		requestsLimiter,
 		checkDeviceRefreshTokenMiddleware,
 		async (req: Request, res: Response) => {
 			const refreshTokenFromCookie = jwtService.getDeviceRefreshTokenFromReq(req)
@@ -25,6 +27,7 @@ function getSecurityRouter() {
 	// Terminate all other (exclude current) device's sessions
 	router.delete(
 		'/devices',
+		requestsLimiter,
 		checkDeviceRefreshTokenMiddleware,
 		async (req: Request, res: Response) => {
 			const refreshTokenFromCookie = jwtService.getDeviceRefreshTokenFromReq(req)
@@ -37,6 +40,7 @@ function getSecurityRouter() {
 	// Terminate specified device session
 	router.delete(
 		'/devices/:deviceId',
+		requestsLimiter,
 		checkDeviceRefreshTokenMiddleware,
 		async (req: ReqWithParams<{ deviceId: string }>, res: Response) => {
 			const refreshTokenFromCookie = jwtService.getDeviceRefreshTokenFromReq(req)

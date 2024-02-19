@@ -1,6 +1,7 @@
 import express, { Response } from 'express'
 import { HTTP_STATUSES } from '../config/config'
 import { adminAuthMiddleware } from '../middlewares/adminAuth.middleware'
+import requestsLimiter from '../middlewares/requestsLimitter'
 import { commentsQueryRepository } from '../repositories/comments.queryRepository'
 import { postsService } from '../services/posts.service'
 import { checkAccessTokenMiddleware } from '../middlewares/checkAccessTokenMiddleware'
@@ -41,6 +42,7 @@ function getPostsRouter() {
 	// Create new post
 	router.post(
 		'/',
+		requestsLimiter,
 		adminAuthMiddleware,
 		postValidation(),
 		async (req: ReqWithBody<CreatePostDtoModel>, res: Response) => {
@@ -69,6 +71,7 @@ function getPostsRouter() {
 	// Update existing post by id with InputModel
 	router.put(
 		'/:postId',
+		requestsLimiter,
 		adminAuthMiddleware,
 		postValidation(),
 		async (
@@ -91,6 +94,7 @@ function getPostsRouter() {
 	// Delete post specified by id
 	router.delete(
 		'/:postId',
+		requestsLimiter,
 		adminAuthMiddleware,
 		async (req: ReqWithParams<{ postId: string }>, res: Response) => {
 			const postId = req.params.postId
@@ -129,6 +133,7 @@ function getPostsRouter() {
 	// Create new comment
 	router.post(
 		'/:postId/comments',
+		requestsLimiter,
 		checkAccessTokenMiddleware,
 		createPostCommentValidation(),
 		async (

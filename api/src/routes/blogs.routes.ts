@@ -1,6 +1,7 @@
 import express, { Response } from 'express'
 import { HTTP_STATUSES } from '../config/config'
 import { adminAuthMiddleware } from '../middlewares/adminAuth.middleware'
+import requestsLimiter from '../middlewares/requestsLimitter'
 import { blogsRepository } from '../repositories/blogs.repository'
 import { postsQueryRepository } from '../repositories/posts.queryRepository'
 import { blogsService } from '../services/blogs.service'
@@ -41,6 +42,7 @@ function getBlogsRouter() {
 	// Create new blog
 	router.post(
 		'/',
+		requestsLimiter,
 		adminAuthMiddleware,
 		blogValidation(),
 		async function (req: ReqWithBody<CreateBlogDtoModel>, res: Response) {
@@ -81,6 +83,7 @@ function getBlogsRouter() {
 	// Create new post for specific blog
 	router.post(
 		'/:blogId/posts',
+		requestsLimiter,
 		adminAuthMiddleware,
 		createBlogPostsValidation(),
 		async function (
@@ -105,21 +108,26 @@ function getBlogsRouter() {
 	)
 
 	// Returns blog by id
-	router.get('/:blogId', async (req: ReqWithParams<{ blogId: string }>, res: Response) => {
-		const blogId = req.params.blogId
+	router.get(
+		'/:blogId',
+		requestsLimiter,
+		async (req: ReqWithParams<{ blogId: string }>, res: Response) => {
+			const blogId = req.params.blogId
 
-		const blog = await blogsQueryRepository.getBlog(blogId)
-		if (!blog) {
-			res.sendStatus(HTTP_STATUSES.NOT_FOUNT_404)
-			return
-		}
+			const blog = await blogsQueryRepository.getBlog(blogId)
+			if (!blog) {
+				res.sendStatus(HTTP_STATUSES.NOT_FOUNT_404)
+				return
+			}
 
-		res.status(HTTP_STATUSES.OK_200).send(blog)
-	})
+			res.status(HTTP_STATUSES.OK_200).send(blog)
+		},
+	)
 
 	// Update existing Blog by id with InputModel
 	router.put(
 		'/:blogId',
+		requestsLimiter,
 		adminAuthMiddleware,
 		blogValidation(),
 		async (
@@ -142,6 +150,7 @@ function getBlogsRouter() {
 	// Delete blog specified by id
 	router.delete(
 		'/:blogId',
+		requestsLimiter,
 		adminAuthMiddleware,
 		async (req: ReqWithParams<{ blogId: string }>, res: Response) => {
 			const blogId = req.params.blogId

@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express'
 import { config, HTTP_STATUSES } from '../config/config'
 import { checkAccessTokenMiddleware } from '../middlewares/checkAccessTokenMiddleware'
+import requestsLimiter from '../middlewares/requestsLimitter'
 import { AuthLoginDtoModel } from '../models/input/authLogin.input.model'
 import { ReqWithBody } from '../models/common'
 import { AuthRegistrationDtoModel } from '../models/input/authRegistration.input.model'
@@ -113,10 +114,15 @@ function getAuthRouter() {
 	)
 
 	// Get information about current user
-	router.get('/me', checkAccessTokenMiddleware, async (req: Request, res: Response) => {
-		const user = authService.getCurrentUser(req.user!)
-		res.status(HTTP_STATUSES.OK_200).send(user)
-	})
+	router.get(
+		'/me',
+		requestsLimiter,
+		checkAccessTokenMiddleware,
+		async (req: Request, res: Response) => {
+			const user = authService.getCurrentUser(req.user!)
+			res.status(HTTP_STATUSES.OK_200).send(user)
+		},
+	)
 
 	// In cookie client must send correct refreshToken that will be revoked
 	router.post('/logout', async (req: Request, res: Response) => {

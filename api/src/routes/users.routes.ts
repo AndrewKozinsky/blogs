@@ -1,6 +1,7 @@
 import express, { Response } from 'express'
 import { HTTP_STATUSES } from '../config/config'
 import { adminAuthMiddleware } from '../middlewares/adminAuth.middleware'
+import requestsLimiter from '../middlewares/requestsLimitter'
 import { CreateUserDtoModel, GetUsersQueries } from '../models/input/users.input.model'
 import { ReqWithBody, ReqWithParams, ReqWithParamsAndBody, ReqWithQuery } from '../models/common'
 import { usersQueryRepository } from '../repositories/users.queryRepository'
@@ -14,6 +15,7 @@ function getUsersRouter() {
 	// Returns all users
 	router.get(
 		'/',
+		requestsLimiter,
 		adminAuthMiddleware,
 		getUsersValidation(),
 		async (req: ReqWithQuery<GetUsersQueries>, res: Response) => {
@@ -25,6 +27,7 @@ function getUsersRouter() {
 	// Create new user by the admin
 	router.post(
 		'/',
+		requestsLimiter,
 		adminAuthMiddleware,
 		userValidation(),
 		async (req: ReqWithBody<CreateUserDtoModel>, res: Response) => {
@@ -39,6 +42,7 @@ function getUsersRouter() {
 	// Delete user specified by id
 	router.delete(
 		'/:userId',
+		requestsLimiter,
 		adminAuthMiddleware,
 		async (req: ReqWithParams<{ userId: string }>, res: Response) => {
 			const userId = req.params.userId
