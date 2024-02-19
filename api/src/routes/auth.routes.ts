@@ -21,6 +21,7 @@ function getAuthRouter() {
 	// User login
 	router.post(
 		'/login',
+		requestsLimiter,
 		authLoginValidation(),
 		async (req: ReqWithBody<AuthLoginDtoModel>, res: Response) => {
 			const loginServiceRes = await authService.login(req)
