@@ -1,6 +1,7 @@
 import express from 'express'
 import cookieParser from 'cookie-parser'
 import RouteNames from './config/routeNames'
+import requestsLimiter from './middlewares/requestsLimitter'
 import getAuthRouter from './routes/auth.routes'
 import getBlogsRouter from './routes/blogs.routes'
 import getCommentsRouter from './routes/comments.routes'
@@ -12,6 +13,7 @@ import getUsersRouter from './routes/users.routes'
 export const app = express()
 app.use(express.json())
 app.use(cookieParser())
+app.use(requestsLimiter)
 app.set('trust proxy', true)
 
 app.use(RouteNames.blogs, getBlogsRouter())
