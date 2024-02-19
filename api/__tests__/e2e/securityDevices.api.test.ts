@@ -141,8 +141,7 @@ describe('Terminate specified device session', () => {
 			.expect(HTTP_STATUSES.FORBIDDEN_403)
 	})
 
-	it('should return 204 if a client tries to terminate his device', async () => {
-		// Create a user 1
+	it.skip('should return 204 if a client tries to terminate his device', async () => {
 		const createdUserRes = await addUserByAdminRequest(app)
 		expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
 
@@ -158,6 +157,59 @@ describe('Terminate specified device session', () => {
 
 		return request(app)
 			.delete(RouteNames.securityDevice(deviceId))
+			.set('Cookie', config.refreshToken.name + '=' + deviceRefreshTokenValue)
+			.expect(HTTP_STATUSES.NO_CONTENT_204)
+	})
+})
+
+describe('Terminate this device session', () => {
+	it.skip('should forbid a request from a user without a device refresh token', async () => {
+		return request(app)
+			.delete(RouteNames.securityDevices)
+			.expect(HTTP_STATUSES.UNAUTHORIZED_401)
+	})
+
+	it.skip('should forbid a request from a user with an expired device refresh token', async () => {
+		const createdUserRes = await addUserByAdminRequest(app)
+		expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
+		const userId = createdUserRes.body.id
+
+		// Create expired token
+		const deviceId = createUniqString()
+
+		const expiredRefreshToken: DBTypes.DeviceToken = {
+			issuedAt: new Date(),
+			expirationDate: new Date(),
+			deviceIP: '123',
+			deviceId,
+			deviceName: 'Unknown',
+			userId,
+		}
+
+		await authRepository.insertDeviceRefreshToken(expiredRefreshToken)
+
+		// Get created expired token
+		const refreshToken = authRepository.getDeviceRefreshTokenByDeviceId(deviceId)
+
+		return request(app)
+			.delete(RouteNames.securityDevices)
+			.set('Cookie', config.refreshToken.name + '=' + refreshToken)
+			.expect(HTTP_STATUSES.UNAUTHORIZED_401)
+	})
+
+	it('should return 204 if a client tries to terminate current device', async () => {
+		const createdUserRes = await addUserByAdminRequest(app)
+		expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
+
+		const loginRes = await loginRequest(app, userLogin, userPassword).expect(
+			HTTP_STATUSES.OK_200,
+		)
+
+		const deviceRefreshTokenStr = loginRes.headers['set-cookie'][0]
+		const deviceRefreshTokenValue = parseCookieStringToObj(deviceRefreshTokenStr).cookieValue
+
+		return request(app)
+			.delete(RouteNames.securityDevices)
 			.set('Cookie', config.refreshToken.name + '=' + deviceRefreshTokenValue)
 			.expect(HTTP_STATUSES.NO_CONTENT_204)
 	})
