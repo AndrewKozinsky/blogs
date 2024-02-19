@@ -8,6 +8,10 @@ export const config = {
 		name: 'accessToken',
 		lifeDurationInMs: 1000 * 10, // 10 seconds
 	},
+	reqLimit: {
+		max: 5,
+		durationInMs: 1000 * 10, // 10 seconds
+	},
 }
 
 export const HTTP_STATUSES = {

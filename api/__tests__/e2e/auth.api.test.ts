@@ -99,8 +99,8 @@ describe('Login user', () => {
 		expect(refreshToken['Max-Age']).toBe(20)
 	})
 
-	it.skip('should return 429 if too many requests were made', async () => {
-		for (let i = 1; i <= 5; i++) {
+	it('should return 429 if too many requests were made', async () => {
+		for (let i = 1; i <= config.reqLimit.max; i++) {
 			await request(app)
 				.post(RouteNames.authLogin)
 				.send({ loginOrEmail: '', password: '' })
@@ -109,7 +109,7 @@ describe('Login user', () => {
 
 		await request(app).post(RouteNames.authLogin).expect(HTTP_STATUSES.TOO_MANY_REQUESTS_429)
 
-		await wait(10000)
+		await wait(config.reqLimit.durationInMs)
 
 		await request(app)
 			.post(RouteNames.authLogin)
@@ -219,8 +219,8 @@ describe('Register user', () => {
 		expect(allUsers.body.items.length).toBe(1)
 	})
 
-	it.skip('should return 429 if too many requests were made', async () => {
-		for (let i = 1; i <= 5; i++) {
+	it('should return 429 if too many requests were made', async () => {
+		for (let i = 1; i <= config.reqLimit.max; i++) {
 			await request(app)
 				.post(RouteNames.authRegistration)
 				.send({ login: '', password: '', email: '' })
@@ -232,7 +232,7 @@ describe('Register user', () => {
 			.send({ login: '', password: '', email: '' })
 			.expect(HTTP_STATUSES.TOO_MANY_REQUESTS_429)
 
-		await wait(10000)
+		await wait(config.reqLimit.durationInMs)
 
 		await request(app)
 			.post(RouteNames.authRegistration)
@@ -280,8 +280,8 @@ describe('Registration confirmation', () => {
 			.expect(HTTP_STATUSES.NO_CONTENT_204)
 	})
 
-	it.skip('should return 429 if too many requests were made', async () => {
-		for (let i = 1; i <= 5; i++) {
+	it('should return 429 if too many requests were made', async () => {
+		for (let i = 1; i <= config.reqLimit.max; i++) {
 			await request(app)
 				.post(RouteNames.authRegistrationConfirmation)
 				.expect(HTTP_STATUSES.BAD_REQUEST_400)
@@ -291,7 +291,7 @@ describe('Registration confirmation', () => {
 			.post(RouteNames.authRegistrationConfirmation)
 			.expect(HTTP_STATUSES.TOO_MANY_REQUESTS_429)
 
-		await wait(10000)
+		await wait(config.reqLimit.durationInMs)
 
 		await request(app)
 			.post(RouteNames.authRegistrationConfirmation)
@@ -331,8 +331,8 @@ describe('Resending email confirmation code', () => {
 			.expect(HTTP_STATUSES.NO_CONTENT_204)
 	})
 
-	it.skip('should return 429 if too many requests were made', async () => {
-		for (let i = 1; i <= 5; i++) {
+	it('should return 429 if too many requests were made', async () => {
+		for (let i = 1; i <= config.reqLimit.max; i++) {
 			await request(app)
 				.post(RouteNames.authRegistrationEmailResending)
 				.send({ email: '' })
@@ -344,7 +344,7 @@ describe('Resending email confirmation code', () => {
 			.send({ email: '' })
 			.expect(HTTP_STATUSES.TOO_MANY_REQUESTS_429)
 
-		await wait(10000)
+		await wait(config.reqLimit.durationInMs)
 
 		await request(app)
 			.post(RouteNames.authRegistrationEmailResending)

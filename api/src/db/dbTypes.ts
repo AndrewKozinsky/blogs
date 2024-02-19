@@ -48,4 +48,11 @@ export namespace DBTypes {
 		deviceName: string
 		userId: string
 	}
+
+	export type RateLimit = {
+		ip: string
+		date: Date
+		path: string
+		method: string
+	}
 }
