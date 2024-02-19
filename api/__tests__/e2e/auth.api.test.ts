@@ -9,15 +9,16 @@ import RouteNames from '../../src/config/routeNames'
 import { usersRepository } from '../../src/repositories/users.repository'
 import { settings } from '../../src/settings'
 import { createUniqString, parseCookieStringToObj } from '../../src/utils/stringUtils'
+import { resetDbEveryTest } from './utils/common'
 import { addUserByAdminRequest, adminAuthorizationValue, loginRequest } from './utils/utils'
 
-// resetDbEveryTest()
+resetDbEveryTest()
 
 it('123', async () => {
 	expect(2).toBe(2)
 })
 
-/*describe('Login user', () => {
+describe('Login user', () => {
 	it.skip('should return 400 if to pass wrong dto', async () => {
 		const loginRes = await request(app)
 			.post(RouteNames.authLogin)
@@ -96,9 +97,9 @@ it('123', async () => {
 		expect(refreshToken.Secure).toBe(true)
 		expect(refreshToken['Max-Age']).toBe(20)
 	})
-})*/
+})
 
-/*describe('Refresh token', () => {
+describe('Refresh token', () => {
 	it.skip('should return 401 if the JWT refreshToken inside cookie is missing, expired or incorrect', async () => {
 		const login = 'login'
 		const password = 'password'
@@ -154,9 +155,9 @@ it('123', async () => {
 		expect(newRefreshTokenObj.Secure).toBe(true)
 		expect(newRefreshTokenObj.HttpOnly).toBe(true)
 	})
-})*/
+})
 
-/*describe('Register user', () => {
+describe('Register user', () => {
 	it.skip('should return 400 if dto has incorrect values', async () => {
 		const registrationRes = await request(app)
 			.post(RouteNames.authRegistration)
@@ -198,9 +199,9 @@ it('123', async () => {
 
 		expect(allUsers.body.items.length).toBe(1)
 	})
-})*/
+})
 
-/*describe('Registration confirmation', () => {
+describe('Registration confirmation', () => {
 	it.skip('should return 400 if the request has wrong dto', async () => {
 		const regConfirmRes = await request(app)
 			.post(RouteNames.authRegistrationConfirmation)
@@ -238,9 +239,9 @@ it('123', async () => {
 			.send({ code: confirmationCode })
 			.expect(HTTP_STATUSES.NO_CONTENT_204)
 	})
-})*/
+})
 
-/*describe('Resending email confirmation code', () => {
+describe('Resending email confirmation code', () => {
 	it.skip('should return 400 if dto has incorrect values', async () => {
 		const registrationRes = await request(app)
 			.post(RouteNames.authRegistrationEmailResending)
@@ -271,9 +272,9 @@ it('123', async () => {
 			.send({ email })
 			.expect(HTTP_STATUSES.NO_CONTENT_204)
 	})
-})*/
+})
 
-/*describe('Get current user', () => {
+describe('Get current user', () => {
 	it.skip('should forbid a request from an unauthorized user', async () => {
 		await request(app).post(RouteNames.blogs).expect(HTTP_STATUSES.UNAUTHORIZED_401)
 	})
@@ -297,9 +298,9 @@ it('123', async () => {
 		expect(authMeRes.body.login).toBe(login)
 		expect(authMeRes.body.userId).toBe(createdUserRes.body.id)
 	})
-})*/
+})
 
-/*describe('Logout', () => {
+describe('Logout', () => {
 	it.skip('should return 401 if the JWT refreshToken inside cookie is missing, expired or incorrect', async () => {
 		const login = 'login'
 		const password = 'password'
@@ -349,4 +350,4 @@ it('123', async () => {
 			.set('Cookie', config.refreshToken.name + '=' + refreshTokenValue)
 			.expect(HTTP_STATUSES.NO_CONTENT_204)
 	})
-})*/
+})

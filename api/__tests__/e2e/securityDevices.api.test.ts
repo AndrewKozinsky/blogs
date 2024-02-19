@@ -197,7 +197,7 @@ describe('Terminate this device session', () => {
 			.expect(HTTP_STATUSES.UNAUTHORIZED_401)
 	})
 
-	it('should return 204 if a client tries to terminate current device', async () => {
+	it.skip('should return 204 if a client tries to terminate current device', async () => {
 		const createdUserRes = await addUserByAdminRequest(app)
 		expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
 

@@ -7,26 +7,26 @@ import { CreatePostDtoModel } from '../../src/models/input/posts.input.model'
 import { GetPostCommentsOutModel } from '../../src/models/output/comments.output.model'
 import { GetPostsOutModel } from '../../src/models/output/posts.output.model'
 import { resetDbEveryTest } from './utils/common'
-// import {
-// 	addBlogRequest,
-// 	addPostCommentRequest,
-// 	addPostRequest,
-// 	addUserByAdminRequest,
-// 	adminAuthorizationValue,
-// 	checkCommentObj,
-// 	checkPostObj,
-// 	loginRequest,
-// 	userEmail,
-// 	userPassword,
-// } from './utils/utils'
+import {
+	addBlogRequest,
+	addPostCommentRequest,
+	addPostRequest,
+	addUserByAdminRequest,
+	adminAuthorizationValue,
+	checkCommentObj,
+	checkPostObj,
+	loginRequest,
+	userEmail,
+	userPassword,
+} from './utils/utils'
 
-// resetDbEveryTest()
+resetDbEveryTest()
 
 it('123', async () => {
 	expect(2).toBe(2)
 })
 
-/*describe('Getting post comments', () => {
+describe('Getting post comments', () => {
 	it.skip('should return an object with property items contains an empty array', async () => {
 		const createdBlogRes = await addBlogRequest(app)
 		expect(createdBlogRes.status).toBe(HTTP_STATUSES.CREATED_201)
@@ -132,9 +132,9 @@ it('123', async () => {
 
 		expect(getPostCommentsRes.body.items.length).toBe(2)
 	})
-})*/
+})
 
-/*describe('Creating a comment', () => {
+describe('Creating a comment', () => {
 	it.skip('should forbid a request from an unauthorized user', async () => {
 		await request(app)
 			.post(RouteNames.postComments('999'))
@@ -207,9 +207,9 @@ it('123', async () => {
 			.expect(HTTP_STATUSES.OK_200)
 		expect(getPostCommentsRes.body.items.length).toBe(2)
 	})
-})*/
+})
 
-/*describe('Getting all posts', () => {
+describe('Getting all posts', () => {
 	it.skip('should return an object with property items contains an empty array', async () => {
 		const successAnswer: GetPostsOutModel = {
 			pagesCount: 0,
@@ -260,9 +260,9 @@ it('123', async () => {
 		expect(getPostsRes.body.totalCount).toBe(7)
 		expect(getPostsRes.body.items.length).toBe(2)
 	})
-})*/
+})
 
-/*describe('Creating a post', () => {
+describe('Creating a post', () => {
 	it.skip('should forbid a request from an unauthorized user', async () => {
 		await request(app).post(RouteNames.posts).expect(HTTP_STATUSES.UNAUTHORIZED_401)
 	})
@@ -295,9 +295,9 @@ it('123', async () => {
 		const allPostsRes = await request(app).get(RouteNames.posts)
 		expect(allPostsRes.body.items.length).toBe(2)
 	})
-})*/
+})
 
-/*describe('Getting a post', () => {
+describe('Getting a post', () => {
 	it.skip('should return 404 if a post does not exists', async () => {
 		const getPostRes = await request(app).get(RouteNames.post('999'))
 
@@ -317,9 +317,9 @@ it('123', async () => {
 
 		checkPostObj(getPostRes.body)
 	})
-})*/
+})
 
-/*describe('Updating a post', () => {
+describe('Updating a post', () => {
 	it.skip('should forbid a request from an unauthorized user', async () => {
 		await request(app).put(RouteNames.post('999')).expect(HTTP_STATUSES.UNAUTHORIZED_401)
 	})
@@ -377,9 +377,9 @@ it('123', async () => {
 		expect(getPostRes.body.shortDescription).toBe(updatePostDto.shortDescription)
 		expect(getPostRes.body.content).toBe(updatePostDto.content)
 	})
-})*/
+})
 
-/*describe('Deleting a post', () => {
+describe('Deleting a post', () => {
 	it.skip('should forbid a request from an unauthorized user', async () => {
 		return request(app).put(RouteNames.posts)
 	})
@@ -406,4 +406,4 @@ it('123', async () => {
 
 		await request(app).get(RouteNames.post(createdPostId)).expect(HTTP_STATUSES.NOT_FOUNT_404)
 	})
-})*/
+})
