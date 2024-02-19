@@ -68,6 +68,7 @@ function getAuthRouter() {
 	// Email with confirmation code will be sent to passed email address.
 	router.post(
 		'/registration',
+		requestsLimiter,
 		authRegistrationValidation(),
 		async (req: ReqWithBody<AuthRegistrationDtoModel>, res: Response) => {
 			const regStatus = await authService.registration(req.body)
@@ -84,6 +85,7 @@ function getAuthRouter() {
 	// Registration email resending.
 	router.post(
 		'/registration-email-resending',
+		requestsLimiter,
 		authRegistrationEmailResending(),
 		async (req: ReqWithBody<AuthRegistrationEmailResendingDtoModel>, res: Response) => {
 			const resendingStatus = await authService.resendEmailConfirmationCode(req.body)
@@ -100,6 +102,7 @@ function getAuthRouter() {
 	// Confirm registration
 	router.post(
 		'/registration-confirmation',
+		requestsLimiter,
 		authRegistrationConfirmationValidation(),
 		async (req: ReqWithBody<AuthRegistrationConfirmationDtoModel>, res: Response) => {
 			const confirmationStatus = await authService.confirmEmail(req.body.code)
@@ -114,15 +117,10 @@ function getAuthRouter() {
 	)
 
 	// Get information about current user
-	router.get(
-		'/me',
-		requestsLimiter,
-		checkAccessTokenMiddleware,
-		async (req: Request, res: Response) => {
-			const user = authService.getCurrentUser(req.user!)
-			res.status(HTTP_STATUSES.OK_200).send(user)
-		},
-	)
+	router.get('/me', checkAccessTokenMiddleware, async (req: Request, res: Response) => {
+		const user = authService.getCurrentUser(req.user!)
+		res.status(HTTP_STATUSES.OK_200).send(user)
+	})
 
 	// In cookie client must send correct refreshToken that will be revoked
 	router.post('/logout', async (req: Request, res: Response) => {

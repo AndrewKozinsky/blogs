@@ -15,7 +15,6 @@ function getUsersRouter() {
 	// Returns all users
 	router.get(
 		'/',
-		requestsLimiter,
 		adminAuthMiddleware,
 		getUsersValidation(),
 		async (req: ReqWithQuery<GetUsersQueries>, res: Response) => {
@@ -27,7 +26,6 @@ function getUsersRouter() {
 	// Create new user by the admin
 	router.post(
 		'/',
-		requestsLimiter,
 		adminAuthMiddleware,
 		userValidation(),
 		async (req: ReqWithBody<CreateUserDtoModel>, res: Response) => {
@@ -42,7 +40,6 @@ function getUsersRouter() {
 	// Delete user specified by id
 	router.delete(
 		'/:userId',
-		requestsLimiter,
 		adminAuthMiddleware,
 		async (req: ReqWithParams<{ userId: string }>, res: Response) => {
 			const userId = req.params.userId

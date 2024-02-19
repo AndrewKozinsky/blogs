@@ -28,7 +28,6 @@ function getCommentsRouter() {
 	// Update existing comment by id with InputModel
 	router.put(
 		'/:commentId',
-		requestsLimiter,
 		checkAccessTokenMiddleware,
 		updateCommentValidation(),
 		async (
@@ -60,7 +59,6 @@ function getCommentsRouter() {
 	// Delete comment specified by id
 	router.delete(
 		'/:commentId',
-		requestsLimiter,
 		checkAccessTokenMiddleware,
 		async (req: ReqWithParams<{ commentId: string }>, res: Response) => {
 			const commentId = req.params.commentId

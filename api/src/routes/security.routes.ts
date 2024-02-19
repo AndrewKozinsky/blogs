@@ -14,7 +14,6 @@ function getSecurityRouter() {
 	// Returns all devices with active sessions for current user
 	router.get(
 		'/devices',
-		requestsLimiter,
 		checkDeviceRefreshTokenMiddleware,
 		async (req: Request, res: Response) => {
 			const refreshTokenFromCookie = jwtService.getDeviceRefreshTokenFromReq(req)
@@ -27,7 +26,6 @@ function getSecurityRouter() {
 	// Terminate all other (exclude current) device's sessions
 	router.delete(
 		'/devices',
-		requestsLimiter,
 		checkDeviceRefreshTokenMiddleware,
 		async (req: Request, res: Response) => {
 			const refreshTokenFromCookie = jwtService.getDeviceRefreshTokenFromReq(req)
@@ -40,7 +38,6 @@ function getSecurityRouter() {
 	// Terminate specified device session
 	router.delete(
 		'/devices/:deviceId',
-		requestsLimiter,
 		checkDeviceRefreshTokenMiddleware,
 		async (req: ReqWithParams<{ deviceId: string }>, res: Response) => {
 			const refreshTokenFromCookie = jwtService.getDeviceRefreshTokenFromReq(req)
