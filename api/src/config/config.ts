@@ -2,7 +2,7 @@ export const config = {
 	port: 3000,
 	refreshToken: {
 		name: 'refreshToken',
-		lifeDurationInMs: 1000 * 20 * 1000, // 20 seconds
+		lifeDurationInMs: 1000 * 20, // 20 seconds
 	},
 	accessToken: {
 		name: 'accessToken',
