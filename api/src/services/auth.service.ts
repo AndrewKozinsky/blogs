@@ -75,29 +75,9 @@ export const authService = {
 			code: LayerResultCode.Success,
 			data: {
 				newAccessToken: jwtService.createAccessTokenStr(deviceRefreshToken.userId),
-				newRefreshToken: newRefreshToken,
+				newRefreshToken,
 			},
 		}
-
-		/*const clientIP = browserService.getClientIP(req)
-		const clientName = browserService.getClientName(req)
-
-		const newDeviceRefreshToken = jwtService.createDeviceRefreshToken(
-			userRes.data.id,
-			clientIP,
-			clientName,
-		)
-
-		await authRepository.insertDeviceRefreshToken(newDeviceRefreshToken)
-		const newRefreshToken = jwtService.createRefreshTokenStr(newDeviceRefreshToken.deviceId)
-
-		return {
-			code: LayerResultCode.Success,
-			data: {
-				newAccessToken: jwtService.createAccessTokenStr(deviceRefreshToken.userId),
-				newRefreshToken: newRefreshToken,
-			},
-		}*/
 	},
 
 	async registration(dto: AuthRegistrationDtoModel): Promise<LayerResult<null>> {

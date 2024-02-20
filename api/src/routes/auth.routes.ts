@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express'
 import { config, HTTP_STATUSES } from '../config/config'
 import { checkAccessTokenMiddleware } from '../middlewares/checkAccessTokenMiddleware'
+import { checkDeviceRefreshTokenMiddleware } from '../middlewares/checkDeviceRefreshTokenMiddleware'
 import requestsLimiter from '../middlewares/requestsLimitter'
 import { AuthLoginDtoModel } from '../models/input/authLogin.input.model'
 import { ReqWithBody } from '../models/common'
@@ -124,18 +125,22 @@ function getAuthRouter() {
 	})
 
 	// In cookie client must send correct refreshToken that will be revoked
-	router.post('/logout', async (req: Request, res: Response) => {
-		const refreshTokenFromCookie = jwtService.getDeviceRefreshTokenFromReq(req)
-		const logoutServiceRes = await authService.logout(refreshTokenFromCookie)
+	router.post(
+		'/logout',
+		checkDeviceRefreshTokenMiddleware,
+		async (req: Request, res: Response) => {
+			const refreshTokenFromCookie = jwtService.getDeviceRefreshTokenFromReq(req)
+			const logoutServiceRes = await authService.logout(refreshTokenFromCookie)
 
-		if (logoutServiceRes.code === LayerResultCode.Unauthorized) {
-			res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401)
-			return
-		}
+			if (logoutServiceRes.code === LayerResultCode.Unauthorized) {
+				res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401)
+				return
+			}
 
-		res.clearCookie(config.refreshToken.name)
-		res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
-	})
+			res.clearCookie(config.refreshToken.name)
+			res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
+		},
+	)
 
 	return router
 }
