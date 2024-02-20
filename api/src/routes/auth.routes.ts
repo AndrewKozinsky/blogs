@@ -45,7 +45,7 @@ function getAuthRouter() {
 
 	// Generate the new pair of access and refresh tokens (in cookie client must send correct refreshToken that will be revoked after refreshing)
 	router.post('/refresh-token', async (req: Request, res: Response) => {
-		const generateTokensRes = await authService.generateAccessAndRefreshTokens(req)
+		const generateTokensRes = await authService.refreshToken(req)
 
 		if (generateTokensRes.code === LayerResultCode.Unauthorized) {
 			res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401)

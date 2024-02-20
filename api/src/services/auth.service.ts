@@ -46,13 +46,14 @@ export const authService = {
 		}
 	},
 
-	async generateAccessAndRefreshTokens(
+	async refreshToken(
 		req: Request,
 	): Promise<LayerResult<{ newAccessToken: string; newRefreshToken: string }>> {
-		const refreshTokenStr = jwtService.getDeviceRefreshTokenFromReq(req)
-		const deviceToken = await authRepository.getDeviceRefreshTokenByTokenStr(refreshTokenStr)
+		const deviceRefreshTokenStr = jwtService.getDeviceRefreshTokenFromReq(req)
+		const deviceRefreshToken =
+			await authRepository.getDeviceRefreshTokenByTokenStr(deviceRefreshTokenStr)
 
-		if (!deviceToken || !jwtService.isDeviceRefreshTokenValid(deviceToken)) {
+		if (!deviceRefreshToken || !jwtService.isDeviceRefreshTokenValid(deviceRefreshToken)) {
 			return {
 				code: LayerResultCode.Unauthorized,
 			}
@@ -66,9 +67,19 @@ export const authService = {
 			}
 		}
 
-		await authRepository.updateDeviceRefreshTokenDate(deviceToken.deviceId)
+		await authRepository.updateDeviceRefreshTokenDate(deviceRefreshToken.deviceId)
 
-		const clientIP = browserService.getClientIP(req)
+		const newRefreshToken = jwtService.createRefreshTokenStr(deviceRefreshToken.deviceId)
+
+		return {
+			code: LayerResultCode.Success,
+			data: {
+				newAccessToken: jwtService.createAccessTokenStr(deviceRefreshToken.userId),
+				newRefreshToken: newRefreshToken,
+			},
+		}
+
+		/*const clientIP = browserService.getClientIP(req)
 		const clientName = browserService.getClientName(req)
 
 		const newDeviceRefreshToken = jwtService.createDeviceRefreshToken(
@@ -83,10 +94,10 @@ export const authService = {
 		return {
 			code: LayerResultCode.Success,
 			data: {
-				newAccessToken: jwtService.createAccessTokenStr(deviceToken.userId),
+				newAccessToken: jwtService.createAccessTokenStr(deviceRefreshToken.userId),
 				newRefreshToken: newRefreshToken,
 			},
-		}
+		}*/
 	},
 
 	async registration(dto: AuthRegistrationDtoModel): Promise<LayerResult<null>> {
