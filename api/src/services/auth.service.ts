@@ -53,7 +53,7 @@ export const authService = {
 		const deviceRefreshToken =
 			await authRepository.getDeviceRefreshTokenByTokenStr(deviceRefreshTokenStr)
 
-		if (!deviceRefreshToken || !jwtService.isDeviceRefreshTokenValid(deviceRefreshToken)) {
+		/*if (!deviceRefreshToken || !jwtService.isDeviceRefreshTokenValid(deviceRefreshToken)) {
 			return {
 				code: LayerResultCode.Unauthorized,
 			}
@@ -76,6 +76,13 @@ export const authService = {
 			data: {
 				newAccessToken: jwtService.createAccessTokenStr(deviceRefreshToken.userId),
 				newRefreshToken,
+			},
+		}*/
+		return {
+			code: LayerResultCode.Success,
+			data: {
+				newAccessToken: '',
+				newRefreshToken: '',
 			},
 		}
 	},

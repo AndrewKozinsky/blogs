@@ -13,7 +13,7 @@ export const securityService = {
 	},
 
 	async terminateSpecifiedDeviceRefreshToken(
-		currentUserTokenStr: string,
+		currentDeviceTokenStr: string,
 		deletionDeviceId: string,
 	): Promise<LayerResult<null>> {
 		// Is device for deletion is not exist give NotFound code
@@ -29,16 +29,15 @@ export const securityService = {
 		// Device for deletion exists. Check if current user belongs the device for deletion
 
 		const currentUserDeviceId =
-			jwtService.getRefreshTokenDataFromTokenStr(currentUserTokenStr)?.deviceId
+			jwtService.getRefreshTokenDataFromTokenStr(currentDeviceTokenStr)?.deviceId
 
 		if (!currentUserDeviceId) {
 			return {
-				code: LayerResultCode.Forbidden,
+				code: LayerResultCode.Unauthorized,
 			}
 		}
 
 		const userDevices = await authRepository.getUserDevicesByDeviceId(currentUserDeviceId)
-		// console.log(userDevices)
 
 		if (userDevices.code !== LayerResultCode.Success || !userDevices.data) {
 			return {
