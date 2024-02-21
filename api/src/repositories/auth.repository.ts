@@ -1,6 +1,8 @@
+import { addMilliseconds } from 'date-fns'
 import { ObjectId, WithId } from 'mongodb'
 import { hashService } from '../adapters/hash.adapter'
 import { jwtService } from '../application/jwt.service'
+import { config } from '../config/config'
 import DbNames from '../db/dbNames'
 import { db } from '../db/dbService'
 import { DBTypes } from '../db/dbTypes'
@@ -168,9 +170,18 @@ export const authRepository = {
 	},
 
 	async updateDeviceRefreshTokenDate(deviceId: string): Promise<boolean> {
-		const result = await db
-			.collection(DbNames.refreshTokens)
-			.updateOne({ deviceId }, { $set: { issuedAt: new Date() } })
+		const result = await db.collection(DbNames.refreshTokens).updateOne(
+			{ deviceId },
+			{
+				$set: {
+					issuedAt: new Date(),
+					expirationDate: addMilliseconds(
+						new Date(),
+						config.refreshToken.lifeDurationInMs,
+					),
+				},
+			},
+		)
 
 		return result.modifiedCount === 1
 	},

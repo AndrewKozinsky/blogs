@@ -14,20 +14,18 @@ export async function checkDeviceRefreshTokenMiddleware(
 	try {
 		const refreshTokenStr = jwtService.getDeviceRefreshStrTokenFromReq(req)
 
-		if (!refreshTokenStr || !jwtService.isRefreshTokenStrValid(refreshTokenStr)) {
-			console.log(refreshTokenStr)
+		if (!jwtService.isRefreshTokenStrValid(refreshTokenStr)) {
 			throwError()
-			return
 		}
 
-		// DELETE LATER !!!
-		/*const deviceRefreshToken =
+		// Check if refreshTokenStr has another expiration date
+		const refreshTokenStrExpirationDate = jwtService.getTokenExpirationDate(refreshTokenStr)
+		const deviceRefreshToken =
 			await authRepository.getDeviceRefreshTokenByTokenStr(refreshTokenStr)
 
-		if (!jwtService.isDeviceRefreshTokenValid(deviceRefreshToken)) {
+		if (refreshTokenStrExpirationDate !== deviceRefreshToken!.expirationDate) {
 			throwError()
-			return
-		}*/
+		}
 
 		next()
 	} catch (err: unknown) {

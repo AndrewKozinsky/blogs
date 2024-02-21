@@ -54,7 +54,7 @@ export const authService = {
 		const deviceRefreshToken =
 			await authRepository.getDeviceRefreshTokenByTokenStr(deviceRefreshTokenStr)
 
-		if (!deviceRefreshToken || !jwtService.isDeviceRefreshTokenValid(deviceRefreshToken)) {
+		if (!deviceRefreshToken || !jwtService.isRefreshTokenStrValid(deviceRefreshTokenStr)) {
 			return {
 				code: LayerResultCode.Unauthorized,
 			}
@@ -177,10 +177,11 @@ export const authService = {
 		}
 	},
 
-	async logout(refreshToken: string): Promise<LayerResult<null>> {
-		const refreshTokenInDb = await authRepository.getDeviceRefreshTokenByTokenStr(refreshToken)
+	async logout(refreshTokenStr: string): Promise<LayerResult<null>> {
+		const refreshTokenInDb =
+			await authRepository.getDeviceRefreshTokenByTokenStr(refreshTokenStr)
 
-		if (!refreshTokenInDb || !jwtService.isDeviceRefreshTokenValid(refreshTokenInDb)) {
+		if (!refreshTokenInDb || !jwtService.isRefreshTokenStrValid(refreshTokenStr)) {
 			return { code: LayerResultCode.Unauthorized }
 		}
 

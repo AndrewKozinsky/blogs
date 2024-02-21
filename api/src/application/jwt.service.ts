@@ -1,6 +1,6 @@
 import { Request } from 'express'
 import { addMilliseconds } from 'date-fns'
-import jwt from 'jsonwebtoken'
+import jwt, { decode } from 'jsonwebtoken'
 import { config } from '../config/config'
 import { DBTypes } from '../db/dbTypes'
 import { authRepository } from '../repositories/auth.repository'
@@ -22,14 +22,6 @@ export const jwtService = {
 		return jwt.sign({ deviceId }, settings.JWT_SECRET, {
 			expiresIn: config.refreshToken.lifeDurationInMs / 1000 + 's',
 		})
-	},
-
-	isDeviceRefreshTokenValid(refreshTokenInDb: undefined | null | DBTypes.DeviceToken) {
-		if (!refreshTokenInDb) {
-			return false
-		}
-
-		return refreshTokenInDb.expirationDate > new Date()
 	},
 
 	createDeviceRefreshToken(
@@ -79,6 +71,20 @@ export const jwtService = {
 		} catch (error) {
 			console.log(error)
 			return false
+		}
+	},
+
+	getTokenExpirationDate(tokenStr: string): null | Date {
+		try {
+			const res = decode(tokenStr)
+			if (typeof res === 'string' || !res) {
+				return null
+			}
+
+			return new Date(res.exp!)
+		} catch (error) {
+			console.log(error)
+			return null
 		}
 	},
 }
