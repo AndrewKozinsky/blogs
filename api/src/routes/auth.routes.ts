@@ -45,26 +45,30 @@ function getAuthRouter() {
 	)
 
 	// Generate the new pair of access and refresh tokens (in cookie client must send correct refreshToken that will be revoked after refreshing)
-	router.post('/refresh-token', async (req: Request, res: Response) => {
-		const generateTokensRes = await authService.refreshToken(req)
+	router.post(
+		'/refresh-token',
+		checkDeviceRefreshTokenMiddleware,
+		async (req: Request, res: Response) => {
+			const generateTokensRes = await authService.refreshToken(req)
 
-		if (generateTokensRes.code === LayerResultCode.Unauthorized) {
-			res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401)
-			return
-		}
+			if (generateTokensRes.code === LayerResultCode.Unauthorized) {
+				res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401)
+				return
+			}
 
-		const { newAccessToken, newRefreshToken } = generateTokensRes.data!
+			const { newAccessToken, newRefreshToken } = generateTokensRes.data!
 
-		res.cookie(config.refreshToken.name, newRefreshToken, {
-			maxAge: config.refreshToken.lifeDurationInMs,
-			httpOnly: true,
-			secure: true,
-		})
+			res.cookie(config.refreshToken.name, newRefreshToken, {
+				maxAge: config.refreshToken.lifeDurationInMs,
+				httpOnly: true,
+				secure: true,
+			})
 
-		res.status(HTTP_STATUSES.OK_200).send({
-			accessToken: newAccessToken,
-		})
-	})
+			res.status(HTTP_STATUSES.OK_200).send({
+				accessToken: newAccessToken,
+			})
+		},
+	)
 
 	// Registration in the system.
 	// Email with confirmation code will be sent to passed email address.
