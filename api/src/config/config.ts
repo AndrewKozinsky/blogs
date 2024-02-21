@@ -3,7 +3,7 @@ export const config = {
 	refreshToken: {
 		name: 'refreshToken',
 		// 999 удалить потом
-		lifeDurationInMs: 1000 * 20 * 999, // 20 seconds
+		lifeDurationInMs: 1000 * 20, // 20 seconds
 	},
 	accessToken: {
 		name: 'accessToken',
