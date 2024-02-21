@@ -19,13 +19,13 @@ export async function checkDeviceRefreshTokenMiddleware(
 		}
 
 		// Check if refreshTokenStr has another expiration date
-		const refreshTokenStrExpirationDate = jwtService.getTokenExpirationDate(refreshTokenStr)
+		/*const refreshTokenStrExpirationDate = jwtService.getTokenExpirationDate(refreshTokenStr)
 		const deviceRefreshToken =
 			await authRepository.getDeviceRefreshTokenByTokenStr(refreshTokenStr)
 
 		if (refreshTokenStrExpirationDate !== deviceRefreshToken!.expirationDate) {
 			throwError()
-		}
+		}*/
 
 		next()
 	} catch (err: unknown) {
