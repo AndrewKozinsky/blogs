@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
+import jwt from 'jsonwebtoken'
 import { loginRequest } from '../../__tests__/e2e/utils/utils'
 import { jwtService } from '../application/jwt.service'
 import { HTTP_STATUSES } from '../config/config'
@@ -11,20 +12,22 @@ export async function checkDeviceRefreshTokenMiddleware(
 	next: NextFunction,
 ) {
 	try {
-		const refreshToken = jwtService.getDeviceRefreshTokenFromReq(req)
+		const refreshTokenStr = jwtService.getDeviceRefreshStrTokenFromReq(req)
 
-		if (!refreshToken) {
+		if (!refreshTokenStr || !jwtService.isRefreshTokenStrValid(refreshTokenStr)) {
+			console.log(refreshTokenStr)
 			throwError()
 			return
 		}
 
-		const deviceRefreshToken =
-			await authRepository.getDeviceRefreshTokenByTokenStr(refreshToken)
+		// DELETE LATER !!!
+		/*const deviceRefreshToken =
+			await authRepository.getDeviceRefreshTokenByTokenStr(refreshTokenStr)
 
 		if (!jwtService.isDeviceRefreshTokenValid(deviceRefreshToken)) {
 			throwError()
 			return
-		}
+		}*/
 
 		next()
 	} catch (err: unknown) {

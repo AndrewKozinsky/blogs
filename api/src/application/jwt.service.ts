@@ -8,7 +8,7 @@ import { settings } from '../settings'
 import { createUniqString } from '../utils/stringUtils'
 
 export const jwtService = {
-	getDeviceRefreshTokenFromReq(req: Request): string {
+	getDeviceRefreshStrTokenFromReq(req: Request): string {
 		return req.cookies[config.refreshToken.name]
 	},
 
@@ -29,10 +29,7 @@ export const jwtService = {
 			return false
 		}
 
-		return (
-			+addMilliseconds(refreshTokenInDb.issuedAt, config.refreshToken.lifeDurationInMs) >
-			+new Date()
-		)
+		return refreshTokenInDb.expirationDate > new Date()
 	},
 
 	createDeviceRefreshToken(
@@ -72,6 +69,16 @@ export const jwtService = {
 		} catch (error) {
 			console.log(error)
 			return null
+		}
+	},
+
+	isRefreshTokenStrValid(refreshTokenStr: string) {
+		try {
+			jwt.verify(refreshTokenStr, settings.JWT_SECRET)
+			return true
+		} catch (error) {
+			console.log(error)
+			return false
 		}
 	},
 }

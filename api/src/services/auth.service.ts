@@ -50,7 +50,7 @@ export const authService = {
 	async refreshToken(
 		req: Request,
 	): Promise<LayerResult<{ newAccessToken: string; newRefreshToken: string }>> {
-		const deviceRefreshTokenStr = jwtService.getDeviceRefreshTokenFromReq(req)
+		const deviceRefreshTokenStr = jwtService.getDeviceRefreshStrTokenFromReq(req)
 		const deviceRefreshToken =
 			await authRepository.getDeviceRefreshTokenByTokenStr(deviceRefreshTokenStr)
 

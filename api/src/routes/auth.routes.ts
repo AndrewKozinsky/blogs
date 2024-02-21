@@ -133,7 +133,7 @@ function getAuthRouter() {
 		'/logout',
 		checkDeviceRefreshTokenMiddleware,
 		async (req: Request, res: Response) => {
-			const refreshTokenFromCookie = jwtService.getDeviceRefreshTokenFromReq(req)
+			const refreshTokenFromCookie = jwtService.getDeviceRefreshStrTokenFromReq(req)
 			const logoutServiceRes = await authService.logout(refreshTokenFromCookie)
 
 			if (logoutServiceRes.code === LayerResultCode.Unauthorized) {
