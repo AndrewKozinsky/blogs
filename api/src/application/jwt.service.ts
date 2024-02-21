@@ -81,7 +81,7 @@ export const jwtService = {
 				return null
 			}
 
-			return new Date(res.exp!)
+			return new Date(res.exp! * 1000)
 		} catch (error) {
 			console.log(error)
 			return null
