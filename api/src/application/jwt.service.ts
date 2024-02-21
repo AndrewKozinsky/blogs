@@ -68,9 +68,7 @@ export const jwtService = {
 	getRefreshTokenDataFromTokenStr(refreshTokenStr: string) {
 		try {
 			const payload = jwt.verify(refreshTokenStr, settings.JWT_SECRET)
-			console.log(payload)
-			// return payload as { deviceId: string }
-			return { deviceId: 'string' }
+			return payload as { deviceId: string }
 		} catch (error) {
 			console.log(error)
 			return null

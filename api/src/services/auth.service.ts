@@ -9,6 +9,7 @@ import { AuthRegistrationEmailResendingDtoModel } from '../models/input/authRegi
 import { MeOutModel } from '../models/output/auth.output.model'
 import { UserServiceModel } from '../models/service/users.service.model'
 import { authRepository } from '../repositories/auth.repository'
+import { usersRepository } from '../repositories/users.repository'
 import { LayerResult, LayerResultCode } from '../types/resultCodes'
 import { commonService } from './common'
 import { usersService } from './users.service'
@@ -53,15 +54,15 @@ export const authService = {
 		const deviceRefreshToken =
 			await authRepository.getDeviceRefreshTokenByTokenStr(deviceRefreshTokenStr)
 
-		/*if (!deviceRefreshToken || !jwtService.isDeviceRefreshTokenValid(deviceRefreshToken)) {
+		if (!deviceRefreshToken || !jwtService.isDeviceRefreshTokenValid(deviceRefreshToken)) {
 			return {
 				code: LayerResultCode.Unauthorized,
 			}
 		}
 
-		const userRes = await authRepository.getConfirmedUserByLoginOrEmailAndPassword(req.body)
+		const userRes = await usersRepository.getUserById(deviceRefreshToken.userId)
 
-		if (userRes.code !== LayerResultCode.Success || !userRes.data) {
+		if (!userRes) {
 			return {
 				code: LayerResultCode.Unauthorized,
 			}
@@ -76,13 +77,6 @@ export const authService = {
 			data: {
 				newAccessToken: jwtService.createAccessTokenStr(deviceRefreshToken.userId),
 				newRefreshToken,
-			},
-		}*/
-		return {
-			code: LayerResultCode.Success,
-			data: {
-				newAccessToken: '',
-				newRefreshToken: '',
 			},
 		}
 	},
