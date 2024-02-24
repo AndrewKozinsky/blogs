@@ -1,14 +1,13 @@
 import { ObjectId, WithId } from 'mongodb'
-import DbNames from '../db/dbNames'
+import { PostModel } from '../db/dbMongoose'
 import { DBTypes } from '../db/dbTypes'
 import { UpdatePostDtoModel } from '../models/input/posts.input.model'
 import { CreatePostOutModel } from '../models/output/posts.output.model'
 import { PostServiceModel } from '../models/service/posts.service.model'
-import { db } from '../db/dbService'
 
 export const postsRepository = {
 	/*async getPosts() {
-		const getPostsRes = await db.collection<DBTypes.Post>(DbNames.posts).find({}).toArray()
+		const getPostsRes = await PostModel.find({}).lean()
 		return getPostsRes.map(this.mapDbPostToClientPost)
 	},*/
 
@@ -17,16 +16,14 @@ export const postsRepository = {
 			return null
 		}
 
-		const getPostRes = await db
-			.collection<DBTypes.Post>(DbNames.posts)
-			.findOne({ _id: new ObjectId(postId) })
+		const getPostRes = await PostModel.findOne({ _id: new ObjectId(postId) })
 
 		return getPostRes ? this.mapDbPostToClientPost(getPostRes) : null
 	},
 
 	async createPost(dto: CreatePostOutModel) {
-		const createdPostRes = await db.collection(DbNames.posts).insertOne(dto)
-		return createdPostRes.insertedId.toString()
+		const createdPostRes = await PostModel.create(dto)
+		return createdPostRes.id
 	},
 
 	async updatePost(postId: string, updatePostDto: UpdatePostDtoModel): Promise<boolean> {
@@ -34,9 +31,10 @@ export const postsRepository = {
 			return false
 		}
 
-		const updatePostRes = await db
-			.collection<DBTypes.Post>(DbNames.posts)
-			.updateOne({ _id: new ObjectId(postId) }, { $set: updatePostDto })
+		const updatePostRes = await PostModel.updateOne(
+			{ _id: new ObjectId(postId) },
+			{ $set: updatePostDto },
+		)
 
 		return updatePostRes.modifiedCount === 1
 	},
@@ -46,7 +44,7 @@ export const postsRepository = {
 			return false
 		}
 
-		const result = await db.collection(DbNames.posts).deleteOne({ _id: new ObjectId(postId) })
+		const result = await PostModel.deleteOne({ _id: new ObjectId(postId) })
 
 		return result.deletedCount === 1
 	},

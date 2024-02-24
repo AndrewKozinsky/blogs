@@ -1,9 +1,8 @@
 import { ObjectId, WithId } from 'mongodb'
-import DbNames from '../db/dbNames'
+import { CommentModel, PostModel } from '../db/dbMongoose'
 import { DBTypes } from '../db/dbTypes'
 import { GetPostCommentsQueries } from '../models/input/posts.input.model'
 import { CommentOutModel, GetCommentOutModel } from '../models/output/comments.output.model'
-import { db } from '../db/dbService'
 
 type GetPostCommentsResult =
 	| {
@@ -29,9 +28,7 @@ export const commentsQueryRepository = {
 			return null
 		}
 
-		const getCommentRes = await db
-			.collection<DBTypes.Comment>(DbNames.comments)
-			.findOne({ _id: new ObjectId(commentId) })
+		const getCommentRes = await CommentModel.findOne({ _id: new ObjectId(commentId) })
 
 		return getCommentRes ? this.mapDbCommentToOutputComment(getCommentRes) : null
 	},
@@ -41,6 +38,7 @@ export const commentsQueryRepository = {
 	): Promise<GetPostCommentsResult> {
 		const sortBy = queries.sortBy ?? 'createdAt'
 		const sortDirection = queries.sortDirection ?? 'desc'
+		const sort = { [sortBy]: sortDirection }
 
 		const pageNumber = queries.pageNumber ? +queries.pageNumber : 1
 		const pageSize = queries.pageSize ? +queries.pageSize : 10
@@ -51,9 +49,7 @@ export const commentsQueryRepository = {
 			}
 		}
 
-		const getPostRes = await db
-			.collection<DBTypes.Post>(DbNames.posts)
-			.findOne({ _id: new ObjectId(postId) })
+		const getPostRes = await PostModel.findOne({ _id: new ObjectId(postId) })
 
 		if (!getPostRes) {
 			return {
@@ -61,18 +57,14 @@ export const commentsQueryRepository = {
 			}
 		}
 
-		const totalPostCommentsCount = await db
-			.collection(DbNames.comments)
-			.countDocuments({ postId })
+		const totalPostCommentsCount = await CommentModel.countDocuments({ postId })
 		const pagesCount = Math.ceil(totalPostCommentsCount / pageSize)
 
-		const getPostCommentsRes = await db
-			.collection<DBTypes.Comment>(DbNames.comments)
-			.find({ postId })
-			.sort(sortBy, sortDirection)
+		const getPostCommentsRes = await CommentModel.find({ postId })
+			.sort(sort)
 			.skip((pageNumber - 1) * pageSize)
 			.limit(pageSize)
-			.toArray()
+			.lean()
 
 		return {
 			status: 'success',

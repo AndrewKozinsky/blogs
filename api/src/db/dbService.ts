@@ -1,19 +1,14 @@
 import dotenv from 'dotenv'
-import { MongoClient } from 'mongodb'
+import * as mongoose from 'mongoose'
 
 dotenv.config()
 
-export const client = new MongoClient(process.env.MONGO_URL as string)
-export const db = client.db(process.env.MONGO_DB_NAME)
+const mongoURI = process.env.MONGO_URL + '/' + process.env.MONGO_DB_NAME
 
 export const dbService = {
-	client: new MongoClient(process.env.MONGO_URL as string),
-
 	async runDb() {
 		try {
-			await this.client.connect()
-			// Проверка, что соединение произошло успешно сделав запрос на несуществующую БД products.
-			await this.client.db('products').command({ ping: 1 })
+			await mongoose.connect(mongoURI)
 			console.log('Connected to DB 🔥')
 		} catch {
 			await this.close()
@@ -22,15 +17,16 @@ export const dbService = {
 	},
 
 	async close() {
-		await this.client.close()
+		await mongoose.disconnect()
 	},
 
 	async drop() {
 		try {
-			const collections = await db.listCollections().toArray()
+			const { models } = mongoose
 
-			for (const collection of collections) {
-				await db.collection(collection.name).deleteMany({})
+			for (const modelName in models) {
+				const model = models[modelName]
+				await model.deleteMany()
 			}
 
 			return true
@@ -41,7 +37,7 @@ export const dbService = {
 
 			return false
 		} finally {
-			await this.client.close()
+			await this.close()
 			// console.log('Connection successful closed')
 		}
 	},

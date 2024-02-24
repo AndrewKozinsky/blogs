@@ -1,8 +1,7 @@
 import { ObjectId, WithId } from 'mongodb'
-import DbNames from '../db/dbNames'
+import { UserModel } from '../db/dbMongoose'
 import { DBTypes } from '../db/dbTypes'
 import { UserServiceModel } from '../models/service/users.service.model'
-import { db } from '../db/dbService'
 import { commonService } from '../services/common'
 
 export const usersRepository = {
@@ -11,9 +10,7 @@ export const usersRepository = {
 			return null
 		}
 
-		const getUserRes = await db
-			.collection<DBTypes.User>(DbNames.users)
-			.findOne({ _id: new ObjectId(userId) })
+		const getUserRes = await UserModel.findOne({ _id: new ObjectId(userId) })
 
 		if (!getUserRes) return null
 

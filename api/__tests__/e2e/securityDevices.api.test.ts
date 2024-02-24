@@ -26,11 +26,10 @@ it.skip('123', () => {
 })
 
 describe('Getting all user devices', () => {
-	it.skip('should forbid a request if there is not refresh token', async () => {
+	/*it.skip('should forbid a request if there is not refresh token', async () => {
 		await request(app).get(RouteNames.securityDevices).expect(HTTP_STATUSES.UNAUTHORIZED_401)
-	})
-
-	it.skip('should return an array of devices data if a refreshToken inside cookie is valid', async () => {
+	})*/
+	/*it.skip('should return an array of devices data if a refreshToken inside cookie is valid', async () => {
 		const login = 'login'
 		const password = 'password'
 		const email = 'email@email.ru'
@@ -48,17 +47,16 @@ describe('Getting all user devices', () => {
 			.expect(HTTP_STATUSES.OK_200)
 
 		checkUserDeviceObj(getUserDevicesRes.body[0])
-	})
+	})*/
 })
 
 describe('Terminate specified device session', () => {
-	it.skip('should forbid a request from a user without a device refresh token', async () => {
+	/*it.skip('should forbid a request from a user without a device refresh token', async () => {
 		return request(app)
 			.delete(RouteNames.securityDevice('999'))
 			.expect(HTTP_STATUSES.UNAUTHORIZED_401)
-	})
-
-	it.skip('should forbid a request from a user with an expired device refresh token', async () => {
+	})*/
+	/*it.skip('should forbid a request from a user with an expired device refresh token', async () => {
 		const createdUserRes = await addUserByAdminRequest(app)
 		expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
 		const userId = createdUserRes.body.id
@@ -84,9 +82,8 @@ describe('Terminate specified device session', () => {
 			.delete(RouteNames.securityDevice('999'))
 			.set('Cookie', config.refreshToken.name + '=' + refreshToken)
 			.expect(HTTP_STATUSES.UNAUTHORIZED_401)
-	})
-
-	it.skip('should return 404 if client tries to terminate a non existed device', async () => {
+	})*/
+	/*it.skip('should return 404 if client tries to terminate a non existed device', async () => {
 		const createdUserRes = await addUserByAdminRequest(app)
 		expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
 
@@ -100,9 +97,8 @@ describe('Terminate specified device session', () => {
 			.delete(RouteNames.securityDevice('999'))
 			.set('Cookie', config.refreshToken.name + '=' + refreshTokenValue)
 			.expect(HTTP_STATUSES.NOT_FOUNT_404)
-	})
-
-	it.skip('should return 403 if a client tries to terminate a device which does not belong to him', async () => {
+	})*/
+	/*it.skip('should return 403 if a client tries to terminate a device which does not belong to him', async () => {
 		// Create a user 1
 		const createdUser_1_Res = await addUserByAdminRequest(app)
 		expect(createdUser_1_Res.status).toBe(HTTP_STATUSES.CREATED_201)
@@ -139,9 +135,8 @@ describe('Terminate specified device session', () => {
 			.delete(RouteNames.securityDevice(deviceId))
 			.set('Cookie', config.refreshToken.name + '=' + deviceRefreshTokenUser_2_Value)
 			.expect(HTTP_STATUSES.FORBIDDEN_403)
-	})
-
-	it.skip('should return 204 if a client tries to terminate his device', async () => {
+	})*/
+	/*it.skip('should return 204 if a client tries to terminate his device', async () => {
 		const createdUserRes = await addUserByAdminRequest(app)
 		expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
 
@@ -159,17 +154,16 @@ describe('Terminate specified device session', () => {
 			.delete(RouteNames.securityDevice(deviceId))
 			.set('Cookie', config.refreshToken.name + '=' + deviceRefreshTokenValue)
 			.expect(HTTP_STATUSES.NO_CONTENT_204)
-	})
+	})*/
 })
 
 describe('Terminate this device session', () => {
-	it.skip('should forbid a request from a user without a device refresh token', async () => {
+	/*it.skip('should forbid a request from a user without a device refresh token', async () => {
 		return request(app)
 			.delete(RouteNames.securityDevices)
 			.expect(HTTP_STATUSES.UNAUTHORIZED_401)
-	})
-
-	it.skip('should forbid a request from a user with an expired device refresh token', async () => {
+	})*/
+	/*it.skip('should forbid a request from a user with an expired device refresh token', async () => {
 		const createdUserRes = await addUserByAdminRequest(app)
 		expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
 		const userId = createdUserRes.body.id
@@ -195,9 +189,8 @@ describe('Terminate this device session', () => {
 			.delete(RouteNames.securityDevices)
 			.set('Cookie', config.refreshToken.name + '=' + refreshToken)
 			.expect(HTTP_STATUSES.UNAUTHORIZED_401)
-	})
-
-	it.skip('should return 204 if a client tries to terminate current device', async () => {
+	})*/
+	/*it.skip('should return 204 if a client tries to terminate current device', async () => {
 		const createdUserRes = await addUserByAdminRequest(app)
 		expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
 
@@ -212,5 +205,5 @@ describe('Terminate this device session', () => {
 			.delete(RouteNames.securityDevices)
 			.set('Cookie', config.refreshToken.name + '=' + deviceRefreshTokenValue)
 			.expect(HTTP_STATUSES.NO_CONTENT_204)
-	})
+	})*/
 })

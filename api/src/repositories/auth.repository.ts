@@ -3,8 +3,7 @@ import { ObjectId, WithId } from 'mongodb'
 import { hashService } from '../adapters/hash.adapter'
 import { jwtService } from '../application/jwt.service'
 import { config } from '../config/config'
-import DbNames from '../db/dbNames'
-import { db } from '../db/dbService'
+import { DeviceTokenModel, UserModel } from '../db/dbMongoose'
 import { DBTypes } from '../db/dbTypes'
 import { DeviceRefreshTokenServiceModel } from '../models/service/auth.service.model'
 import { UserServiceModel } from '../models/service/users.service.model'
@@ -16,17 +15,15 @@ export const authRepository = {
 	async getUserByRefreshToken(refreshTokenStr: string) {
 		const refreshTokenData = jwtService.getRefreshTokenDataFromTokenStr(refreshTokenStr)
 
-		const getDeviceRes = await db
-			.collection<DBTypes.DeviceToken>(DbNames.refreshTokens)
-			.findOne({
-				deviceId: refreshTokenData!.deviceId,
-			})
+		const getDeviceRes = await DeviceTokenModel.findOne({
+			deviceId: refreshTokenData!.deviceId,
+		})
 
 		if (!getDeviceRes) {
 			return null
 		}
 
-		const getUserRes = await db.collection<DBTypes.User>(DbNames.users).findOne({
+		const getUserRes = await UserModel.findOne({
 			_id: new ObjectId(getDeviceRes.userId),
 		})
 
@@ -38,7 +35,7 @@ export const authRepository = {
 	},
 
 	async getUserByEmail(loginOrEmail: string) {
-		const getUserRes = await db.collection<DBTypes.User>(DbNames.users).findOne({
+		const getUserRes = await UserModel.findOne({
 			'account.email': loginOrEmail,
 		})
 
@@ -50,7 +47,7 @@ export const authRepository = {
 	},
 
 	async getUserByLoginOrEmail(loginOrEmail: string) {
-		const getUserRes = await db.collection<DBTypes.User>(DbNames.users).findOne({
+		const getUserRes = await UserModel.findOne({
 			$or: [{ 'account.login': loginOrEmail }, { 'account.email': loginOrEmail }],
 		})
 
@@ -62,7 +59,7 @@ export const authRepository = {
 	},
 
 	async getUserByLoginOrEmailAndPassword(loginDto: { loginOrEmail: string; password: string }) {
-		const getUserRes = await db.collection<DBTypes.User>(DbNames.users).findOne({
+		const getUserRes = await UserModel.findOne({
 			$or: [
 				{ 'account.login': loginDto.loginOrEmail },
 				{ 'account.email': loginDto.loginOrEmail },
@@ -104,9 +101,9 @@ export const authRepository = {
 	},
 
 	async getUserByConfirmationCode(confirmationCode: string) {
-		const getUserRes = await db
-			.collection<DBTypes.User>(DbNames.users)
-			.findOne({ 'emailConfirmation.confirmationCode': confirmationCode })
+		const getUserRes = await UserModel.findOne({
+			'emailConfirmation.confirmationCode': confirmationCode,
+		})
 
 		if (!getUserRes) {
 			return null
@@ -120,12 +117,10 @@ export const authRepository = {
 	},
 
 	async makeUserEmailConfirmed(userId: string) {
-		const updateUserRes = await db
-			.collection(DbNames.users)
-			.updateOne(
-				{ _id: new ObjectId(userId) },
-				{ $set: { 'emailConfirmation.isConfirmed': true } },
-			)
+		const updateUserRes = await UserModel.updateOne(
+			{ _id: new ObjectId(userId) },
+			{ $set: { 'emailConfirmation.isConfirmed': true } },
+		)
 
 		return updateUserRes.modifiedCount === 1
 	},
@@ -133,12 +128,10 @@ export const authRepository = {
 	async setNewEmailConfirmationCode(userId: string) {
 		const confirmationCode = createUniqString()
 
-		await db
-			.collection(DbNames.users)
-			.updateOne(
-				{ _id: new ObjectId(userId) },
-				{ $set: { 'emailConfirmation.confirmationCode': confirmationCode } },
-			)
+		await UserModel.updateOne(
+			{ _id: new ObjectId(userId) },
+			{ $set: { 'emailConfirmation.confirmationCode': confirmationCode } },
+		)
 
 		return confirmationCode
 	},
@@ -148,15 +141,13 @@ export const authRepository = {
 	},
 
 	async insertDeviceRefreshToken(deviceRefreshToken: DBTypes.DeviceToken) {
-		await db.collection(DbNames.refreshTokens).insertOne(deviceRefreshToken)
+		await DeviceTokenModel.insertMany(deviceRefreshToken)
 	},
 
 	async getDeviceRefreshTokenByDeviceId(deviceId: string): Promise<null | DBTypes.DeviceToken> {
-		const getTokenRes = await db
-			.collection<DBTypes.DeviceToken>(DbNames.refreshTokens)
-			.findOne({
-				deviceId,
-			})
+		const getTokenRes = await DeviceTokenModel.findOne({
+			deviceId,
+		})
 
 		if (!getTokenRes) return null
 
@@ -164,13 +155,13 @@ export const authRepository = {
 	},
 
 	async deleteDeviceRefreshTokenByDeviceId(deviceId: string): Promise<boolean> {
-		const result = await db.collection(DbNames.refreshTokens).deleteOne({ deviceId })
+		const result = await DeviceTokenModel.deleteOne({ deviceId })
 
 		return result.deletedCount === 1
 	},
 
 	async updateDeviceRefreshTokenDate(deviceId: string): Promise<boolean> {
-		const result = await db.collection(DbNames.refreshTokens).updateOne(
+		const result = await DeviceTokenModel.updateOne(
 			{ deviceId },
 			{
 				$set: {
@@ -193,11 +184,11 @@ export const authRepository = {
 	},
 
 	async findDeviceRefreshTokenInDb(deviceId: string) {
-		return await db.collection(DbNames.refreshTokens).findOne({ deviceId })
+		return DeviceTokenModel.findOne({ deviceId })
 	},
 
 	async getUserDevicesByDeviceId(deviceId: string): Promise<LayerResult<DBTypes.DeviceToken[]>> {
-		const userDevice = await db.collection(DbNames.refreshTokens).findOne({ deviceId })
+		const userDevice = await DeviceTokenModel.findOne({ deviceId })
 
 		if (!userDevice) {
 			return {
@@ -205,10 +196,7 @@ export const authRepository = {
 			}
 		}
 
-		const userDevices = await db
-			.collection<DBTypes.DeviceToken>(DbNames.refreshTokens)
-			.find({ userId: userDevice.userId })
-			.toArray()
+		const userDevices = await DeviceTokenModel.find({ userId: userDevice.userId }).lean()
 
 		if (!userDevices) {
 			return {

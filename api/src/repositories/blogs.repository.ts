@@ -1,14 +1,13 @@
 import { ObjectId, WithId } from 'mongodb'
-import DbNames from '../db/dbNames'
+import { BlogModel } from '../db/dbMongoose'
 import { DBTypes } from '../db/dbTypes'
 import { UpdateBlogDtoModel } from '../models/input/blogs.input.model'
 import { CreateBlogOutModel } from '../models/output/blogs.output.model'
 import { BlogServiceModel } from '../models/service/blogs.service.model'
-import { db } from '../db/dbService'
 
 export const blogsRepository = {
 	async getBlogs() {
-		const getBlogsRes = await db.collection<DBTypes.Blog>(DbNames.blogs).find({}).toArray()
+		const getBlogsRes = await BlogModel.find({}).lean()
 
 		return getBlogsRes.map(this.mapDbBlogToServiceBlog)
 	},
@@ -18,18 +17,14 @@ export const blogsRepository = {
 			return null
 		}
 
-		const getBlogRes = await db
-			.collection<DBTypes.Blog>(DbNames.blogs)
-			.findOne({ _id: new ObjectId(blogId) })
+		const getBlogRes = await BlogModel.findOne({ _id: new ObjectId(blogId) })
 
 		return getBlogRes ? this.mapDbBlogToServiceBlog(getBlogRes) : null
 	},
 	async createBlog(dto: CreateBlogOutModel) {
-		const createBlogRes = await db
-			.collection(DbNames.blogs)
-			.insertOne({ ...dto, isMembership: false })
+		const createBlogRes = await BlogModel.create({ ...dto, isMembership: false })
 
-		return createBlogRes.insertedId.toString()
+		return createBlogRes.id
 	},
 
 	async updateBlog(blogId: string, updateBlogDto: UpdateBlogDtoModel): Promise<boolean> {
@@ -37,9 +32,10 @@ export const blogsRepository = {
 			return false
 		}
 
-		const updateBlogRes = await db
-			.collection<DBTypes.Blog>(DbNames.blogs)
-			.updateOne({ _id: new ObjectId(blogId) }, { $set: updateBlogDto })
+		const updateBlogRes = await BlogModel.updateOne(
+			{ _id: new ObjectId(blogId) },
+			{ $set: updateBlogDto },
+		)
 
 		return updateBlogRes.modifiedCount === 1
 	},
@@ -49,7 +45,7 @@ export const blogsRepository = {
 			return false
 		}
 
-		const result = await db.collection(DbNames.blogs).deleteOne({ _id: new ObjectId(blogId) })
+		const result = await BlogModel.deleteOne({ _id: new ObjectId(blogId) })
 
 		return result.deletedCount === 1
 	},

@@ -1,8 +1,7 @@
 import { add } from 'date-fns'
 import { ObjectId, WithId } from 'mongodb'
 import { hashService } from '../adapters/hash.adapter'
-import DbNames from '../db/dbNames'
-import { db } from '../db/dbService'
+import { UserModel } from '../db/dbMongoose'
 import { DBTypes } from '../db/dbTypes'
 import { UserServiceModel } from '../models/service/users.service.model'
 import { createUniqString } from '../utils/stringUtils'
@@ -32,8 +31,8 @@ export const commonService = {
 	},
 
 	async createUser(dto: DBTypes.User) {
-		const userRes = await db.collection(DbNames.users).insertOne(dto)
-		return userRes.insertedId.toString()
+		const userRes = await UserModel.create(dto)
+		return userRes.id
 	},
 
 	async deleteUser(userId: string): Promise<boolean> {
@@ -41,7 +40,7 @@ export const commonService = {
 			return false
 		}
 
-		const result = await db.collection(DbNames.users).deleteOne({ _id: new ObjectId(userId) })
+		const result = await UserModel.deleteOne({ _id: new ObjectId(userId) })
 
 		return result.deletedCount === 1
 	},

@@ -1,10 +1,9 @@
 import { ObjectId, WithId } from 'mongodb'
-import DbNames from '../db/dbNames'
+import { CommentModel } from '../db/dbMongoose'
 import { DBTypes } from '../db/dbTypes'
 import { UpdateCommentDtoModel } from '../models/input/comments.input.model'
 import { CreatePostCommentDtoModel } from '../models/input/posts.input.model'
 import { CommentServiceModel } from '../models/service/comments.service.model'
-import { db } from '../db/dbService'
 import { UserServiceModel } from '../models/service/users.service.model'
 
 export const commentsRepository = {
@@ -13,9 +12,7 @@ export const commentsRepository = {
 			return null
 		}
 
-		const getCommentRes = await db
-			.collection<DBTypes.Comment>(DbNames.comments)
-			.findOne({ _id: new ObjectId(commentId) })
+		const getCommentRes = await CommentModel.findOne({ _id: new ObjectId(commentId) })
 
 		return getCommentRes ? this.mapDbCommentToClientComment(getCommentRes) : null
 	},
@@ -35,10 +32,8 @@ export const commentsRepository = {
 			createdAt: new Date().toISOString(),
 		}
 
-		const createdPostCommentRes = await db
-			.collection(DbNames.comments)
-			.insertOne(newPostComment)
-		return createdPostCommentRes.insertedId.toString()
+		const createdPostCommentRes = await CommentModel.create(newPostComment)
+		return createdPostCommentRes.id
 	},
 
 	async updateComment(
@@ -49,9 +44,10 @@ export const commentsRepository = {
 			return false
 		}
 
-		const updateCommentRes = await db
-			.collection<DBTypes.Comment>(DbNames.comments)
-			.updateOne({ _id: new ObjectId(commentId) }, { $set: updateCommentDto })
+		const updateCommentRes = await CommentModel.updateOne(
+			{ _id: new ObjectId(commentId) },
+			{ $set: updateCommentDto },
+		)
 
 		return updateCommentRes.modifiedCount === 1
 	},
@@ -61,9 +57,7 @@ export const commentsRepository = {
 			return false
 		}
 
-		const result = await db
-			.collection(DbNames.comments)
-			.deleteOne({ _id: new ObjectId(commentId) })
+		const result = await CommentModel.deleteOne({ _id: new ObjectId(commentId) })
 
 		return result.deletedCount === 1
 	},

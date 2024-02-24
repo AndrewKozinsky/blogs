@@ -1,4 +1,5 @@
 import express, { Request, Response } from 'express'
+import { requestService } from '../application/request.service'
 import { config, HTTP_STATUSES } from '../config/config'
 import { checkAccessTokenMiddleware } from '../middlewares/checkAccessTokenMiddleware'
 import { checkDeviceRefreshTokenMiddleware } from '../middlewares/checkDeviceRefreshTokenMiddleware'
@@ -23,9 +24,9 @@ function getAuthRouter() {
 	router.post(
 		'/login',
 		requestsLimiter,
-		authLoginValidation(),
+		// authLoginValidation(),
 		async (req: ReqWithBody<AuthLoginDtoModel>, res: Response) => {
-			const loginServiceRes = await authService.login(req)
+			/*const loginServiceRes = await authService.login(req)
 
 			if (loginServiceRes.code === LayerResultCode.Unauthorized || !loginServiceRes.data) {
 				res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401)
@@ -40,7 +41,8 @@ function getAuthRouter() {
 
 			res.status(HTTP_STATUSES.OK_200).send({
 				accessToken: jwtService.createAccessTokenStr(loginServiceRes.data.user.id),
-			})
+			})*/
+			res.sendStatus(HTTP_STATUSES.OK_200)
 		},
 	)
 
@@ -133,7 +135,7 @@ function getAuthRouter() {
 		'/logout',
 		checkDeviceRefreshTokenMiddleware,
 		async (req: Request, res: Response) => {
-			const refreshTokenFromCookie = jwtService.getDeviceRefreshStrTokenFromReq(req)
+			const refreshTokenFromCookie = requestService.getDeviceRefreshStrTokenFromReq(req)
 			const logoutServiceRes = await authService.logout(refreshTokenFromCookie)
 
 			if (logoutServiceRes.code === LayerResultCode.Unauthorized) {

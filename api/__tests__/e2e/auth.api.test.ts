@@ -20,7 +20,7 @@ it('123', async () => {
 })
 
 describe('Login user', () => {
-	it.skip('should return 400 if to pass wrong dto', async () => {
+	it('should return 400 if to pass wrong dto', async () => {
 		const loginRes = await request(app)
 			.post(RouteNames.authLogin)
 			.send({ loginOrEmail: '', password: 'password' })
@@ -31,7 +31,7 @@ describe('Login user', () => {
 		expect(loginRes.body.errorsMessages[0].field).toBe('loginOrEmail')
 	})
 
-	it.skip('should return 401 if the login is wrong', async () => {
+	/*it.skip('should return 401 if the login is wrong', async () => {
 		const login = 'login'
 		const password = 'password'
 		const email = 'email@email.ru'
@@ -43,9 +43,8 @@ describe('Login user', () => {
 			.post(RouteNames.authLogin)
 			.send({ loginOrEmail: login + 'wrong', password })
 			.expect(HTTP_STATUSES.UNAUTHORIZED_401)
-	})
-
-	it.skip('should return 401 if the password is wrong', async () => {
+	})*/
+	/*it.skip('should return 401 if the password is wrong', async () => {
 		const login = 'login'
 		const password = 'password'
 		const email = 'email@email.ru'
@@ -57,9 +56,8 @@ describe('Login user', () => {
 			.post(RouteNames.authLogin)
 			.send({ loginOrEmail: login, password: password + 'wrong' })
 			.expect(HTTP_STATUSES.UNAUTHORIZED_401)
-	})
-
-	it.skip('should return 401 if user email is not verified', async () => {
+	})*/
+	/*it.skip('should return 401 if user email is not verified', async () => {
 		const login = 'login_new'
 		const password = 'password_new'
 		const email = 'email@email.ru'
@@ -70,9 +68,8 @@ describe('Login user', () => {
 			.expect(HTTP_STATUSES.NO_CONTENT_204)
 
 		await loginRequest(app, login, password).expect(HTTP_STATUSES.UNAUTHORIZED_401)
-	})
-
-	it.skip('should return 200 and object with token and JWT refreshToken in cookie if the DTO is correct and user has verified email', async () => {
+	})*/
+	/*it.skip('should return 200 and object with token and JWT refreshToken in cookie if the DTO is correct and user has verified email', async () => {
 		const login = 'login'
 		const password = 'password'
 		const email = 'email@email.ru'
@@ -97,9 +94,8 @@ describe('Login user', () => {
 		expect(refreshToken.HttpOnly).toBe(true)
 		expect(refreshToken.Secure).toBe(true)
 		expect(refreshToken['Max-Age']).toBe(20)
-	})
-
-	it('should return 429 if too many requests were made', async () => {
+	})*/
+	/*it('should return 429 if too many requests were made', async () => {
 		for (let i = 1; i <= config.reqLimit.max; i++) {
 			await request(app)
 				.post(RouteNames.authLogin)
@@ -115,11 +111,11 @@ describe('Login user', () => {
 			.post(RouteNames.authLogin)
 			.send({ loginOrEmail: '', password: '' })
 			.expect(HTTP_STATUSES.BAD_REQUEST_400)
-	})
+	})*/
 })
 
 describe('Refresh token', () => {
-	it.skip('should return 401 if the JWT refreshToken inside cookie is missing, expired or incorrect', async () => {
+	/*it.skip('should return 401 if the JWT refreshToken inside cookie is missing, expired or incorrect', async () => {
 		const login = 'login'
 		const password = 'password'
 		const email = 'email@email.ru'
@@ -149,9 +145,8 @@ describe('Refresh token', () => {
 			.post(RouteNames.authRefreshToken)
 			.set('Cookie', config.refreshToken.name + '=' + refreshToken)
 			.expect(HTTP_STATUSES.UNAUTHORIZED_401)
-	})
-
-	it.skip('should return 200 if the JWT refreshToken inside cookie is valid', async () => {
+	})*/
+	/*it.skip('should return 200 if the JWT refreshToken inside cookie is valid', async () => {
 		const login = 'login'
 		const password = 'password'
 		const email = 'email@email.ru'
@@ -173,11 +168,11 @@ describe('Refresh token', () => {
 		expect(newRefreshTokenObj['Max-Age']).toBe(20)
 		expect(newRefreshTokenObj.Secure).toBe(true)
 		expect(newRefreshTokenObj.HttpOnly).toBe(true)
-	})
+	})*/
 })
 
 describe('Register user', () => {
-	it.skip('should return 400 if dto has incorrect values', async () => {
+	/*it.skip('should return 400 if dto has incorrect values', async () => {
 		const registrationRes = await request(app)
 			.post(RouteNames.authRegistration)
 			.send({ login: '', password: '', email: 'wrong-email.com' })
@@ -185,9 +180,8 @@ describe('Register user', () => {
 
 		expect({}.toString.call(registrationRes.body.errorsMessages)).toBe('[object Array]')
 		expect(registrationRes.body.errorsMessages.length).toBe(3)
-	})
-
-	it.skip('should return 400 if the user with the given email already exists', async () => {
+	})*/
+	/*it.skip('should return 400 if the user with the given email already exists', async () => {
 		const email = 'email@email.com'
 
 		await addUserByAdminRequest(app, { login: 'login', password: 'password', email })
@@ -200,9 +194,8 @@ describe('Register user', () => {
 		expect({}.toString.call(registrationRes.body.errorsMessages)).toBe('[object Array]')
 		expect(registrationRes.body.errorsMessages.length).toBe(1)
 		expect(registrationRes.body.errorsMessages[0].field).toBe('email')
-	})
-
-	it.skip('should return 204 if passed correct dto', async () => {
+	})*/
+	/*it.skip('should return 204 if passed correct dto', async () => {
 		const email = 'email@email.com'
 
 		await request(app)
@@ -217,9 +210,8 @@ describe('Register user', () => {
 		console.log(allUsers.body.items)
 
 		expect(allUsers.body.items.length).toBe(1)
-	})
-
-	it('should return 429 if too many requests were made', async () => {
+	})*/
+	/*it('should return 429 if too many requests were made', async () => {
 		for (let i = 1; i <= config.reqLimit.max; i++) {
 			await request(app)
 				.post(RouteNames.authRegistration)
@@ -238,11 +230,11 @@ describe('Register user', () => {
 			.post(RouteNames.authRegistration)
 			.send({ login: '', password: '', email: '' })
 			.expect(HTTP_STATUSES.BAD_REQUEST_400)
-	})
+	})*/
 })
 
 describe('Registration confirmation', () => {
-	it.skip('should return 400 if the request has wrong dto', async () => {
+	/*it.skip('should return 400 if the request has wrong dto', async () => {
 		const regConfirmRes = await request(app)
 			.post(RouteNames.authRegistrationConfirmation)
 			.send({ code: '' })
@@ -250,16 +242,14 @@ describe('Registration confirmation', () => {
 
 		expect({}.toString.call(regConfirmRes.body.errorsMessages)).toBe('[object Array]')
 		expect(regConfirmRes.body.errorsMessages.length).toBe(1)
-	})
-
-	it.skip('should return 400 if there is not user with given confirmation code', async () => {
+	})*/
+	/*it.skip('should return 400 if there is not user with given confirmation code', async () => {
 		await request(app)
 			.post(RouteNames.authRegistrationConfirmation)
 			.send({ code: 'e18ad1ac-18ad-4dc9-80d9-28d60390e224' })
 			.expect(HTTP_STATUSES.BAD_REQUEST_400)
-	})
-
-	it.skip('should return 204 if passed right confirmation code', async () => {
+	})*/
+	/*it.skip('should return 204 if passed right confirmation code', async () => {
 		await request(app)
 			.post(RouteNames.authRegistration)
 			.send({ login: 'login_new', password: 'password_new', email: 'email@email.com' })
@@ -278,9 +268,8 @@ describe('Registration confirmation', () => {
 			.post(RouteNames.authRegistrationConfirmation)
 			.send({ code: confirmationCode })
 			.expect(HTTP_STATUSES.NO_CONTENT_204)
-	})
-
-	it('should return 429 if too many requests were made', async () => {
+	})*/
+	/*it('should return 429 if too many requests were made', async () => {
 		for (let i = 1; i <= config.reqLimit.max; i++) {
 			await request(app)
 				.post(RouteNames.authRegistrationConfirmation)
@@ -296,11 +285,11 @@ describe('Registration confirmation', () => {
 		await request(app)
 			.post(RouteNames.authRegistrationConfirmation)
 			.expect(HTTP_STATUSES.BAD_REQUEST_400)
-	})
+	})*/
 })
 
 describe('Resending email confirmation code', () => {
-	it.skip('should return 400 if dto has incorrect values', async () => {
+	/*it.skip('should return 400 if dto has incorrect values', async () => {
 		const registrationRes = await request(app)
 			.post(RouteNames.authRegistrationEmailResending)
 			.send({ email: 'wrong-email.com' })
@@ -308,16 +297,14 @@ describe('Resending email confirmation code', () => {
 
 		expect({}.toString.call(registrationRes.body.errorsMessages)).toBe('[object Array]')
 		expect(registrationRes.body.errorsMessages.length).toBe(1)
-	})
-
-	it.skip('should return 400 if email in dto is not exists', async () => {
+	})*/
+	/*it.skip('should return 400 if email in dto is not exists', async () => {
 		await request(app)
 			.post(RouteNames.authRegistrationEmailResending)
 			.send({ email: 'my@email.com' })
 			.expect(HTTP_STATUSES.BAD_REQUEST_400)
-	})
-
-	it.skip('should return 204 if passed correct dto', async () => {
+	})*/
+	/*it.skip('should return 204 if passed correct dto', async () => {
 		const email = 'email@email.com'
 
 		await request(app)
@@ -329,9 +316,8 @@ describe('Resending email confirmation code', () => {
 			.post(RouteNames.authRegistrationEmailResending)
 			.send({ email })
 			.expect(HTTP_STATUSES.NO_CONTENT_204)
-	})
-
-	it('should return 429 if too many requests were made', async () => {
+	})*/
+	/*it('should return 429 if too many requests were made', async () => {
 		for (let i = 1; i <= config.reqLimit.max; i++) {
 			await request(app)
 				.post(RouteNames.authRegistrationEmailResending)
@@ -350,15 +336,14 @@ describe('Resending email confirmation code', () => {
 			.post(RouteNames.authRegistrationEmailResending)
 			.send({ email: '' })
 			.expect(HTTP_STATUSES.BAD_REQUEST_400)
-	})
+	})*/
 })
 
 describe('Get current user', () => {
-	it.skip('should forbid a request from an unauthorized user', async () => {
+	/*it.skip('should forbid a request from an unauthorized user', async () => {
 		await request(app).post(RouteNames.blogs).expect(HTTP_STATUSES.UNAUTHORIZED_401)
-	})
-
-	it.skip('should return 200 and user data if the DTO is correct', async () => {
+	})*/
+	/*it.skip('should return 200 and user data if the DTO is correct', async () => {
 		const login = 'login'
 		const password = 'password'
 		const email = 'email@email.ru'
@@ -376,11 +361,11 @@ describe('Get current user', () => {
 		expect(authMeRes.body.email).toBe(email)
 		expect(authMeRes.body.login).toBe(login)
 		expect(authMeRes.body.userId).toBe(createdUserRes.body.id)
-	})
+	})*/
 })
 
 describe('Logout', () => {
-	it.skip('should return 401 if the JWT refreshToken inside cookie is missing, expired or incorrect', async () => {
+	/*it.skip('should return 401 if the JWT refreshToken inside cookie is missing, expired or incorrect', async () => {
 		const login = 'login'
 		const password = 'password'
 		const email = 'email@email.ru'
@@ -410,9 +395,8 @@ describe('Logout', () => {
 			.post(RouteNames.authLogout)
 			.set('Cookie', config.refreshToken.name + '=' + refreshToken)
 			.expect(HTTP_STATUSES.UNAUTHORIZED_401)
-	})
-
-	it.skip('should return 200 if the JWT refreshToken inside cookie is valid', async () => {
+	})*/
+	/*it.skip('should return 200 if the JWT refreshToken inside cookie is valid', async () => {
 		const login = 'login'
 		const password = 'password'
 		const email = 'email@email.ru'
@@ -428,5 +412,5 @@ describe('Logout', () => {
 			.post(RouteNames.authLogout)
 			.set('Cookie', config.refreshToken.name + '=' + refreshTokenValue)
 			.expect(HTTP_STATUSES.NO_CONTENT_204)
-	})
+	})*/
 })

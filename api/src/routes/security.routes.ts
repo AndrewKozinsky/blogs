@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express'
 import { jwtService } from '../application/jwt.service'
+import { requestService } from '../application/request.service'
 import { HTTP_STATUSES } from '../config/config'
 import { checkDeviceRefreshTokenMiddleware } from '../middlewares/checkDeviceRefreshTokenMiddleware'
 import requestsLimiter from '../middlewares/requestsLimitter'
@@ -16,7 +17,7 @@ function getSecurityRouter() {
 		'/devices',
 		checkDeviceRefreshTokenMiddleware,
 		async (req: Request, res: Response) => {
-			const refreshTokenFromCookie = jwtService.getDeviceRefreshStrTokenFromReq(req)
+			const refreshTokenFromCookie = requestService.getDeviceRefreshStrTokenFromReq(req)
 
 			const userDevices = await securityQueryRepository.getUserDevices(refreshTokenFromCookie)
 			res.status(HTTP_STATUSES.OK_200).send(userDevices)
@@ -28,7 +29,7 @@ function getSecurityRouter() {
 		'/devices',
 		checkDeviceRefreshTokenMiddleware,
 		async (req: Request, res: Response) => {
-			const refreshTokenFromCookie = jwtService.getDeviceRefreshStrTokenFromReq(req)
+			const refreshTokenFromCookie = requestService.getDeviceRefreshStrTokenFromReq(req)
 			await securityService.terminateAllDeviceRefreshTokensApartThis(refreshTokenFromCookie)
 
 			res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
@@ -40,7 +41,7 @@ function getSecurityRouter() {
 		'/devices/:deviceId',
 		checkDeviceRefreshTokenMiddleware,
 		async (req: ReqWithParams<{ deviceId: string }>, res: Response) => {
-			const refreshTokenFromCookie = jwtService.getDeviceRefreshStrTokenFromReq(req)
+			const refreshTokenFromCookie = requestService.getDeviceRefreshStrTokenFromReq(req)
 			const terminateDeviceRes = await securityService.terminateSpecifiedDeviceRefreshToken(
 				refreshTokenFromCookie,
 				req.params.deviceId,

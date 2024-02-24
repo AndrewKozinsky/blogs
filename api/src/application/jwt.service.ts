@@ -8,10 +8,6 @@ import { settings } from '../settings'
 import { createUniqString } from '../utils/stringUtils'
 
 export const jwtService = {
-	getDeviceRefreshStrTokenFromReq(req: Request): string {
-		return req.cookies[config.refreshToken.name]
-	},
-
 	createAccessTokenStr(userId: string) {
 		return jwt.sign({ userId }, settings.JWT_SECRET, {
 			expiresIn: config.accessToken.lifeDurationInMs / 1000 + 's',

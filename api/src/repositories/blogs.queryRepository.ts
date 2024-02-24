@@ -1,5 +1,6 @@
-import { Filter, ObjectId, WithId } from 'mongodb'
-import DbNames from '../db/dbNames'
+import { ObjectId, WithId } from 'mongodb'
+import { FilterQuery } from 'mongoose'
+import { BlogModel, PostModel } from '../db/dbMongoose'
 import { DBTypes } from '../db/dbTypes'
 import { GetBlogPostsQueries, GetBlogsQueries } from '../models/input/blogs.input.model'
 import {
@@ -9,12 +10,11 @@ import {
 	GetBlogsOutModel,
 } from '../models/output/blogs.output.model'
 import { PostOutModel } from '../models/output/posts.output.model'
-import { db, dbService } from '../db/dbService'
 import { postsQueryRepository } from './posts.queryRepository'
 
 export const blogsQueryRepository = {
 	async getBlogs(query: GetBlogsQueries): Promise<GetBlogsOutModel> {
-		const filter: Filter<DBTypes.Blog> = {}
+		const filter: FilterQuery<DBTypes.Blog> = {}
 
 		if (query.searchNameTerm) {
 			filter.name = { $regex: query.searchNameTerm, $options: 'i' }
@@ -22,20 +22,19 @@ export const blogsQueryRepository = {
 
 		const sortBy = query.sortBy ?? 'createdAt'
 		const sortDirection = query.sortDirection ?? 'desc'
+		const sort = { [sortBy]: sortDirection }
 
 		const pageNumber = query.pageNumber ? +query.pageNumber : 1
 		const pageSize = query.pageSize ? +query.pageSize : 10
 
-		const totalBlogsCount = await db.collection(DbNames.blogs).countDocuments(filter)
+		const totalBlogsCount = await BlogModel.countDocuments(filter)
 		const pagesCount = Math.ceil(totalBlogsCount / pageSize)
 
-		const getBlogsRes = await db
-			.collection<BlogOutModel>(DbNames.blogs)
-			.find(filter)
-			.sort(sortBy, sortDirection)
+		const getBlogsRes = await BlogModel.find({ filter })
+			.sort(sort)
 			.skip((pageNumber - 1) * pageSize)
 			.limit(pageSize)
-			.toArray()
+			.lean()
 
 		return {
 			pagesCount,
@@ -50,26 +49,25 @@ export const blogsQueryRepository = {
 		blogId: string,
 		queries: GetBlogPostsQueries,
 	): Promise<GetBlogPostsOutModel> {
-		const filter: Filter<PostOutModel> = {
+		const filter: FilterQuery<PostOutModel> = {
 			blogId,
 		}
 
 		const sortBy = queries.sortBy ?? 'createdAt'
 		const sortDirection = queries.sortDirection ?? 'desc'
+		const sort = { [sortBy]: sortDirection }
 
 		const pageNumber = queries.pageNumber ? +queries.pageNumber : 1
 		const pageSize = queries.pageSize ? +queries.pageSize : 10
 
-		const totalBlogPostsCount = await db.collection(DbNames.posts).countDocuments(filter)
+		const totalBlogPostsCount = await PostModel.countDocuments(filter)
 		const pagesCount = Math.ceil(totalBlogPostsCount / pageSize)
 
-		const getBlogPostsRes = await db
-			.collection<PostOutModel>(DbNames.posts)
-			.find(filter)
-			.sort(sortBy, sortDirection)
+		const getBlogPostsRes = await PostModel.find(filter)
+			.sort(sort)
 			.skip((pageNumber - 1) * pageSize)
 			.limit(pageSize)
-			.toArray()
+			.lean()
 
 		return {
 			pagesCount,
@@ -85,9 +83,7 @@ export const blogsQueryRepository = {
 			return null
 		}
 
-		const getBlogRes = await db
-			.collection<DBTypes.Blog>(DbNames.blogs)
-			.findOne({ _id: new ObjectId(blogId) })
+		const getBlogRes = await BlogModel.findOne({ _id: new ObjectId(blogId) })
 
 		return getBlogRes ? this.mapDbBlogToOutputBlog(getBlogRes) : null
 	},

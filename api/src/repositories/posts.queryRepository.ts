@@ -1,5 +1,5 @@
 import { ObjectId, WithId } from 'mongodb'
-import DbNames from '../db/dbNames'
+import { PostModel } from '../db/dbMongoose'
 import { DBTypes } from '../db/dbTypes'
 import { GetPostsQueries } from '../models/input/posts.input.model'
 import {
@@ -7,26 +7,24 @@ import {
 	GetPostsOutModel,
 	PostOutModel,
 } from '../models/output/posts.output.model'
-import { db } from '../db/dbService'
 
 export const postsQueryRepository = {
 	async getPosts(queries: GetPostsQueries): Promise<GetPostsOutModel> {
 		const sortBy = queries.sortBy ?? 'createdAt'
 		const sortDirection = queries.sortDirection ?? 'desc'
+		const sort = { [sortBy]: sortDirection }
 
 		const pageNumber = queries.pageNumber ? +queries.pageNumber : 1
 		const pageSize = queries.pageSize ? +queries.pageSize : 10
 
-		const totalPostsCount = await db.collection(DbNames.posts).countDocuments({})
+		const totalPostsCount = await PostModel.countDocuments({})
 		const pagesCount = Math.ceil(totalPostsCount / pageSize)
 
-		const getPostsRes = await db
-			.collection<DBTypes.Post>(DbNames.posts)
-			.find({})
-			.sort(sortBy, sortDirection)
+		const getPostsRes = await PostModel.find({})
+			.sort(sort)
 			.skip((pageNumber - 1) * pageSize)
 			.limit(pageSize)
-			.toArray()
+			.lean()
 
 		return {
 			pagesCount,
@@ -42,9 +40,7 @@ export const postsQueryRepository = {
 			return null
 		}
 
-		const getPostRes = await db
-			.collection<DBTypes.Post>(DbNames.posts)
-			.findOne({ _id: new ObjectId(postId) })
+		const getPostRes = await PostModel.findOne({ _id: new ObjectId(postId) })
 
 		return getPostRes ? this.mapDbPostToOutputPost(getPostRes) : null
 	},

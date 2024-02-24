@@ -1,6 +1,7 @@
 import { Request } from 'express'
 import { browserService } from '../application/browser.service'
 import { jwtService } from '../application/jwt.service'
+import { requestService } from '../application/request.service'
 import { emailManager } from '../managers/email.manager'
 import { ReqWithBody } from '../models/common'
 import { AuthLoginDtoModel } from '../models/input/authLogin.input.model'
@@ -50,7 +51,7 @@ export const authService = {
 	async refreshToken(
 		req: Request,
 	): Promise<LayerResult<{ newAccessToken: string; newRefreshToken: string }>> {
-		const deviceRefreshTokenStr = jwtService.getDeviceRefreshStrTokenFromReq(req)
+		const deviceRefreshTokenStr = requestService.getDeviceRefreshStrTokenFromReq(req)
 		const deviceRefreshToken =
 			await authRepository.getDeviceRefreshTokenByTokenStr(deviceRefreshTokenStr)
 
