@@ -4,7 +4,7 @@ import { clearAllDB } from './db'
 
 export function resetDbEveryTest() {
 	beforeAll(async () => {
-		// await dbService.runMongoMemoryDb()
+		await dbService.runDb()
 	})
 
 	beforeEach(async () => {
@@ -12,6 +12,6 @@ export function resetDbEveryTest() {
 	})
 
 	afterAll(async function () {
-		await dbService.close()
+		// await dbService.close()
 	})
 }

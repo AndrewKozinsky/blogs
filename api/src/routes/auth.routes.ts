@@ -24,9 +24,9 @@ function getAuthRouter() {
 	router.post(
 		'/login',
 		requestsLimiter,
-		// authLoginValidation(),
+		authLoginValidation(),
 		async (req: ReqWithBody<AuthLoginDtoModel>, res: Response) => {
-			/*const loginServiceRes = await authService.login(req)
+			const loginServiceRes = await authService.login(req)
 
 			if (loginServiceRes.code === LayerResultCode.Unauthorized || !loginServiceRes.data) {
 				res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401)
@@ -41,8 +41,7 @@ function getAuthRouter() {
 
 			res.status(HTTP_STATUSES.OK_200).send({
 				accessToken: jwtService.createAccessTokenStr(loginServiceRes.data.user.id),
-			})*/
-			res.sendStatus(HTTP_STATUSES.OK_200)
+			})
 		},
 	)
 

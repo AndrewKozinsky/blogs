@@ -22,12 +22,13 @@ it('123', async () => {
 })
 
 describe('Getting a comment', () => {
-	/*it.skip('should return 404 if a comment does not exists', async () => {
+	it.skip('should return 404 if a comment does not exists', async () => {
 		const getCommentRes = await request(app).get(RouteNames.comment('999'))
 
 		expect(getCommentRes.status).toBe(HTTP_STATUSES.NOT_FOUNT_404)
-	})*/
-	/*it.skip('should return an existing comment', async () => {
+	})
+
+	it.skip('should return an existing comment', async () => {
 		const createdBlogRes = await addBlogRequest(app)
 		expect(createdBlogRes.status).toBe(HTTP_STATUSES.CREATED_201)
 		const blogId = createdBlogRes.body.id
@@ -49,14 +50,15 @@ describe('Getting a comment', () => {
 			.expect(HTTP_STATUSES.OK_200)
 
 		checkCommentObj(getCommentRes.body, createdUserRes.body.id, createdUserRes.body.login)
-	})*/
+	})
 })
 
 describe('Updating a comment', () => {
-	/*it.skip('should forbid a request from an unauthorized user', async () => {
+	it.skip('should forbid a request from an unauthorized user', async () => {
 		await request(app).put(RouteNames.comment('999')).expect(HTTP_STATUSES.UNAUTHORIZED_401)
-	})*/
-	/*it.skip('should not update a non existing comment', async () => {
+	})
+
+	it.skip('should not update a non existing comment', async () => {
 		const createdUserRes = await addUserByAdminRequest(app)
 		expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
 		const loginUserRes = await loginRequest(app, userEmail, userPassword)
@@ -66,8 +68,9 @@ describe('Updating a comment', () => {
 			.post(RouteNames.comment('999'))
 			.set('authorization', 'Bearer ' + userToken)
 			.expect(HTTP_STATUSES.NOT_FOUNT_404)
-	})*/
-	/*it.skip('should not update a comment if the user is not owner', async () => {
+	})
+
+	it.skip('should not update a comment if the user is not owner', async () => {
 		const createdBlogRes = await addBlogRequest(app)
 		expect(createdBlogRes.status).toBe(HTTP_STATUSES.CREATED_201)
 		const blogId = createdBlogRes.body.id
@@ -104,8 +107,9 @@ describe('Updating a comment', () => {
 			.set('Accept', 'application/json')
 			.set('authorization', 'Bearer ' + userTwoToken)
 			.expect(HTTP_STATUSES.FORBIDDEN_403)
-	})*/
-	/*it.skip('should not update a comment by wrong dto', async () => {
+	})
+
+	it.skip('should not update a comment by wrong dto', async () => {
 		const createdBlogRes = await addBlogRequest(app)
 		expect(createdBlogRes.status).toBe(HTTP_STATUSES.CREATED_201)
 		const blogId = createdBlogRes.body.id
@@ -131,8 +135,9 @@ describe('Updating a comment', () => {
 			.set('Accept', 'application/json')
 			.set('authorization', 'Bearer ' + userToken)
 			.expect(HTTP_STATUSES.BAD_REQUEST_400)
-	})*/
-	/*it.skip('should update a comment by correct dto', async () => {
+	})
+
+	it.skip('should update a comment by correct dto', async () => {
 		const createdBlogRes = await addBlogRequest(app)
 		expect(createdBlogRes.status).toBe(HTTP_STATUSES.CREATED_201)
 		const blogId = createdBlogRes.body.id
@@ -158,14 +163,15 @@ describe('Updating a comment', () => {
 			.set('Accept', 'application/json')
 			.set('authorization', 'Bearer ' + userToken)
 			.expect(HTTP_STATUSES.NO_CONTENT_204)
-	})*/
+	})
 })
 
 describe('Deleting a comment', () => {
-	/*it.skip('should forbid a request from an unauthorized user', async () => {
+	it.skip('should forbid a request from an unauthorized user', async () => {
 		return request(app).put(RouteNames.comment(''))
-	})*/
-	/*it.skip('should not delete a non existing comment', async () => {
+	})
+
+	it.skip('should not delete a non existing comment', async () => {
 		// User will create a comment
 		const createdUserRes = await addUserByAdminRequest(app)
 		expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
@@ -176,8 +182,9 @@ describe('Deleting a comment', () => {
 			.delete(RouteNames.comment('notExist'))
 			.set('authorization', 'Bearer ' + userToken)
 			.expect(HTTP_STATUSES.NOT_FOUNT_404)
-	})*/
-	/*it.skip('should not delete a comment if the user is not owner', async () => {
+	})
+
+	it.skip('should not delete a comment if the user is not owner', async () => {
 		const createdBlogRes = await addBlogRequest(app)
 		expect(createdBlogRes.status).toBe(HTTP_STATUSES.CREATED_201)
 		const blogId = createdBlogRes.body.id
@@ -211,8 +218,9 @@ describe('Deleting a comment', () => {
 			.delete(RouteNames.comment(commentId))
 			.set('authorization', 'Bearer ' + userTwoToken)
 			.expect(HTTP_STATUSES.FORBIDDEN_403)
-	})*/
-	/*it.skip('should delete an existing comment', async () => {
+	})
+
+	it.skip('should delete an existing comment', async () => {
 		const createdBlogRes = await addBlogRequest(app)
 		expect(createdBlogRes.status).toBe(HTTP_STATUSES.CREATED_201)
 		const blogId = createdBlogRes.body.id
@@ -235,5 +243,5 @@ describe('Deleting a comment', () => {
 			.delete(RouteNames.comment(commentId))
 			.set('authorization', 'Bearer ' + userToken)
 			.expect(HTTP_STATUSES.NO_CONTENT_204)
-	})*/
+	})
 })

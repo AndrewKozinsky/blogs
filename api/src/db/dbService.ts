@@ -36,9 +36,6 @@ export const dbService = {
 			}
 
 			return false
-		} finally {
-			await this.close()
-			// console.log('Connection successful closed')
 		}
 	},
 }

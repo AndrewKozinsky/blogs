@@ -17,7 +17,7 @@ export const blogsQueryRepository = {
 		const filter: FilterQuery<DBTypes.Blog> = {}
 
 		if (query.searchNameTerm) {
-			filter.name = { $regex: query.searchNameTerm, $options: 'i' }
+			filter.name = { $regex: new RegExp(query.searchNameTerm, 'i') }
 		}
 
 		const sortBy = query.sortBy ?? 'createdAt'
@@ -30,7 +30,7 @@ export const blogsQueryRepository = {
 		const totalBlogsCount = await BlogModel.countDocuments(filter)
 		const pagesCount = Math.ceil(totalBlogsCount / pageSize)
 
-		const getBlogsRes = await BlogModel.find({ filter })
+		const getBlogsRes = await BlogModel.find(filter)
 			.sort(sort)
 			.skip((pageNumber - 1) * pageSize)
 			.limit(pageSize)

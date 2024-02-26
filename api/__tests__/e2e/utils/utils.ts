@@ -1,8 +1,7 @@
 import dotenv from 'dotenv'
 import { Express } from 'express'
 import request from 'supertest'
-// import { app } from '../../../src/app'
-// import { HTTP_STATUSES } from '../../../src/config/config'
+import { HTTP_STATUSES } from '../../../src/config/config'
 import RouteNames from '../../../src/config/routeNames'
 import {
 	CreateBlogDtoModel,
@@ -13,7 +12,6 @@ import {
 	CreatePostDtoModel,
 } from '../../../src/models/input/posts.input.model'
 import { CreateUserDtoModel } from '../../../src/models/input/users.input.model'
-import any = jasmine.any
 
 dotenv.config()
 
