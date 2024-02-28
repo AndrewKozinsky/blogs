@@ -17,7 +17,7 @@ export const blogsRepository = {
 			return null
 		}
 
-		const getBlogRes = await BlogModel.findOne({ _id: new ObjectId(blogId) })
+		const getBlogRes = await BlogModel.findOne({ _id: new ObjectId(blogId) }).lean()
 
 		return getBlogRes ? this.mapDbBlogToServiceBlog(getBlogRes) : null
 	},

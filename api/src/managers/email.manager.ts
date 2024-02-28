@@ -2,7 +2,7 @@ import { emailAdapter } from '../adapters/email.adapter'
 
 export const emailManager = {
 	async sendEmailConfirmationMessage(userEmail: string, confirmationCode: string) {
-		const subject = 'Registration at out web-site'
+		const subject = 'Registration at our web-site'
 		const textMessage = 'Registration at our web-site'
 		const htmlMessage = `
 <h1>Thanks for your registration</h1>
@@ -11,6 +11,19 @@ export const emailManager = {
 </p>
 <p>
 	<a href="http://localhost:3000/unsubscribe">unsubscribe</a>
+</p>`
+
+		// Send an email
+		await emailAdapter.sendEmail(userEmail, subject, textMessage, htmlMessage)
+	},
+
+	async sendPasswordRecoveryMessage(userEmail: string, recoveryCode: string) {
+		const subject = 'Password recovery at our web-site'
+		const textMessage = 'Password recovery at our web-site'
+		const htmlMessage = `
+<h1>Password recovery</h1>
+<p>To finish password recovery please follow the link below:
+  <a href='https://somesite.com/password-recovery?recoveryCode=${recoveryCode}'>recovery password</a>
 </p>`
 
 		// Send an email

@@ -28,7 +28,7 @@ export const commentsQueryRepository = {
 			return null
 		}
 
-		const getCommentRes = await CommentModel.findOne({ _id: new ObjectId(commentId) })
+		const getCommentRes = await CommentModel.findOne({ _id: new ObjectId(commentId) }).lean()
 
 		return getCommentRes ? this.mapDbCommentToOutputComment(getCommentRes) : null
 	},
@@ -49,7 +49,7 @@ export const commentsQueryRepository = {
 			}
 		}
 
-		const getPostRes = await PostModel.findOne({ _id: new ObjectId(postId) })
+		const getPostRes = await PostModel.findOne({ _id: new ObjectId(postId) }).lean()
 
 		if (!getPostRes) {
 			return {

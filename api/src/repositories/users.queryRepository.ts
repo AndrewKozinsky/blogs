@@ -49,7 +49,7 @@ export const usersQueryRepository = {
 			return null
 		}
 
-		const getUserRes = await UserModel.findOne({ _id: new ObjectId(userId) })
+		const getUserRes = await UserModel.findOne({ _id: new ObjectId(userId) }).lean()
 
 		return getUserRes ? this.mapDbUserToOutputUser(getUserRes) : null
 	},

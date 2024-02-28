@@ -21,6 +21,7 @@ export namespace DBTypes {
 			login: string
 			email: string
 			password: string
+			passwordRecoveryCode: null | string
 			createdAt: string
 		}
 		emailConfirmation: {

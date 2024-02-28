@@ -12,6 +12,7 @@ import { UserServiceModel } from '../models/service/users.service.model'
 import { authRepository } from '../repositories/auth.repository'
 import { usersRepository } from '../repositories/users.repository'
 import { LayerResult, LayerResultCode } from '../types/resultCodes'
+import { createUniqString } from '../utils/stringUtils'
 import { commonService } from './common'
 import { usersService } from './users.service'
 
@@ -189,5 +190,49 @@ export const authService = {
 		await authRepository.deleteDeviceRefreshTokenByDeviceId(refreshTokenInDb.deviceId)
 
 		return { code: LayerResultCode.Success }
+	},
+
+	async passwordRecovery(email: string): Promise<LayerResult<null>> {
+		const user = await authRepository.getUserByLoginOrEmail(email)
+
+		// Send success status even if current email is not registered (for prevent user's email detection)
+		if (!user) {
+			return { code: LayerResultCode.Success }
+		}
+
+		const recoveryCode = createUniqString()
+
+		await usersRepository.setPasswordRecoveryCodeToUser(user.id, recoveryCode)
+
+		try {
+			await emailManager.sendPasswordRecoveryMessage(email, recoveryCode)
+
+			return {
+				code: LayerResultCode.Success,
+			}
+		} catch (err: unknown) {
+			console.log(err)
+			await authRepository.deleteUser(user.id)
+
+			return {
+				code: LayerResultCode.BadRequest,
+			}
+		}
+	},
+
+	async newPassword(passRecoveryCode: string, newPassword: string): Promise<LayerResult<null>> {
+		const user = await usersRepository.getUserByPasswordRecoveryCode(passRecoveryCode)
+
+		if (!user) {
+			return { code: LayerResultCode.BadRequest }
+		}
+
+		await usersRepository.setPasswordRecoveryCodeToUser(user.id, null)
+
+		await usersRepository.setNewPasswordToUser(user.id, newPassword)
+
+		return {
+			code: LayerResultCode.Success,
+		}
 	},
 }

@@ -16,7 +16,7 @@ export const postsRepository = {
 			return null
 		}
 
-		const getPostRes = await PostModel.findOne({ _id: new ObjectId(postId) })
+		const getPostRes = await PostModel.findOne({ _id: new ObjectId(postId) }).lean()
 
 		return getPostRes ? this.mapDbPostToClientPost(getPostRes) : null
 	},

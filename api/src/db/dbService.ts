@@ -3,12 +3,12 @@ import * as mongoose from 'mongoose'
 
 dotenv.config()
 
-const mongoURI = process.env.MONGO_URL + '/' + process.env.MONGO_DB_NAME
+const mongoURI = process.env.MONGO_URL
 
 export const dbService = {
 	async runDb() {
 		try {
-			await mongoose.connect(mongoURI)
+			await mongoose.connect(mongoURI, { dbName: process.env.MONGO_DB_NAME })
 			console.log('Connected to DB 🔥')
 		} catch {
 			await this.close()

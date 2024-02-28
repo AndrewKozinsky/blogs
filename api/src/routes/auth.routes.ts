@@ -9,10 +9,14 @@ import { ReqWithBody } from '../models/common'
 import { AuthRegistrationDtoModel } from '../models/input/authRegistration.input.model'
 import { AuthRegistrationConfirmationDtoModel } from '../models/input/authRegistrationConfirmation.input.model'
 import { AuthRegistrationEmailResendingDtoModel } from '../models/input/authRegistrationEmailResending.input.model'
+import { AuthNewPasswordDtoModel } from '../models/input/newPassword.input.model'
+import { AuthPasswordRecoveryDtoModel } from '../models/input/passwordRecovery.input.model'
 import { authService } from '../services/auth.service'
 import { jwtService } from '../application/jwt.service'
 import { LayerResultCode } from '../types/resultCodes'
 import { authLoginValidation } from '../validators/auth/authLogin.validator'
+import { authNewPasswordValidation } from '../validators/auth/authNewPassword.validator'
+import { authPasswordRecoveryValidation } from '../validators/auth/authPasswordRecoveryValidation.validator'
 import { authRegistrationValidation } from '../validators/auth/authRegistration.validator'
 import { authRegistrationConfirmationValidation } from '../validators/auth/authRegistrationConfirmation.validator'
 import { authRegistrationEmailResending } from '../validators/auth/authRegistrationEmailResending.validator'
@@ -143,6 +147,45 @@ function getAuthRouter() {
 			}
 
 			res.clearCookie(config.refreshToken.name)
+			res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
+		},
+	)
+
+	// Password recovery via Email confirmation. Email should be sent with RecoveryCode inside
+	router.post(
+		'/password-recovery',
+		requestsLimiter,
+		authPasswordRecoveryValidation(),
+		async (req: ReqWithBody<AuthPasswordRecoveryDtoModel>, res: Response) => {
+			const passwordRecoveryServiceRes = await authService.passwordRecovery(req.body.email)
+
+			if (passwordRecoveryServiceRes.code !== LayerResultCode.Success) {
+				res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400)
+				return
+			}
+
+			// 204 Even if current email is not registered (for prevent user's email detection)
+			res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
+		},
+	)
+
+	// Confirm Password recovery
+	router.post(
+		'/new-password',
+		requestsLimiter,
+		authNewPasswordValidation(),
+		async (req: ReqWithBody<AuthNewPasswordDtoModel>, res: Response) => {
+			const passwordRecoveryServiceRes = await authService.newPassword(
+				req.body.recoveryCode,
+				req.body.newPassword,
+			)
+
+			if (passwordRecoveryServiceRes.code !== LayerResultCode.Success) {
+				res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400)
+				return
+			}
+
+			// 204 Even if current email is not registered (for prevent user's email detection)
 			res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
 		},
 	)

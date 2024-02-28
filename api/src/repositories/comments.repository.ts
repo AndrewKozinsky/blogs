@@ -12,7 +12,7 @@ export const commentsRepository = {
 			return null
 		}
 
-		const getCommentRes = await CommentModel.findOne({ _id: new ObjectId(commentId) })
+		const getCommentRes = await CommentModel.findOne({ _id: new ObjectId(commentId) }).lean()
 
 		return getCommentRes ? this.mapDbCommentToClientComment(getCommentRes) : null
 	},

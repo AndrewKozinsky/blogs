@@ -10,7 +10,17 @@ export const usersRepository = {
 			return null
 		}
 
-		const getUserRes = await UserModel.findOne({ _id: new ObjectId(userId) })
+		const getUserRes = await UserModel.findOne({ _id: new ObjectId(userId) }).lean()
+
+		if (!getUserRes) return null
+
+		return this.mapDbUserToServiceUser(getUserRes)
+	},
+
+	async getUserByPasswordRecoveryCode(passwordRecoveryCode: string) {
+		const getUserRes = await UserModel.findOne({
+			'account.passwordRecoveryCode': passwordRecoveryCode,
+		}).lean()
 
 		if (!getUserRes) return null
 
@@ -27,5 +37,19 @@ export const usersRepository = {
 
 	mapDbUserToServiceUser(dbUser: WithId<DBTypes.User>): UserServiceModel {
 		return commonService.mapDbUserToServiceUser(dbUser)
+	},
+
+	async setPasswordRecoveryCodeToUser(userId: string, recoveryCode: null | string) {
+		await UserModel.updateOne(
+			{ _id: new ObjectId(userId) },
+			{ $set: { 'account.passwordRecoveryCode': recoveryCode } },
+		)
+	},
+
+	async setNewPasswordToUser(userId: string, newPassword: string) {
+		await UserModel.updateOne(
+			{ _id: new ObjectId(userId) },
+			{ $set: { 'account.password': newPassword } },
+		)
 	},
 }

@@ -17,7 +17,7 @@ export const authRepository = {
 
 		const getDeviceRes = await DeviceTokenModel.findOne({
 			deviceId: refreshTokenData!.deviceId,
-		})
+		}).lean()
 
 		if (!getDeviceRes) {
 			return null
@@ -25,7 +25,7 @@ export const authRepository = {
 
 		const getUserRes = await UserModel.findOne({
 			_id: new ObjectId(getDeviceRes.userId),
-		})
+		}).lean()
 
 		if (!getUserRes) {
 			return null
@@ -37,7 +37,7 @@ export const authRepository = {
 	async getUserByEmail(loginOrEmail: string) {
 		const getUserRes = await UserModel.findOne({
 			'account.email': loginOrEmail,
-		})
+		}).lean()
 
 		if (!getUserRes) {
 			return null
@@ -49,7 +49,7 @@ export const authRepository = {
 	async getUserByLoginOrEmail(loginOrEmail: string) {
 		const getUserRes = await UserModel.findOne({
 			$or: [{ 'account.login': loginOrEmail }, { 'account.email': loginOrEmail }],
-		})
+		}).lean()
 
 		if (!getUserRes) {
 			return null
@@ -64,7 +64,7 @@ export const authRepository = {
 				{ 'account.login': loginDto.loginOrEmail },
 				{ 'account.email': loginDto.loginOrEmail },
 			],
-		})
+		}).lean()
 
 		if (!getUserRes) {
 			return null
@@ -103,7 +103,7 @@ export const authRepository = {
 	async getUserByConfirmationCode(confirmationCode: string) {
 		const getUserRes = await UserModel.findOne({
 			'emailConfirmation.confirmationCode': confirmationCode,
-		})
+		}).lean()
 
 		if (!getUserRes) {
 			return null
@@ -147,7 +147,7 @@ export const authRepository = {
 	async getDeviceRefreshTokenByDeviceId(deviceId: string): Promise<null | DBTypes.DeviceToken> {
 		const getTokenRes = await DeviceTokenModel.findOne({
 			deviceId,
-		})
+		}).lean()
 
 		if (!getTokenRes) return null
 
@@ -184,11 +184,11 @@ export const authRepository = {
 	},
 
 	async findDeviceRefreshTokenInDb(deviceId: string) {
-		return DeviceTokenModel.findOne({ deviceId })
+		return DeviceTokenModel.findOne({ deviceId }).lean()
 	},
 
 	async getUserDevicesByDeviceId(deviceId: string): Promise<LayerResult<DBTypes.DeviceToken[]>> {
-		const userDevice = await DeviceTokenModel.findOne({ deviceId })
+		const userDevice = await DeviceTokenModel.findOne({ deviceId }).lean()
 
 		if (!userDevice) {
 			return {
