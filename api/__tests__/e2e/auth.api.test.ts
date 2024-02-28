@@ -495,7 +495,7 @@ describe('New password setting', () => {
 		const createdUserRes = await addUserByAdminRequest(app)
 		expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
 
-		const authPasswordRecoveryRes = await request(app)
+		await request(app)
 			.post(RouteNames.authPasswordRecovery)
 			.send({ email: userEmail })
 			.expect(HTTP_STATUSES.NO_CONTENT_204)
