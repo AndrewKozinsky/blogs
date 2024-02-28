@@ -1,4 +1,5 @@
 import { ObjectId, WithId } from 'mongodb'
+import { hashService } from '../adapters/hash.adapter'
 import { UserModel } from '../db/dbMongoose'
 import { DBTypes } from '../db/dbTypes'
 import { UserServiceModel } from '../models/service/users.service.model'
@@ -47,9 +48,11 @@ export const usersRepository = {
 	},
 
 	async setNewPasswordToUser(userId: string, newPassword: string) {
+		const passwordHash = await hashService.hashedString(newPassword)
+
 		await UserModel.updateOne(
 			{ _id: new ObjectId(userId) },
-			{ $set: { 'account.password': newPassword } },
+			{ $set: { 'account.password': passwordHash } },
 		)
 	},
 }

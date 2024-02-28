@@ -16,7 +16,7 @@ export const recoveryCodeValidation = body('recoveryCode')
 	.custom(async (value) => {
 		const user = await usersRepository.getUserByPasswordRecoveryCode(value)
 
-		if (user) {
+		if (!user) {
 			throw new Error('User does not exist')
 		}
 

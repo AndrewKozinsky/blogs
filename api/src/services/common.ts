@@ -12,8 +12,7 @@ export const commonService = {
 		dto: { login: string; email: string; password: string },
 		isEmailConfirmed: boolean,
 	): Promise<DBTypes.User> {
-		const passwordSalt = await hashService.generateSalt()
-		const passwordHash = await hashService.generateHash(dto.password, passwordSalt)
+		const passwordHash = await hashService.hashedString(dto.password)
 
 		return {
 			account: {
