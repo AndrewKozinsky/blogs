@@ -17,7 +17,7 @@ export const recoveryCodeValidation = body('recoveryCode')
 		const user = await usersRepository.getUserByPasswordRecoveryCode(value)
 
 		if (!user) {
-			throw new Error('User does not exist')
+			throw new Error('Recovery code is not correct')
 		}
 
 		return true
