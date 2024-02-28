@@ -32,6 +32,7 @@ export const UserSchema = new mongoose.Schema<DBTypes.User>({
 		login: { type: String, require: true },
 		email: { type: String, require: true },
 		password: { type: String, require: true },
+		passwordRecoveryCode: { type: String, require: false },
 		createdAt: { type: String, require: true },
 	},
 	emailConfirmation: {

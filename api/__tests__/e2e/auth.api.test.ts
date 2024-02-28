@@ -11,7 +11,12 @@ import { settings } from '../../src/settings'
 import { wait } from '../../src/utils/promise'
 import { createUniqString, parseCookieStringToObj } from '../../src/utils/stringUtils'
 import { resetDbEveryTest } from './utils/common'
-import { addUserByAdminRequest, adminAuthorizationValue, loginRequest } from './utils/utils'
+import {
+	addUserByAdminRequest,
+	adminAuthorizationValue,
+	loginRequest,
+	userEmail,
+} from './utils/utils'
 
 resetDbEveryTest()
 
@@ -426,6 +431,84 @@ describe('Logout', () => {
 		await request(app)
 			.post(RouteNames.authLogout)
 			.set('Cookie', config.refreshToken.name + '=' + refreshTokenValue)
+			.expect(HTTP_STATUSES.NO_CONTENT_204)
+	})
+})
+
+describe('Password recovery', () => {
+	it.skip('should return 400 if the request body has incorrect data', async () => {
+		const createdUserRes = await addUserByAdminRequest(app)
+		expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
+
+		await request(app)
+			.post(RouteNames.authPasswordRecovery)
+			.send({ email: 'wrong' })
+			.expect(HTTP_STATUSES.BAD_REQUEST_400)
+	})
+
+	it.skip('should return 204 if the request body has correct data', async () => {
+		const createdUserRes = await addUserByAdminRequest(app)
+		expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
+
+		await request(app)
+			.post(RouteNames.authPasswordRecovery)
+			.send({ email: userEmail })
+			.expect(HTTP_STATUSES.NO_CONTENT_204)
+	})
+})
+
+describe('New password setting', () => {
+	it.skip('should return 400 if the new password is short in request body', async () => {
+		const createdUserRes = await addUserByAdminRequest(app)
+		expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
+
+		const authPasswordRecoveryRes = await request(app)
+			.post(RouteNames.authPasswordRecovery)
+			.send({ email: userEmail })
+			.expect(HTTP_STATUSES.NO_CONTENT_204)
+
+		const userId = createdUserRes.body.id
+		const getUserRes = await usersRepository.getUserById(userId)
+
+		await request(app)
+			.post(RouteNames.authNewPassword)
+			.send({ newPassword: 'short', recoveryCode: getUserRes!.account.passwordRecoveryCode })
+			.expect(HTTP_STATUSES.BAD_REQUEST_400)
+	})
+
+	it.skip('should return 400 if the password recovery code is incorrect in request body', async () => {
+		const createdUserRes = await addUserByAdminRequest(app)
+		expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
+
+		const authPasswordRecoveryRes = await request(app)
+			.post(RouteNames.authPasswordRecovery)
+			.send({ email: userEmail })
+			.expect(HTTP_STATUSES.NO_CONTENT_204)
+
+		await request(app)
+			.post(RouteNames.authNewPassword)
+			.send({ newPassword: 'short', recoveryCode: 'wrongRecoveryCode' })
+			.expect(HTTP_STATUSES.BAD_REQUEST_400)
+	})
+
+	it('should return 204 if the data is correct in request body', async () => {
+		const createdUserRes = await addUserByAdminRequest(app)
+		expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
+
+		const authPasswordRecoveryRes = await request(app)
+			.post(RouteNames.authPasswordRecovery)
+			.send({ email: userEmail })
+			.expect(HTTP_STATUSES.NO_CONTENT_204)
+
+		const userId = createdUserRes.body.id
+		const getUserRes = await usersRepository.getUserById(userId)
+
+		const newPasswordRes = await request(app)
+			.post(RouteNames.authNewPassword)
+			.send({
+				newPassword: 'newPassword123',
+				recoveryCode: getUserRes!.account.passwordRecoveryCode,
+			})
 			.expect(HTTP_STATUSES.NO_CONTENT_204)
 	})
 })

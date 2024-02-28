@@ -12,14 +12,14 @@ export const commonService = {
 		dto: { login: string; email: string; password: string },
 		isEmailConfirmed: boolean,
 	): Promise<DBTypes.User> {
-		const passwordHash = await hashService.hashedString(dto.password)
+		const passwordHash = await hashService.hashString(dto.password)
 
 		return {
 			account: {
 				login: dto.login,
 				email: dto.email,
 				password: passwordHash,
-				passwordRecoveryCode: null,
+				passwordRecoveryCode: undefined,
 				createdAt: new Date().toISOString(),
 			},
 			emailConfirmation: {
@@ -52,6 +52,7 @@ export const commonService = {
 				login: DbUser.account.login,
 				email: DbUser.account.email,
 				password: DbUser.account.password,
+				passwordRecoveryCode: DbUser.account.passwordRecoveryCode,
 				createdAt: DbUser.account.createdAt,
 			},
 			emailConfirmation: {

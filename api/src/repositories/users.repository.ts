@@ -48,7 +48,7 @@ export const usersRepository = {
 	},
 
 	async setNewPasswordToUser(userId: string, newPassword: string) {
-		const passwordHash = await hashService.hashedString(newPassword)
+		const passwordHash = await hashService.hashString(newPassword)
 
 		await UserModel.updateOne(
 			{ _id: new ObjectId(userId) },

@@ -25,6 +25,8 @@ const RouteNames = {
 	authRegistrationEmailResending: '/auth/registration-email-resending',
 	authRegistrationConfirmation: '/auth/registration-confirmation',
 	authLogout: '/auth/logout',
+	authPasswordRecovery: '/auth/password-recovery',
+	authNewPassword: '/auth/new-password',
 	authMe: '/auth/me',
 
 	comments: '/comments',

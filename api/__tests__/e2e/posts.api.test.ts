@@ -22,7 +22,7 @@ import {
 
 resetDbEveryTest()
 
-it('123', async () => {
+it.skip('123', async () => {
 	expect(2).toBe(2)
 })
 

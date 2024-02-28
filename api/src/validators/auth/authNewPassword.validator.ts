@@ -22,7 +22,7 @@ export const recoveryCodeValidation = body('recoveryCode')
 
 		return true
 	})
-	.withMessage('User does not exist')
+	.withMessage('Recovery code is not correct')
 
 export function authNewPasswordValidation() {
 	return [newPasswordValidation, recoveryCodeValidation, inputValidation]

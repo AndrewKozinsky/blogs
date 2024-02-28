@@ -9,7 +9,7 @@ import { addUserByAdminRequest, adminAuthorizationValue, checkUserObj } from './
 
 resetDbEveryTest()
 
-it('123', () => {
+it.skip('123', () => {
 	expect(2).toBe(2)
 })
 
