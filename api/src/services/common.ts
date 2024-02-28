@@ -20,6 +20,7 @@ export const commonService = {
 				login: dto.login,
 				email: dto.email,
 				password: passwordHash,
+				passwordRecoveryCode: null,
 				createdAt: new Date().toISOString(),
 			},
 			emailConfirmation: {

@@ -1,6 +1,5 @@
 import express, { Response } from 'express'
 import { HTTP_STATUSES } from '../config/config'
-import requestsLimiter from '../middlewares/requestsLimitter'
 import { UpdateCommentDtoModel } from '../models/input/comments.input.model'
 import { commentsQueryRepository } from '../repositories/comments.queryRepository'
 import { commentsService } from '../services/comments.service'
