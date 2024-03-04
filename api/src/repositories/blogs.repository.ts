@@ -5,12 +5,12 @@ import { UpdateBlogDtoModel } from '../models/input/blogs.input.model'
 import { CreateBlogOutModel } from '../models/output/blogs.output.model'
 import { BlogServiceModel } from '../models/service/blogs.service.model'
 
-export const blogsRepository = {
+class BlogsRepository {
 	async getBlogs() {
 		const getBlogsRes = await BlogModel.find({}).lean()
 
 		return getBlogsRes.map(this.mapDbBlogToServiceBlog)
-	},
+	}
 
 	async getBlogById(blogId: string) {
 		if (!ObjectId.isValid(blogId)) {
@@ -20,12 +20,12 @@ export const blogsRepository = {
 		const getBlogRes = await BlogModel.findOne({ _id: new ObjectId(blogId) }).lean()
 
 		return getBlogRes ? this.mapDbBlogToServiceBlog(getBlogRes) : null
-	},
+	}
 	async createBlog(dto: CreateBlogOutModel) {
 		const createBlogRes = await BlogModel.create({ ...dto, isMembership: false })
 
 		return createBlogRes.id
-	},
+	}
 
 	async updateBlog(blogId: string, updateBlogDto: UpdateBlogDtoModel): Promise<boolean> {
 		if (!ObjectId.isValid(blogId)) {
@@ -38,7 +38,7 @@ export const blogsRepository = {
 		)
 
 		return updateBlogRes.modifiedCount === 1
-	},
+	}
 
 	async deleteBlog(blogId: string): Promise<boolean> {
 		if (!ObjectId.isValid(blogId)) {
@@ -48,7 +48,7 @@ export const blogsRepository = {
 		const result = await BlogModel.deleteOne({ _id: new ObjectId(blogId) })
 
 		return result.deletedCount === 1
-	},
+	}
 
 	mapDbBlogToServiceBlog(DbBlog: WithId<DBTypes.Blog>): BlogServiceModel {
 		return {
@@ -59,5 +59,6 @@ export const blogsRepository = {
 			createdAt: DbBlog.createdAt,
 			isMembership: DbBlog.isMembership,
 		}
-	},
+	}
 }
+export const blogsRepository = new BlogsRepository()

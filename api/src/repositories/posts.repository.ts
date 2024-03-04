@@ -5,11 +5,11 @@ import { UpdatePostDtoModel } from '../models/input/posts.input.model'
 import { CreatePostOutModel } from '../models/output/posts.output.model'
 import { PostServiceModel } from '../models/service/posts.service.model'
 
-export const postsRepository = {
+class PostsRepository {
 	/*async getPosts() {
 		const getPostsRes = await PostModel.find({}).lean()
 		return getPostsRes.map(this.mapDbPostToClientPost)
-	},*/
+	}*/
 
 	async getPostById(postId: string) {
 		if (!ObjectId.isValid(postId)) {
@@ -19,12 +19,12 @@ export const postsRepository = {
 		const getPostRes = await PostModel.findOne({ _id: new ObjectId(postId) }).lean()
 
 		return getPostRes ? this.mapDbPostToClientPost(getPostRes) : null
-	},
+	}
 
 	async createPost(dto: CreatePostOutModel) {
 		const createdPostRes = await PostModel.create(dto)
 		return createdPostRes.id
-	},
+	}
 
 	async updatePost(postId: string, updatePostDto: UpdatePostDtoModel): Promise<boolean> {
 		if (!ObjectId.isValid(postId)) {
@@ -37,7 +37,7 @@ export const postsRepository = {
 		)
 
 		return updatePostRes.modifiedCount === 1
-	},
+	}
 
 	async deletePost(postId: string): Promise<boolean> {
 		if (!ObjectId.isValid(postId)) {
@@ -47,7 +47,7 @@ export const postsRepository = {
 		const result = await PostModel.deleteOne({ _id: new ObjectId(postId) })
 
 		return result.deletedCount === 1
-	},
+	}
 
 	mapDbPostToClientPost(DbPost: WithId<DBTypes.Post>): PostServiceModel {
 		return {
@@ -59,5 +59,6 @@ export const postsRepository = {
 			blogName: DbPost.blogName,
 			createdAt: DbPost.createdAt,
 		}
-	},
+	}
 }
+export const postsRepository = new PostsRepository()

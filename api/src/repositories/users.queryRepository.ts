@@ -9,7 +9,7 @@ import {
 	UserOutModel,
 } from '../models/output/users.output.model'
 
-export const usersQueryRepository = {
+class UsersQueryRepository {
 	async getUsers(queries: GetUsersQueries): Promise<GetUsersOutModel> {
 		const filter: FilterQuery<DBTypes.User> = {
 			$or: [
@@ -42,7 +42,7 @@ export const usersQueryRepository = {
 			totalCount: totalUsersCount,
 			items: getUsersRes.map(this.mapDbUserToOutputUser),
 		}
-	},
+	}
 
 	async getUser(userId: string): Promise<null | GetUserOutModel> {
 		if (!ObjectId.isValid(userId)) {
@@ -52,7 +52,7 @@ export const usersQueryRepository = {
 		const getUserRes = await UserModel.findOne({ _id: new ObjectId(userId) }).lean()
 
 		return getUserRes ? this.mapDbUserToOutputUser(getUserRes) : null
-	},
+	}
 
 	mapDbUserToOutputUser(DbUser: WithId<DBTypes.User>): UserOutModel {
 		return {
@@ -61,5 +61,7 @@ export const usersQueryRepository = {
 			login: DbUser.account.login,
 			createdAt: DbUser.account.createdAt,
 		}
-	},
+	}
 }
+
+export const usersQueryRepository = new UsersQueryRepository()

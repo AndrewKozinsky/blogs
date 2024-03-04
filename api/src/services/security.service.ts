@@ -1,16 +1,15 @@
 import { jwtService } from '../application/jwt.service'
 import { authRepository } from '../repositories/auth.repository'
 import { securityRepository } from '../repositories/security.repository'
-import { UserServiceModel } from '../models/service/users.service.model'
 import { LayerResult, LayerResultCode } from '../types/resultCodes'
 
-export const securityService = {
+class SecurityService {
 	async terminateAllDeviceRefreshTokensApartThis(refreshTokenStr: string) {
 		const refreshToken = jwtService.getRefreshTokenDataFromTokenStr(refreshTokenStr)
 		const { deviceId } = refreshToken!
 
 		await securityRepository.terminateAllDeviceRefreshTokensApartThis(deviceId)
-	},
+	}
 
 	async terminateSpecifiedDeviceRefreshToken(
 		currentDeviceTokenStr: string,
@@ -61,5 +60,7 @@ export const securityService = {
 		return {
 			code: isDeviceDeleted ? LayerResultCode.Success : LayerResultCode.Forbidden,
 		}
-	},
+	}
 }
+
+export const securityService = new SecurityService()

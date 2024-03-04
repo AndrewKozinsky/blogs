@@ -16,7 +16,7 @@ import { createUniqString } from '../utils/stringUtils'
 import { commonService } from './common'
 import { usersService } from './users.service'
 
-export const authService = {
+class AuthService {
 	async login(
 		req: ReqWithBody<AuthLoginDtoModel>,
 	): Promise<LayerResult<{ refreshTokenStr: string; user: UserServiceModel }>> {
@@ -47,7 +47,7 @@ export const authService = {
 				user: getUserRes.data,
 			},
 		}
-	},
+	}
 
 	async refreshToken(
 		req: Request,
@@ -81,7 +81,7 @@ export const authService = {
 				newRefreshToken,
 			},
 		}
-	},
+	}
 
 	async registration(dto: AuthRegistrationDtoModel): Promise<LayerResult<null>> {
 		const userByEmail = await authRepository.getUserByLoginOrEmail(dto.email)
@@ -115,7 +115,7 @@ export const authService = {
 				code: LayerResultCode.BadRequest,
 			}
 		}
-	},
+	}
 
 	async confirmEmail(confirmationCode: string): Promise<{ status: 'fail' | 'success' }> {
 		const user = await authRepository.getUserByConfirmationCode(confirmationCode)
@@ -139,7 +139,7 @@ export const authService = {
 		return {
 			status: 'success',
 		}
-	},
+	}
 
 	async resendEmailConfirmationCode(
 		dto: AuthRegistrationEmailResendingDtoModel,
@@ -169,7 +169,7 @@ export const authService = {
 		return {
 			code: LayerResultCode.Success,
 		}
-	},
+	}
 
 	getCurrentUser(user: UserServiceModel): MeOutModel {
 		return {
@@ -177,7 +177,7 @@ export const authService = {
 			email: user.account.email,
 			login: user.account.login,
 		}
-	},
+	}
 
 	async logout(refreshTokenStr: string): Promise<LayerResult<null>> {
 		const refreshTokenInDb =
@@ -190,7 +190,7 @@ export const authService = {
 		await authRepository.deleteDeviceRefreshTokenByDeviceId(refreshTokenInDb.deviceId)
 
 		return { code: LayerResultCode.Success }
-	},
+	}
 
 	async passwordRecovery(email: string): Promise<LayerResult<null>> {
 		const user = await authRepository.getUserByLoginOrEmail(email)
@@ -218,7 +218,7 @@ export const authService = {
 				code: LayerResultCode.BadRequest,
 			}
 		}
-	},
+	}
 
 	async newPassword(passRecoveryCode: string, newPassword: string): Promise<LayerResult<null>> {
 		const user = await usersRepository.getUserByPasswordRecoveryCode(passRecoveryCode)
@@ -234,5 +234,7 @@ export const authService = {
 		return {
 			code: LayerResultCode.Success,
 		}
-	},
+	}
 }
+
+export const authService = new AuthService()

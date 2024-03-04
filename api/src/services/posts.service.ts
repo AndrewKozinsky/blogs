@@ -10,7 +10,7 @@ import { blogsRepository } from '../repositories/blogs.repository'
 import { commentsRepository } from '../repositories/comments.repository'
 import { postsRepository } from '../repositories/posts.repository'
 
-export const postsService = {
+class PostsService {
 	async createPost(dto: CreatePostDtoModel): Promise<string> {
 		const blog = await blogsRepository.getBlogById(dto.blogId)
 
@@ -25,13 +25,13 @@ export const postsService = {
 		}
 
 		return await postsRepository.createPost(newPostDto)
-	},
+	}
 	async updatePost(postId: string, updatePostDto: UpdatePostDtoModel) {
 		return postsRepository.updatePost(postId, updatePostDto)
-	},
+	}
 	async deletePost(postId: string): Promise<boolean> {
 		return postsRepository.deletePost(postId)
-	},
+	}
 	async createPostComment(
 		postId: string,
 		commentDto: CreatePostCommentDtoModel,
@@ -45,5 +45,7 @@ export const postsService = {
 		if (!post) return 'postNotExist'
 
 		return await commentsRepository.createPostComment(user, postId, commentDto)
-	},
+	}
 }
+
+export const postsService = new PostsService()

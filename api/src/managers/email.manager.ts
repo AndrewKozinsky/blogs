@@ -1,6 +1,6 @@
 import { emailAdapter } from '../adapters/email.adapter'
 
-export const emailManager = {
+class EmailManager {
 	async sendEmailConfirmationMessage(userEmail: string, confirmationCode: string) {
 		const subject = 'Registration at our web-site'
 		const textMessage = 'Registration at our web-site'
@@ -15,7 +15,7 @@ export const emailManager = {
 
 		// Send an email
 		await emailAdapter.sendEmail(userEmail, subject, textMessage, htmlMessage)
-	},
+	}
 
 	async sendPasswordRecoveryMessage(userEmail: string, recoveryCode: string) {
 		const subject = 'Password recovery at our web-site'
@@ -28,5 +28,7 @@ export const emailManager = {
 
 		// Send an email
 		await emailAdapter.sendEmail(userEmail, subject, textMessage, htmlMessage)
-	},
+	}
 }
+
+export const emailManager = new EmailManager()

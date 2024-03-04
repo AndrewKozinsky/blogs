@@ -11,7 +11,7 @@ import { commonService } from '../services/common'
 import { LayerResult, LayerResultCode } from '../types/resultCodes'
 import { createUniqString } from '../utils/stringUtils'
 
-export const authRepository = {
+class AuthRepository {
 	async getUserByRefreshToken(refreshTokenStr: string) {
 		const refreshTokenData = jwtService.getRefreshTokenDataFromTokenStr(refreshTokenStr)
 
@@ -32,7 +32,7 @@ export const authRepository = {
 		}
 
 		return this.mapDbUserToServiceUser(getUserRes)
-	},
+	}
 
 	async getUserByEmail(loginOrEmail: string) {
 		const getUserRes = await UserModel.findOne({
@@ -44,7 +44,7 @@ export const authRepository = {
 		}
 
 		return this.mapDbUserToServiceUser(getUserRes)
-	},
+	}
 
 	async getUserByLoginOrEmail(loginOrEmail: string) {
 		const getUserRes = await UserModel.findOne({
@@ -56,7 +56,7 @@ export const authRepository = {
 		}
 
 		return this.mapDbUserToServiceUser(getUserRes)
-	},
+	}
 
 	async getUserByLoginOrEmailAndPassword(loginDto: { loginOrEmail: string; password: string }) {
 		const getUserRes = await UserModel.findOne({
@@ -80,7 +80,7 @@ export const authRepository = {
 		}
 
 		return this.mapDbUserToServiceUser(getUserRes)
-	},
+	}
 
 	async getConfirmedUserByLoginOrEmailAndPassword(loginDto: {
 		loginOrEmail: string
@@ -98,7 +98,7 @@ export const authRepository = {
 			code: LayerResultCode.Success,
 			data: user,
 		}
-	},
+	}
 
 	async getUserByConfirmationCode(confirmationCode: string) {
 		const getUserRes = await UserModel.findOne({
@@ -110,11 +110,11 @@ export const authRepository = {
 		}
 
 		return this.mapDbUserToServiceUser(getUserRes)
-	},
+	}
 
 	async createUser(dto: DBTypes.User) {
 		return commonService.createUser(dto)
-	},
+	}
 
 	async makeUserEmailConfirmed(userId: string) {
 		const updateUserRes = await UserModel.updateOne(
@@ -123,7 +123,7 @@ export const authRepository = {
 		)
 
 		return updateUserRes.modifiedCount === 1
-	},
+	}
 
 	async setNewEmailConfirmationCode(userId: string) {
 		const confirmationCode = createUniqString()
@@ -134,15 +134,15 @@ export const authRepository = {
 		)
 
 		return confirmationCode
-	},
+	}
 
 	async deleteUser(userId: string): Promise<boolean> {
 		return commonService.deleteUser(userId)
-	},
+	}
 
 	async insertDeviceRefreshToken(deviceRefreshToken: DBTypes.DeviceToken) {
 		await DeviceTokenModel.insertMany(deviceRefreshToken)
-	},
+	}
 
 	async getDeviceRefreshTokenByDeviceId(deviceId: string): Promise<null | DBTypes.DeviceToken> {
 		const getTokenRes = await DeviceTokenModel.findOne({
@@ -152,13 +152,13 @@ export const authRepository = {
 		if (!getTokenRes) return null
 
 		return this.mapDbDeviceRefreshTokenToServiceDeviceRefreshToken(getTokenRes)
-	},
+	}
 
 	async deleteDeviceRefreshTokenByDeviceId(deviceId: string): Promise<boolean> {
 		const result = await DeviceTokenModel.deleteOne({ deviceId })
 
 		return result.deletedCount === 1
-	},
+	}
 
 	async updateDeviceRefreshTokenDate(deviceId: string): Promise<boolean> {
 		const result = await DeviceTokenModel.updateOne(
@@ -175,17 +175,17 @@ export const authRepository = {
 		)
 
 		return result.modifiedCount === 1
-	},
+	}
 
 	async getDeviceRefreshTokenByTokenStr(tokenStr: string): Promise<null | DBTypes.DeviceToken> {
 		const refreshToken = jwtService.getRefreshTokenDataFromTokenStr(tokenStr)
 
 		return this.getDeviceRefreshTokenByDeviceId(refreshToken!.deviceId)
-	},
+	}
 
 	async findDeviceRefreshTokenInDb(deviceId: string) {
 		return DeviceTokenModel.findOne({ deviceId }).lean()
-	},
+	}
 
 	async getUserDevicesByDeviceId(deviceId: string): Promise<LayerResult<DBTypes.DeviceToken[]>> {
 		const userDevice = await DeviceTokenModel.findOne({ deviceId }).lean()
@@ -208,11 +208,11 @@ export const authRepository = {
 			code: LayerResultCode.Success,
 			data: userDevices.map(this.mapDbDeviceRefreshTokenToServiceDeviceRefreshToken),
 		}
-	},
+	}
 
 	mapDbUserToServiceUser(dbUser: WithId<DBTypes.User>): UserServiceModel {
 		return commonService.mapDbUserToServiceUser(dbUser)
-	},
+	}
 
 	mapDbDeviceRefreshTokenToServiceDeviceRefreshToken(
 		dbDevice: WithId<DBTypes.DeviceToken>,
@@ -226,5 +226,6 @@ export const authRepository = {
 			deviceName: dbDevice.deviceName,
 			userId: dbDevice.userId,
 		}
-	},
+	}
 }
+export const authRepository = new AuthRepository()

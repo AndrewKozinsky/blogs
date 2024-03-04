@@ -8,7 +8,7 @@ import { CreateBlogOutModel } from '../models/output/blogs.output.model'
 import { blogsRepository } from '../repositories/blogs.repository'
 import { postsService } from './posts.service'
 
-export const blogsService = {
+class BlogsService {
 	async createBlog(dto: CreateBlogDtoModel) {
 		const newBlog: CreateBlogOutModel = {
 			id: new Date().toISOString(),
@@ -20,17 +20,19 @@ export const blogsService = {
 		}
 
 		return await blogsRepository.createBlog(newBlog)
-	},
+	}
 	async createBlogPost(blogId: string, postDto: CreateBlogPostDtoModel) {
 		const newPostDto: CreatePostDtoModel = { blogId, ...postDto }
 		return postsService.createPost(newPostDto)
-	},
+	}
 
 	async updateBlog(blogId: string, updateBlogDto: UpdateBlogDtoModel) {
 		return blogsRepository.updateBlog(blogId, updateBlogDto)
-	},
+	}
 
 	async deleteBlog(blogId: string): Promise<boolean> {
 		return blogsRepository.deleteBlog(blogId)
-	},
+	}
 }
+
+export const blogsService = new BlogsService()

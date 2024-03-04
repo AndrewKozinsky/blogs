@@ -8,7 +8,7 @@ import {
 	PostOutModel,
 } from '../models/output/posts.output.model'
 
-export const postsQueryRepository = {
+class PostsQueryRepository {
 	async getPosts(queries: GetPostsQueries): Promise<GetPostsOutModel> {
 		const sortBy = queries.sortBy ?? 'createdAt'
 		const sortDirection = queries.sortDirection ?? 'desc'
@@ -33,7 +33,7 @@ export const postsQueryRepository = {
 			totalCount: totalPostsCount,
 			items: getPostsRes.map(this.mapDbPostToOutputPost),
 		}
-	},
+	}
 
 	async getPost(postId: string): Promise<null | GetPostOutModel> {
 		if (!ObjectId.isValid(postId)) {
@@ -43,7 +43,7 @@ export const postsQueryRepository = {
 		const getPostRes = await PostModel.findOne({ _id: new ObjectId(postId) }).lean()
 
 		return getPostRes ? this.mapDbPostToOutputPost(getPostRes) : null
-	},
+	}
 
 	mapDbPostToOutputPost(DbPost: WithId<DBTypes.Post>): PostOutModel {
 		return {
@@ -55,5 +55,7 @@ export const postsQueryRepository = {
 			blogName: DbPost.blogName,
 			createdAt: DbPost.createdAt,
 		}
-	},
+	}
 }
+
+export const postsQueryRepository = new PostsQueryRepository()

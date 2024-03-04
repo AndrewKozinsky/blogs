@@ -22,7 +22,7 @@ type GetPostCommentsResult =
 			}
 	  }
 
-export const commentsQueryRepository = {
+class CommentsQueryRepository {
 	async getComment(commentId: string): Promise<null | GetCommentOutModel> {
 		if (!ObjectId.isValid(commentId)) {
 			return null
@@ -31,7 +31,7 @@ export const commentsQueryRepository = {
 		const getCommentRes = await CommentModel.findOne({ _id: new ObjectId(commentId) }).lean()
 
 		return getCommentRes ? this.mapDbCommentToOutputComment(getCommentRes) : null
-	},
+	}
 	async getPostComments(
 		postId: string,
 		queries: GetPostCommentsQueries,
@@ -76,7 +76,7 @@ export const commentsQueryRepository = {
 				items: getPostCommentsRes.map(this.mapDbCommentToOutputComment),
 			},
 		}
-	},
+	}
 
 	mapDbCommentToOutputComment(DbComment: WithId<DBTypes.Comment>): CommentOutModel {
 		return {
@@ -88,5 +88,6 @@ export const commentsQueryRepository = {
 			},
 			createdAt: DbComment.createdAt,
 		}
-	},
+	}
 }
+export const commentsQueryRepository = new CommentsQueryRepository()

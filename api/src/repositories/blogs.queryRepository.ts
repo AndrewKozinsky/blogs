@@ -12,7 +12,7 @@ import {
 import { PostOutModel } from '../models/output/posts.output.model'
 import { postsQueryRepository } from './posts.queryRepository'
 
-export const blogsQueryRepository = {
+class BlogsQueryRepository {
 	async getBlogs(query: GetBlogsQueries): Promise<GetBlogsOutModel> {
 		const filter: FilterQuery<DBTypes.Blog> = {}
 
@@ -43,7 +43,7 @@ export const blogsQueryRepository = {
 			totalCount: totalBlogsCount,
 			items: getBlogsRes.map(this.mapDbBlogToOutputBlog),
 		}
-	},
+	}
 
 	async getBlogPosts(
 		blogId: string,
@@ -76,7 +76,7 @@ export const blogsQueryRepository = {
 			totalCount: totalBlogPostsCount,
 			items: getBlogPostsRes.map(postsQueryRepository.mapDbPostToOutputPost),
 		}
-	},
+	}
 
 	async getBlog(blogId: string): Promise<null | GetBlogOutModel> {
 		if (!ObjectId.isValid(blogId)) {
@@ -86,7 +86,7 @@ export const blogsQueryRepository = {
 		const getBlogRes = await BlogModel.findOne({ _id: new ObjectId(blogId) }).lean()
 
 		return getBlogRes ? this.mapDbBlogToOutputBlog(getBlogRes) : null
-	},
+	}
 
 	mapDbBlogToOutputBlog(DbBlog: WithId<DBTypes.Blog>): BlogOutModel {
 		return {
@@ -97,5 +97,6 @@ export const blogsQueryRepository = {
 			createdAt: DbBlog.createdAt,
 			isMembership: DbBlog.isMembership,
 		}
-	},
+	}
 }
+export const blogsQueryRepository = new BlogsQueryRepository()

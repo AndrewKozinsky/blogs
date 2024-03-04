@@ -3,10 +3,10 @@ import { CommentServiceModel } from '../models/service/comments.service.model'
 import { UserServiceModel } from '../models/service/users.service.model'
 import { commentsRepository } from '../repositories/comments.repository'
 
-export const commentsService = {
+class CommentsService {
 	async getComment(commentId: string): Promise<null | CommentServiceModel> {
 		return commentsRepository.getComment(commentId)
-	},
+	}
 
 	async updateComment(
 		user: UserServiceModel,
@@ -21,7 +21,7 @@ export const commentsService = {
 		}
 
 		return commentsRepository.updateComment(commentId, updateCommentDto)
-	},
+	}
 
 	async deleteComment(user: UserServiceModel, commentId: string): Promise<'notOwner' | boolean> {
 		const comment = await commentsRepository.getComment(commentId)
@@ -32,5 +32,7 @@ export const commentsService = {
 		}
 
 		return commentsRepository.deleteComment(commentId)
-	},
+	}
 }
+
+export const commentsService = new CommentsService()

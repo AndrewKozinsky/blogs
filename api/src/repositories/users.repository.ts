@@ -5,7 +5,7 @@ import { DBTypes } from '../db/dbTypes'
 import { UserServiceModel } from '../models/service/users.service.model'
 import { commonService } from '../services/common'
 
-export const usersRepository = {
+class UsersRepository {
 	async getUserById(userId: string) {
 		if (!ObjectId.isValid(userId)) {
 			return null
@@ -16,7 +16,7 @@ export const usersRepository = {
 		if (!getUserRes) return null
 
 		return this.mapDbUserToServiceUser(getUserRes)
-	},
+	}
 
 	async getUserByPasswordRecoveryCode(passwordRecoveryCode: string) {
 		const getUserRes = await UserModel.findOne({
@@ -26,26 +26,26 @@ export const usersRepository = {
 		if (!getUserRes) return null
 
 		return this.mapDbUserToServiceUser(getUserRes)
-	},
+	}
 
 	async createUser(dto: DBTypes.User) {
 		return commonService.createUser(dto)
-	},
+	}
 
 	async deleteUser(userId: string): Promise<boolean> {
 		return commonService.deleteUser(userId)
-	},
+	}
 
 	mapDbUserToServiceUser(dbUser: WithId<DBTypes.User>): UserServiceModel {
 		return commonService.mapDbUserToServiceUser(dbUser)
-	},
+	}
 
 	async setPasswordRecoveryCodeToUser(userId: string, recoveryCode: null | string) {
 		await UserModel.updateOne(
 			{ _id: new ObjectId(userId) },
 			{ $set: { 'account.passwordRecoveryCode': recoveryCode } },
 		)
-	},
+	}
 
 	async setNewPasswordToUser(userId: string, newPassword: string) {
 		const passwordHash = await hashService.hashString(newPassword)
@@ -54,5 +54,7 @@ export const usersRepository = {
 			{ _id: new ObjectId(userId) },
 			{ $set: { 'account.password': passwordHash } },
 		)
-	},
+	}
 }
+
+export const usersRepository = new UsersRepository()

@@ -5,10 +5,8 @@ import dotenv from 'dotenv'
 
 dotenv.config()
 
-function getTestRouter() {
-	const router = express.Router()
-
-	router.delete('/all-data', async (req: Request, res: Response) => {
+class TestRouter {
+	async deleteAllData(req: Request, res: Response) {
 		const isDropped = await dbService.drop()
 
 		if (isDropped) {
@@ -17,7 +15,14 @@ function getTestRouter() {
 		}
 
 		res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400)
-	})
+	}
+}
+
+function getTestRouter() {
+	const router = express.Router()
+	const testRouter = new TestRouter()
+
+	router.delete('/all-data', testRouter.deleteAllData)
 
 	return router
 }

@@ -1,24 +1,22 @@
-import { Request } from 'express'
 import { addMilliseconds } from 'date-fns'
 import jwt, { decode } from 'jsonwebtoken'
 import { config } from '../config/config'
 import { DBTypes } from '../db/dbTypes'
-import { authRepository } from '../repositories/auth.repository'
 import { settings } from '../settings'
 import { createUniqString } from '../utils/stringUtils'
 
-export const jwtService = {
+class JwtService {
 	createAccessTokenStr(userId: string) {
 		return jwt.sign({ userId }, settings.JWT_SECRET, {
 			expiresIn: config.accessToken.lifeDurationInMs / 1000 + 's',
 		})
-	},
+	}
 
 	createRefreshTokenStr(deviceId: string): string {
 		return jwt.sign({ deviceId }, settings.JWT_SECRET, {
 			expiresIn: config.refreshToken.lifeDurationInMs / 1000 + 's',
 		})
-	},
+	}
 
 	createDeviceRefreshToken(
 		userId: string,
@@ -35,11 +33,11 @@ export const jwtService = {
 			deviceName,
 			userId,
 		}
-	},
+	}
 
 	getPayload(tokenStr: string) {
 		return jwt.decode(tokenStr, { complete: true })!.payload
-	},
+	}
 
 	getUserIdByAccessTokenStr(accessToken: string): null | string {
 		try {
@@ -48,7 +46,7 @@ export const jwtService = {
 		} catch (error) {
 			return null
 		}
-	},
+	}
 
 	getRefreshTokenDataFromTokenStr(refreshTokenStr: string) {
 		try {
@@ -58,7 +56,7 @@ export const jwtService = {
 			console.log(error)
 			return null
 		}
-	},
+	}
 
 	isRefreshTokenStrValid(refreshTokenStr: string) {
 		try {
@@ -68,7 +66,7 @@ export const jwtService = {
 			console.log(error)
 			return false
 		}
-	},
+	}
 
 	getTokenExpirationDate(tokenStr: string): null | Date {
 		try {
@@ -82,5 +80,7 @@ export const jwtService = {
 			console.log(error)
 			return null
 		}
-	},
+	}
 }
+
+export const jwtService = new JwtService()

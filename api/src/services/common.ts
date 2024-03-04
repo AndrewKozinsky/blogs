@@ -6,7 +6,7 @@ import { DBTypes } from '../db/dbTypes'
 import { UserServiceModel } from '../models/service/users.service.model'
 import { createUniqString } from '../utils/stringUtils'
 
-export const commonService = {
+class CommonService {
 	// Return object which can be save in DB to create a new user
 	async getCreateUserDto(
 		dto: { login: string; email: string; password: string },
@@ -28,12 +28,12 @@ export const commonService = {
 				isConfirmed: isEmailConfirmed,
 			},
 		}
-	},
+	}
 
 	async createUser(dto: DBTypes.User) {
 		const userRes = await UserModel.create(dto)
 		return userRes.id
-	},
+	}
 
 	async deleteUser(userId: string): Promise<boolean> {
 		if (!ObjectId.isValid(userId)) {
@@ -43,7 +43,7 @@ export const commonService = {
 		const result = await UserModel.deleteOne({ _id: new ObjectId(userId) })
 
 		return result.deletedCount === 1
-	},
+	}
 
 	mapDbUserToServiceUser(DbUser: WithId<DBTypes.User>): UserServiceModel {
 		return {
@@ -61,5 +61,7 @@ export const commonService = {
 				isConfirmed: DbUser.emailConfirmation.isConfirmed,
 			},
 		}
-	},
+	}
 }
+
+export const commonService = new CommonService()

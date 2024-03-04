@@ -6,7 +6,7 @@ import { CreatePostCommentDtoModel } from '../models/input/posts.input.model'
 import { CommentServiceModel } from '../models/service/comments.service.model'
 import { UserServiceModel } from '../models/service/users.service.model'
 
-export const commentsRepository = {
+class CommentsRepository {
 	async getComment(commentId: string) {
 		if (!ObjectId.isValid(commentId)) {
 			return null
@@ -15,7 +15,7 @@ export const commentsRepository = {
 		const getCommentRes = await CommentModel.findOne({ _id: new ObjectId(commentId) }).lean()
 
 		return getCommentRes ? this.mapDbCommentToClientComment(getCommentRes) : null
-	},
+	}
 
 	async createPostComment(
 		user: UserServiceModel,
@@ -34,7 +34,7 @@ export const commentsRepository = {
 
 		const createdPostCommentRes = await CommentModel.create(newPostComment)
 		return createdPostCommentRes.id
-	},
+	}
 
 	async updateComment(
 		commentId: string,
@@ -50,7 +50,7 @@ export const commentsRepository = {
 		)
 
 		return updateCommentRes.modifiedCount === 1
-	},
+	}
 
 	async deleteComment(commentId: string): Promise<boolean> {
 		if (!ObjectId.isValid(commentId)) {
@@ -60,7 +60,7 @@ export const commentsRepository = {
 		const result = await CommentModel.deleteOne({ _id: new ObjectId(commentId) })
 
 		return result.deletedCount === 1
-	},
+	}
 
 	mapDbCommentToClientComment(DbComment: WithId<DBTypes.Comment>): CommentServiceModel {
 		return {
@@ -72,5 +72,6 @@ export const commentsRepository = {
 			},
 			createdAt: DbComment.createdAt,
 		}
-	},
+	}
 }
+export const commentsRepository = new CommentsRepository()
