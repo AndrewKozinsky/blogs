@@ -1,26 +1,46 @@
 import { Request } from 'express'
-import { browserService } from '../application/browser.service'
-import { jwtService } from '../application/jwt.service'
-import { requestService } from '../application/request.service'
-import { emailManager } from '../managers/email.manager'
+import { BrowserService } from '../application/browser.service'
+import { JwtService } from '../application/jwt.service'
+import { RequestService } from '../application/request.service'
+import { EmailManager } from '../managers/email.manager'
 import { ReqWithBody } from '../models/common'
 import { AuthLoginDtoModel } from '../models/input/authLogin.input.model'
 import { AuthRegistrationDtoModel } from '../models/input/authRegistration.input.model'
 import { AuthRegistrationEmailResendingDtoModel } from '../models/input/authRegistrationEmailResending.input.model'
 import { MeOutModel } from '../models/output/auth.output.model'
 import { UserServiceModel } from '../models/service/users.service.model'
-import { authRepository } from '../repositories/auth.repository'
-import { usersRepository } from '../repositories/users.repository'
+import { AuthRepository } from '../repositories/auth.repository'
+import { UsersRepository } from '../repositories/users.repository'
 import { LayerResult, LayerResultCode } from '../types/resultCodes'
 import { createUniqString } from '../utils/stringUtils'
 import { commonService } from './common'
-import { usersService } from './users.service'
+import { UsersService } from './users.service'
 
-class AuthService {
+export class AuthService {
+	private authRepository: AuthRepository
+	private usersService: UsersService
+	private usersRepository: UsersRepository
+	private browserService: BrowserService
+	private jwtService: JwtService
+	private requestService: RequestService
+	private emailManager: EmailManager
+
+	constructor() {
+		this.authRepository = new AuthRepository()
+		this.usersService = new UsersService()
+		this.usersRepository = new UsersRepository()
+		this.browserService = new BrowserService()
+		this.jwtService = new JwtService()
+		this.requestService = new RequestService()
+		this.emailManager = new EmailManager()
+	}
+
 	async login(
 		req: ReqWithBody<AuthLoginDtoModel>,
 	): Promise<LayerResult<{ refreshTokenStr: string; user: UserServiceModel }>> {
-		const getUserRes = await authRepository.getConfirmedUserByLoginOrEmailAndPassword(req.body)
+		const getUserRes = await this.authRepository.getConfirmedUserByLoginOrEmailAndPassword(
+			req.body,
+		)
 
 		if (getUserRes.code !== LayerResultCode.Success || !getUserRes.data) {
 			return {
@@ -28,17 +48,19 @@ class AuthService {
 			}
 		}
 
-		const clientIP = browserService.getClientIP(req)
-		const clientName = browserService.getClientName(req)
+		const clientIP = this.browserService.getClientIP(req)
+		const clientName = this.browserService.getClientName(req)
 
-		const newDeviceRefreshToken = jwtService.createDeviceRefreshToken(
+		const newDeviceRefreshToken = this.jwtService.createDeviceRefreshToken(
 			getUserRes.data.id,
 			clientIP,
 			clientName,
 		)
-		await authRepository.insertDeviceRefreshToken(newDeviceRefreshToken)
+		await this.authRepository.insertDeviceRefreshToken(newDeviceRefreshToken)
 
-		const refreshTokenStr = jwtService.createRefreshTokenStr(newDeviceRefreshToken.deviceId)
+		const refreshTokenStr = this.jwtService.createRefreshTokenStr(
+			newDeviceRefreshToken.deviceId,
+		)
 
 		return {
 			code: LayerResultCode.Success,
@@ -52,17 +74,17 @@ class AuthService {
 	async refreshToken(
 		req: Request,
 	): Promise<LayerResult<{ newAccessToken: string; newRefreshToken: string }>> {
-		const deviceRefreshTokenStr = requestService.getDeviceRefreshStrTokenFromReq(req)
+		const deviceRefreshTokenStr = this.requestService.getDeviceRefreshStrTokenFromReq(req)
 		const deviceRefreshToken =
-			await authRepository.getDeviceRefreshTokenByTokenStr(deviceRefreshTokenStr)
+			await this.authRepository.getDeviceRefreshTokenByTokenStr(deviceRefreshTokenStr)
 
-		if (!deviceRefreshToken || !jwtService.isRefreshTokenStrValid(deviceRefreshTokenStr)) {
+		if (!deviceRefreshToken || !this.jwtService.isRefreshTokenStrValid(deviceRefreshTokenStr)) {
 			return {
 				code: LayerResultCode.Unauthorized,
 			}
 		}
 
-		const userRes = await usersRepository.getUserById(deviceRefreshToken.userId)
+		const userRes = await this.usersRepository.getUserById(deviceRefreshToken.userId)
 
 		if (!userRes) {
 			return {
@@ -70,36 +92,36 @@ class AuthService {
 			}
 		}
 
-		await authRepository.updateDeviceRefreshTokenDate(deviceRefreshToken.deviceId)
+		await this.authRepository.updateDeviceRefreshTokenDate(deviceRefreshToken.deviceId)
 
-		const newRefreshToken = jwtService.createRefreshTokenStr(deviceRefreshToken.deviceId)
+		const newRefreshToken = this.jwtService.createRefreshTokenStr(deviceRefreshToken.deviceId)
 
 		return {
 			code: LayerResultCode.Success,
 			data: {
-				newAccessToken: jwtService.createAccessTokenStr(deviceRefreshToken.userId),
+				newAccessToken: this.jwtService.createAccessTokenStr(deviceRefreshToken.userId),
 				newRefreshToken,
 			},
 		}
 	}
 
 	async registration(dto: AuthRegistrationDtoModel): Promise<LayerResult<null>> {
-		const userByEmail = await authRepository.getUserByLoginOrEmail(dto.email)
+		const userByEmail = await this.authRepository.getUserByLoginOrEmail(dto.email)
 		if (userByEmail) {
 			return { code: LayerResultCode.BadRequest }
 		}
 
 		const newUserDto = await commonService.getCreateUserDto(dto, false)
 
-		const userId = await authRepository.createUser(newUserDto)
+		const userId = await this.authRepository.createUser(newUserDto)
 
-		const user = await usersService.getUser(userId)
+		const user = await this.usersService.getUser(userId)
 		if (!user) {
 			return { code: LayerResultCode.BadRequest }
 		}
 
 		try {
-			await emailManager.sendEmailConfirmationMessage(
+			await this.emailManager.sendEmailConfirmationMessage(
 				user.account.email,
 				user.emailConfirmation.confirmationCode,
 			)
@@ -109,7 +131,7 @@ class AuthService {
 			}
 		} catch (err: unknown) {
 			console.log(err)
-			await authRepository.deleteUser(userId)
+			await this.authRepository.deleteUser(userId)
 
 			return {
 				code: LayerResultCode.BadRequest,
@@ -118,7 +140,7 @@ class AuthService {
 	}
 
 	async confirmEmail(confirmationCode: string): Promise<{ status: 'fail' | 'success' }> {
-		const user = await authRepository.getUserByConfirmationCode(confirmationCode)
+		const user = await this.authRepository.getUserByConfirmationCode(confirmationCode)
 		if (!user || user.emailConfirmation.isConfirmed) {
 			return {
 				status: 'fail',
@@ -134,7 +156,7 @@ class AuthService {
 			}
 		}
 
-		await authRepository.makeUserEmailConfirmed(user.id)
+		await this.authRepository.makeUserEmailConfirmed(user.id)
 
 		return {
 			status: 'success',
@@ -146,7 +168,7 @@ class AuthService {
 	): Promise<LayerResult<null>> {
 		const { email } = dto
 
-		const user = await authRepository.getUserByEmail(email)
+		const user = await this.authRepository.getUserByEmail(email)
 
 		if (!user || user.emailConfirmation.isConfirmed) {
 			return {
@@ -154,10 +176,11 @@ class AuthService {
 			}
 		}
 
-		const newConfirmationCode = await authRepository.setNewEmailConfirmationCode(user.id)
+		const newConfirmationCode = await this.authRepository.setNewEmailConfirmationCode(user.id)
 
+		// await не нужен потому что тест не проходит в Инкубаторе
 		try {
-			emailManager.sendEmailConfirmationMessage(email, newConfirmationCode)
+			this.emailManager.sendEmailConfirmationMessage(email, newConfirmationCode)
 		} catch (err: unknown) {
 			console.log(err)
 
@@ -181,19 +204,19 @@ class AuthService {
 
 	async logout(refreshTokenStr: string): Promise<LayerResult<null>> {
 		const refreshTokenInDb =
-			await authRepository.getDeviceRefreshTokenByTokenStr(refreshTokenStr)
+			await this.authRepository.getDeviceRefreshTokenByTokenStr(refreshTokenStr)
 
-		if (!refreshTokenInDb || !jwtService.isRefreshTokenStrValid(refreshTokenStr)) {
+		if (!refreshTokenInDb || !this.jwtService.isRefreshTokenStrValid(refreshTokenStr)) {
 			return { code: LayerResultCode.Unauthorized }
 		}
 
-		await authRepository.deleteDeviceRefreshTokenByDeviceId(refreshTokenInDb.deviceId)
+		await this.authRepository.deleteDeviceRefreshTokenByDeviceId(refreshTokenInDb.deviceId)
 
 		return { code: LayerResultCode.Success }
 	}
 
 	async passwordRecovery(email: string): Promise<LayerResult<null>> {
-		const user = await authRepository.getUserByLoginOrEmail(email)
+		const user = await this.authRepository.getUserByLoginOrEmail(email)
 
 		// Send success status even if current email is not registered (for prevent user's email detection)
 		if (!user) {
@@ -202,17 +225,17 @@ class AuthService {
 
 		const recoveryCode = createUniqString()
 
-		await usersRepository.setPasswordRecoveryCodeToUser(user.id, recoveryCode)
+		await this.usersRepository.setPasswordRecoveryCodeToUser(user.id, recoveryCode)
 
 		try {
-			await emailManager.sendPasswordRecoveryMessage(email, recoveryCode)
+			await this.emailManager.sendPasswordRecoveryMessage(email, recoveryCode)
 
 			return {
 				code: LayerResultCode.Success,
 			}
 		} catch (err: unknown) {
 			console.log(err)
-			await authRepository.deleteUser(user.id)
+			await this.authRepository.deleteUser(user.id)
 
 			return {
 				code: LayerResultCode.BadRequest,
@@ -221,20 +244,18 @@ class AuthService {
 	}
 
 	async newPassword(passRecoveryCode: string, newPassword: string): Promise<LayerResult<null>> {
-		const user = await usersRepository.getUserByPasswordRecoveryCode(passRecoveryCode)
+		const user = await this.usersRepository.getUserByPasswordRecoveryCode(passRecoveryCode)
 
 		if (!user) {
 			return { code: LayerResultCode.BadRequest }
 		}
 
-		await usersRepository.setPasswordRecoveryCodeToUser(user.id, null)
+		await this.usersRepository.setPasswordRecoveryCodeToUser(user.id, null)
 
-		await usersRepository.setNewPasswordToUser(user.id, newPassword)
+		await this.usersRepository.setNewPasswordToUser(user.id, newPassword)
 
 		return {
 			code: LayerResultCode.Success,
 		}
 	}
 }
-
-export const authService = new AuthService()

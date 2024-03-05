@@ -2,11 +2,17 @@ import { WithId } from 'mongodb'
 import { DeviceTokenModel } from '../db/dbMongoose'
 import { DBTypes } from '../db/dbTypes'
 import { GetUserDevicesOutModel, UserDeviceOutModel } from '../models/output/security.output.model'
-import { authRepository } from './auth.repository'
+import { AuthRepository } from './auth.repository'
 
-class SecurityQueryRepository {
+export class SecurityQueryRepository {
+	authRepository: AuthRepository
+
+	constructor() {
+		this.authRepository = new AuthRepository()
+	}
+
 	async getUserDevices(refreshToken: string): Promise<GetUserDevicesOutModel> {
-		const user = await authRepository.getUserByRefreshToken(refreshToken)
+		const user = await this.authRepository.getUserByRefreshToken(refreshToken)
 
 		const userDevices = await DeviceTokenModel.find({ userId: user!.id }).lean()
 
@@ -24,4 +30,3 @@ class SecurityQueryRepository {
 		}
 	}
 }
-export const securityQueryRepository = new SecurityQueryRepository()

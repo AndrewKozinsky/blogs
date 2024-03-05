@@ -8,7 +8,7 @@ import {
 	PostOutModel,
 } from '../models/output/posts.output.model'
 
-class PostsQueryRepository {
+export class PostsQueryRepository {
 	async getPosts(queries: GetPostsQueries): Promise<GetPostsOutModel> {
 		const sortBy = queries.sortBy ?? 'createdAt'
 		const sortDirection = queries.sortDirection ?? 'desc'
@@ -57,5 +57,3 @@ class PostsQueryRepository {
 		}
 	}
 }
-
-export const postsQueryRepository = new PostsQueryRepository()

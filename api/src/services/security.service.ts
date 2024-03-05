@@ -1,14 +1,24 @@
-import { jwtService } from '../application/jwt.service'
-import { authRepository } from '../repositories/auth.repository'
-import { securityRepository } from '../repositories/security.repository'
+import { JwtService } from '../application/jwt.service'
+import { AuthRepository } from '../repositories/auth.repository'
+import { SecurityRepository } from '../repositories/security.repository'
 import { LayerResult, LayerResultCode } from '../types/resultCodes'
 
-class SecurityService {
+export class SecurityService {
+	securityRepository: SecurityRepository
+	authRepository: AuthRepository
+	jwtService: JwtService
+
+	constructor() {
+		this.securityRepository = new SecurityRepository()
+		this.authRepository = new AuthRepository()
+		this.jwtService = new JwtService()
+	}
+
 	async terminateAllDeviceRefreshTokensApartThis(refreshTokenStr: string) {
-		const refreshToken = jwtService.getRefreshTokenDataFromTokenStr(refreshTokenStr)
+		const refreshToken = this.jwtService.getRefreshTokenDataFromTokenStr(refreshTokenStr)
 		const { deviceId } = refreshToken!
 
-		await securityRepository.terminateAllDeviceRefreshTokensApartThis(deviceId)
+		await this.securityRepository.terminateAllDeviceRefreshTokensApartThis(deviceId)
 	}
 
 	async terminateSpecifiedDeviceRefreshToken(
@@ -17,7 +27,7 @@ class SecurityService {
 	): Promise<LayerResult<null>> {
 		// Is device for deletion is not exist give NotFound code
 		const deviceRefreshToken =
-			await authRepository.getDeviceRefreshTokenByDeviceId(deletionDeviceId)
+			await this.authRepository.getDeviceRefreshTokenByDeviceId(deletionDeviceId)
 
 		if (!deviceRefreshToken) {
 			return {
@@ -28,7 +38,7 @@ class SecurityService {
 		// Device for deletion exists. Check if current user belongs the device for deletion
 
 		const currentUserDeviceId =
-			jwtService.getRefreshTokenDataFromTokenStr(currentDeviceTokenStr)?.deviceId
+			this.jwtService.getRefreshTokenDataFromTokenStr(currentDeviceTokenStr)?.deviceId
 
 		if (!currentUserDeviceId) {
 			return {
@@ -36,7 +46,7 @@ class SecurityService {
 			}
 		}
 
-		const userDevices = await authRepository.getUserDevicesByDeviceId(currentUserDeviceId)
+		const userDevices = await this.authRepository.getUserDevicesByDeviceId(currentUserDeviceId)
 
 		if (userDevices.code !== LayerResultCode.Success || !userDevices.data) {
 			return {
@@ -55,12 +65,10 @@ class SecurityService {
 		}
 
 		const isDeviceDeleted =
-			await securityRepository.deleteRefreshTokenByDeviceId(deletionDeviceId)
+			await this.securityRepository.deleteRefreshTokenByDeviceId(deletionDeviceId)
 
 		return {
 			code: isDeviceDeleted ? LayerResultCode.Success : LayerResultCode.Forbidden,
 		}
 	}
 }
-
-export const securityService = new SecurityService()

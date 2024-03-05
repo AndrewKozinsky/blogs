@@ -1,9 +1,9 @@
 import express, { Response } from 'express'
 import { HTTP_STATUSES } from '../config/config'
 import { adminAuthMiddleware } from '../middlewares/adminAuth.middleware'
-import { blogsRepository } from '../repositories/blogs.repository'
-import { postsQueryRepository } from '../repositories/posts.queryRepository'
-import { blogsService } from '../services/blogs.service'
+import { BlogsRepository } from '../repositories/blogs.repository'
+import { PostsQueryRepository } from '../repositories/posts.queryRepository'
+import { BlogsService } from '../services/blogs.service'
 import {
 	ReqWithBody,
 	ReqWithParams,
@@ -18,22 +18,33 @@ import {
 	GetBlogsQueries,
 	UpdateBlogDtoModel,
 } from '../models/input/blogs.input.model'
-import { blogsQueryRepository } from '../repositories/blogs.queryRepository'
+import { BlogsQueryRepository } from '../repositories/blogs.queryRepository'
 import { blogValidation } from '../validators/blogs/blog.validator'
 import { createBlogPostsValidation } from '../validators/blogs/createBlogPost.validator'
 import { getBlogPostsValidation } from '../validators/blogs/getBlogPosts.validator'
 import { getBlogsValidation } from '../validators/blogs/getBlogs.validator'
 
 class BlogsRouter {
+	blogsService: BlogsService
+	blogsRepository: BlogsRepository
+	blogsQueryRepository: BlogsQueryRepository
+	postsQueryRepository: PostsQueryRepository
+
+	constructor() {
+		this.blogsService = new BlogsService()
+		this.blogsRepository = new BlogsRepository()
+		this.blogsQueryRepository = new BlogsQueryRepository()
+		this.postsQueryRepository = new PostsQueryRepository()
+	}
 	async getBlogs(req: ReqWithQuery<GetBlogsQueries>, res: Response) {
-		const blogs = await blogsQueryRepository.getBlogs(req.query)
+		const blogs = await this.blogsQueryRepository.getBlogs(req.query)
 
 		res.status(HTTP_STATUSES.OK_200).send(blogs)
 	}
 
 	async createNewBlog(req: ReqWithBody<CreateBlogDtoModel>, res: Response) {
-		const createdBlogId = await blogsService.createBlog(req.body)
-		const createdBlog = await blogsQueryRepository.getBlog(createdBlogId)
+		const createdBlogId = await this.blogsService.createBlog(req.body)
+		const createdBlog = await this.blogsQueryRepository.getBlog(createdBlogId)
 
 		res.status(HTTP_STATUSES.CREATED_201).send(createdBlog)
 	}
@@ -44,13 +55,13 @@ class BlogsRouter {
 	) {
 		const blogId = req.params.blogId
 
-		const blog = await blogsRepository.getBlogById(blogId)
+		const blog = await this.blogsRepository.getBlogById(blogId)
 		if (!blog) {
 			res.sendStatus(HTTP_STATUSES.NOT_FOUNT_404)
 			return
 		}
 
-		const posts = await blogsQueryRepository.getBlogPosts(blogId, req.query)
+		const posts = await this.blogsQueryRepository.getBlogPosts(blogId, req.query)
 
 		if (!posts) {
 			res.sendStatus(HTTP_STATUSES.NOT_FOUNT_404)
@@ -66,16 +77,16 @@ class BlogsRouter {
 	) {
 		const blogId = req.params.blogId
 
-		const blog = await blogsRepository.getBlogById(blogId)
+		const blog = await this.blogsRepository.getBlogById(blogId)
 
 		if (!blog) {
 			res.sendStatus(HTTP_STATUSES.NOT_FOUNT_404)
 			return
 		}
 
-		const createPostInsertedId = await blogsService.createBlogPost(blogId, req.body)
+		const createPostInsertedId = await this.blogsService.createBlogPost(blogId, req.body)
 
-		const createdPost = await postsQueryRepository.getPost(createPostInsertedId)
+		const createdPost = await this.postsQueryRepository.getPost(createPostInsertedId)
 
 		res.status(HTTP_STATUSES.CREATED_201).send(createdPost)
 	}
@@ -83,7 +94,7 @@ class BlogsRouter {
 	async getBlog(req: ReqWithParams<{ blogId: string }>, res: Response) {
 		const blogId = req.params.blogId
 
-		const blog = await blogsQueryRepository.getBlog(blogId)
+		const blog = await this.blogsQueryRepository.getBlog(blogId)
 		if (!blog) {
 			res.sendStatus(HTTP_STATUSES.NOT_FOUNT_404)
 			return
@@ -98,7 +109,7 @@ class BlogsRouter {
 	) {
 		const blogId = req.params.blogId
 
-		const isBlogUpdated = await blogsService.updateBlog(blogId, req.body)
+		const isBlogUpdated = await this.blogsService.updateBlog(blogId, req.body)
 
 		if (!isBlogUpdated) {
 			res.sendStatus(HTTP_STATUSES.NOT_FOUNT_404)
@@ -111,7 +122,7 @@ class BlogsRouter {
 	async deleteBlog(req: ReqWithParams<{ blogId: string }>, res: Response) {
 		const blogId = req.params.blogId
 
-		const isBlogDeleted = await blogsService.deleteBlog(blogId)
+		const isBlogDeleted = await this.blogsService.deleteBlog(blogId)
 
 		if (!isBlogDeleted) {
 			res.sendStatus(HTTP_STATUSES.NOT_FOUNT_404)
@@ -127,30 +138,44 @@ function getBlogsRouter() {
 	const blogsRouter = new BlogsRouter()
 
 	// Returns blogs with paging
-	router.get('/', getBlogsValidation(), blogsRouter.getBlogs)
+	router.get('/', getBlogsValidation(), blogsRouter.getBlogs.bind(blogsRouter))
 
 	// Create new blog
-	router.post('/', adminAuthMiddleware, blogValidation(), blogsRouter.createNewBlog)
+	router.post(
+		'/',
+		adminAuthMiddleware,
+		blogValidation(),
+		blogsRouter.createNewBlog.bind(blogsRouter),
+	)
 
 	// Returns all posts for specified blog
-	router.get('/:blogId/posts', getBlogPostsValidation(), blogsRouter.getBlogPosts)
+	router.get(
+		'/:blogId/posts',
+		getBlogPostsValidation(),
+		blogsRouter.getBlogPosts.bind(blogsRouter),
+	)
 
 	// Create new post for specific blog
 	router.post(
 		'/:blogId/posts',
 		adminAuthMiddleware,
 		createBlogPostsValidation(),
-		blogsRouter.createNewPostForSpecificBlog,
+		blogsRouter.createNewPostForSpecificBlog.bind(blogsRouter),
 	)
 
 	// Returns blog by id
-	router.get('/:blogId', blogsRouter.getBlog)
+	router.get('/:blogId', blogsRouter.getBlog.bind(blogsRouter))
 
 	// Update existing Blog by id with InputModel
-	router.put('/:blogId', adminAuthMiddleware, blogValidation(), blogsRouter.updateBlog)
+	router.put(
+		'/:blogId',
+		adminAuthMiddleware,
+		blogValidation(),
+		blogsRouter.updateBlog.bind(blogsRouter),
+	)
 
 	// Delete blog specified by id
-	router.delete('/:blogId', adminAuthMiddleware, blogsRouter.deleteBlog)
+	router.delete('/:blogId', adminAuthMiddleware, blogsRouter.deleteBlog.bind(blogsRouter))
 
 	return router
 }

@@ -1,7 +1,10 @@
 import { Request, Response, NextFunction } from 'express'
-import { jwtService } from '../application/jwt.service'
+import { JwtService } from '../application/jwt.service'
 import { HTTP_STATUSES } from '../config/config'
-import { usersRepository } from '../repositories/users.repository'
+import { UsersRepository } from '../repositories/users.repository'
+
+const usersRepository = new UsersRepository()
+const jwtService = new JwtService()
 
 export async function checkAccessTokenMiddleware(req: Request, res: Response, next: NextFunction) {
 	const authorizationHeader = req.headers['authorization']

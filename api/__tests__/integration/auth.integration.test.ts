@@ -1,5 +1,5 @@
-import { emailManager } from '../../src/managers/email.manager'
-import { authService } from '../../src/services/auth.service'
+import { EmailManager } from '../../src/managers/email.manager'
+import { AuthService } from '../../src/services/auth.service'
 import { resetDbEveryTest } from '../e2e/utils/common'
 // import testSeeder from './testSeeder'
 

@@ -1,6 +1,8 @@
 import { body } from 'express-validator'
 import { inputValidation } from '../../middlewares/input.validation'
-import { blogsRepository } from '../../repositories/blogs.repository'
+import { BlogsRepository } from '../../repositories/blogs.repository'
+
+const blogsRepository = new BlogsRepository()
 
 export const titleValidation = body('title')
 	.isString()

@@ -5,7 +5,7 @@ import { UpdateBlogDtoModel } from '../models/input/blogs.input.model'
 import { CreateBlogOutModel } from '../models/output/blogs.output.model'
 import { BlogServiceModel } from '../models/service/blogs.service.model'
 
-class BlogsRepository {
+export class BlogsRepository {
 	async getBlogs() {
 		const getBlogsRes = await BlogModel.find({}).lean()
 
@@ -61,4 +61,3 @@ class BlogsRepository {
 		}
 	}
 }
-export const blogsRepository = new BlogsRepository()

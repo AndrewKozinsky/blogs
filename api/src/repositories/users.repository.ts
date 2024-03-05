@@ -5,7 +5,7 @@ import { DBTypes } from '../db/dbTypes'
 import { UserServiceModel } from '../models/service/users.service.model'
 import { commonService } from '../services/common'
 
-class UsersRepository {
+export class UsersRepository {
 	async getUserById(userId: string) {
 		if (!ObjectId.isValid(userId)) {
 			return null
@@ -56,5 +56,3 @@ class UsersRepository {
 		)
 	}
 }
-
-export const usersRepository = new UsersRepository()

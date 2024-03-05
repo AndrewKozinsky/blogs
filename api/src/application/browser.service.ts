@@ -1,7 +1,7 @@
 import { Request } from 'express'
 import useragent from 'express-useragent'
 
-class BrowserService {
+export class BrowserService {
 	// Returns client's device IP
 	getClientIP(req: Request): string {
 		return req.header('x-forwarded-for') || req.socket.remoteAddress || 'unknown'
@@ -15,5 +15,3 @@ class BrowserService {
 		return browserInfo.browser + ' ' + browserInfo.version
 	}
 }
-
-export const browserService = new BrowserService()

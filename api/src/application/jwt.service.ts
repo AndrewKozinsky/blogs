@@ -5,7 +5,7 @@ import { DBTypes } from '../db/dbTypes'
 import { settings } from '../settings'
 import { createUniqString } from '../utils/stringUtils'
 
-class JwtService {
+export class JwtService {
 	createAccessTokenStr(userId: string) {
 		return jwt.sign({ userId }, settings.JWT_SECRET, {
 			expiresIn: config.accessToken.lifeDurationInMs / 1000 + 's',
@@ -82,5 +82,3 @@ class JwtService {
 		}
 	}
 }
-
-export const jwtService = new JwtService()

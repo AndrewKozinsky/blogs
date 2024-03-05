@@ -9,7 +9,7 @@ import {
 	UserOutModel,
 } from '../models/output/users.output.model'
 
-class UsersQueryRepository {
+export class UsersQueryRepository {
 	async getUsers(queries: GetUsersQueries): Promise<GetUsersOutModel> {
 		const filter: FilterQuery<DBTypes.User> = {
 			$or: [
@@ -63,5 +63,3 @@ class UsersQueryRepository {
 		}
 	}
 }
-
-export const usersQueryRepository = new UsersQueryRepository()

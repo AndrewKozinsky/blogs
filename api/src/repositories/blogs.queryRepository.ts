@@ -10,9 +10,15 @@ import {
 	GetBlogsOutModel,
 } from '../models/output/blogs.output.model'
 import { PostOutModel } from '../models/output/posts.output.model'
-import { postsQueryRepository } from './posts.queryRepository'
+import { PostsQueryRepository } from './posts.queryRepository'
 
-class BlogsQueryRepository {
+export class BlogsQueryRepository {
+	postsQueryRepository: PostsQueryRepository
+
+	constructor() {
+		this.postsQueryRepository = new PostsQueryRepository()
+	}
+
 	async getBlogs(query: GetBlogsQueries): Promise<GetBlogsOutModel> {
 		const filter: FilterQuery<DBTypes.Blog> = {}
 
@@ -74,7 +80,7 @@ class BlogsQueryRepository {
 			page: pageNumber,
 			pageSize,
 			totalCount: totalBlogPostsCount,
-			items: getBlogPostsRes.map(postsQueryRepository.mapDbPostToOutputPost),
+			items: getBlogPostsRes.map(this.postsQueryRepository.mapDbPostToOutputPost),
 		}
 	}
 
@@ -99,4 +105,3 @@ class BlogsQueryRepository {
 		}
 	}
 }
-export const blogsQueryRepository = new BlogsQueryRepository()

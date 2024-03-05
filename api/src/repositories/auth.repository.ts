@@ -1,7 +1,7 @@
 import { addMilliseconds } from 'date-fns'
 import { ObjectId, WithId } from 'mongodb'
 import { hashService } from '../adapters/hash.adapter'
-import { jwtService } from '../application/jwt.service'
+import { JwtService } from '../application/jwt.service'
 import { config } from '../config/config'
 import { DeviceTokenModel, UserModel } from '../db/dbMongoose'
 import { DBTypes } from '../db/dbTypes'
@@ -11,9 +11,15 @@ import { commonService } from '../services/common'
 import { LayerResult, LayerResultCode } from '../types/resultCodes'
 import { createUniqString } from '../utils/stringUtils'
 
-class AuthRepository {
+export class AuthRepository {
+	jwtService: JwtService
+
+	constructor() {
+		this.jwtService = new JwtService()
+	}
+
 	async getUserByRefreshToken(refreshTokenStr: string) {
-		const refreshTokenData = jwtService.getRefreshTokenDataFromTokenStr(refreshTokenStr)
+		const refreshTokenData = this.jwtService.getRefreshTokenDataFromTokenStr(refreshTokenStr)
 
 		const getDeviceRes = await DeviceTokenModel.findOne({
 			deviceId: refreshTokenData!.deviceId,
@@ -178,7 +184,7 @@ class AuthRepository {
 	}
 
 	async getDeviceRefreshTokenByTokenStr(tokenStr: string): Promise<null | DBTypes.DeviceToken> {
-		const refreshToken = jwtService.getRefreshTokenDataFromTokenStr(tokenStr)
+		const refreshToken = this.jwtService.getRefreshTokenDataFromTokenStr(tokenStr)
 
 		return this.getDeviceRefreshTokenByDeviceId(refreshToken!.deviceId)
 	}
@@ -228,4 +234,3 @@ class AuthRepository {
 		}
 	}
 }
-export const authRepository = new AuthRepository()

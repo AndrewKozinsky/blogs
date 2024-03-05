@@ -1,11 +1,11 @@
 // @ts-ignore
 import request from 'supertest'
 import { app } from '../../src/app'
-import { jwtService } from '../../src/application/jwt.service'
+import { JwtService } from '../../src/application/jwt.service'
 import { HTTP_STATUSES, config } from '../../src/config/config'
 import RouteNames from '../../src/config/routeNames'
 import { DBTypes } from '../../src/db/dbTypes'
-import { authRepository } from '../../src/repositories/auth.repository'
+import { AuthRepository } from '../../src/repositories/auth.repository'
 import { createUniqString, parseCookieStringToObj } from '../../src/utils/stringUtils'
 import { resetDbEveryTest } from './utils/common'
 import {
@@ -19,6 +19,9 @@ import {
 } from './utils/utils'
 import * as jwt from 'jsonwebtoken'
 
+const authRepository = new AuthRepository()
+const jwtService = new JwtService()
+
 resetDbEveryTest()
 
 it.skip('123', () => {
@@ -29,7 +32,6 @@ describe('Getting all user devices', () => {
 	it.skip('should forbid a request if there is not refresh token', async () => {
 		await request(app).get(RouteNames.securityDevices).expect(HTTP_STATUSES.UNAUTHORIZED_401)
 	})
-
 	it.skip('should return an array of devices data if a refreshToken inside cookie is valid', async () => {
 		const login = 'login'
 		const password = 'password'

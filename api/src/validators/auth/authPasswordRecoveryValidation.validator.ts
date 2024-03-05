@@ -1,6 +1,5 @@
 import { body } from 'express-validator'
 import { inputValidation } from '../../middlewares/input.validation'
-import { authRepository } from '../../repositories/auth.repository'
 
 export const emailValidation = body('email')
 	.isString()

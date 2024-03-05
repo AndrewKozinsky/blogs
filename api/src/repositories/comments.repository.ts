@@ -6,7 +6,7 @@ import { CreatePostCommentDtoModel } from '../models/input/posts.input.model'
 import { CommentServiceModel } from '../models/service/comments.service.model'
 import { UserServiceModel } from '../models/service/users.service.model'
 
-class CommentsRepository {
+export class CommentsRepository {
 	async getComment(commentId: string) {
 		if (!ObjectId.isValid(commentId)) {
 			return null
@@ -74,4 +74,3 @@ class CommentsRepository {
 		}
 	}
 }
-export const commentsRepository = new CommentsRepository()

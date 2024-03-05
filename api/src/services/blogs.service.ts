@@ -5,10 +5,18 @@ import {
 } from '../models/input/blogs.input.model'
 import { CreatePostDtoModel } from '../models/input/posts.input.model'
 import { CreateBlogOutModel } from '../models/output/blogs.output.model'
-import { blogsRepository } from '../repositories/blogs.repository'
-import { postsService } from './posts.service'
+import { BlogsRepository } from '../repositories/blogs.repository'
+import { PostsService } from './posts.service'
 
-class BlogsService {
+export class BlogsService {
+	postsService: PostsService
+	blogsRepository: BlogsRepository
+
+	constructor() {
+		this.postsService = new PostsService()
+		this.blogsRepository = new BlogsRepository()
+	}
+
 	async createBlog(dto: CreateBlogDtoModel) {
 		const newBlog: CreateBlogOutModel = {
 			id: new Date().toISOString(),
@@ -19,20 +27,18 @@ class BlogsService {
 			isMembership: false,
 		}
 
-		return await blogsRepository.createBlog(newBlog)
+		return await this.blogsRepository.createBlog(newBlog)
 	}
 	async createBlogPost(blogId: string, postDto: CreateBlogPostDtoModel) {
 		const newPostDto: CreatePostDtoModel = { blogId, ...postDto }
-		return postsService.createPost(newPostDto)
+		return this.postsService.createPost(newPostDto)
 	}
 
 	async updateBlog(blogId: string, updateBlogDto: UpdateBlogDtoModel) {
-		return blogsRepository.updateBlog(blogId, updateBlogDto)
+		return this.blogsRepository.updateBlog(blogId, updateBlogDto)
 	}
 
 	async deleteBlog(blogId: string): Promise<boolean> {
-		return blogsRepository.deleteBlog(blogId)
+		return this.blogsRepository.deleteBlog(blogId)
 	}
 }
-
-export const blogsService = new BlogsService()

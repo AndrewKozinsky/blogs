@@ -22,7 +22,7 @@ function getTestRouter() {
 	const router = express.Router()
 	const testRouter = new TestRouter()
 
-	router.delete('/all-data', testRouter.deleteAllData)
+	router.delete('/all-data', testRouter.deleteAllData.bind(testRouter))
 
 	return router
 }

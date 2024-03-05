@@ -1,33 +1,44 @@
 import express, { Request, Response } from 'express'
-import { requestService } from '../application/request.service'
+import { RequestService } from '../application/request.service'
 import { HTTP_STATUSES } from '../config/config'
 import { checkDeviceRefreshTokenMiddleware } from '../middlewares/checkDeviceRefreshTokenMiddleware'
 import { ReqWithParams } from '../models/common'
-import { securityQueryRepository } from '../repositories/security.queryRepository'
-import { securityService } from '../services/security.service'
+import { SecurityQueryRepository } from '../repositories/security.queryRepository'
+import { SecurityService } from '../services/security.service'
 import { LayerResultCode } from '../types/resultCodes'
 
 class SecurityRouter {
+	securityQueryRepository: SecurityQueryRepository
+	securityService: SecurityService
+	requestService: RequestService
+
+	constructor() {
+		this.securityQueryRepository = new SecurityQueryRepository()
+		this.securityService = new SecurityService()
+		this.requestService = new RequestService()
+	}
+
 	// Returns all devices with active sessions for current user
 	async getUserDevices(req: Request, res: Response) {
-		const refreshTokenFromCookie = requestService.getDeviceRefreshStrTokenFromReq(req)
+		const refreshTokenFromCookie = this.requestService.getDeviceRefreshStrTokenFromReq(req)
 
-		const userDevices = await securityQueryRepository.getUserDevices(refreshTokenFromCookie)
+		const userDevices =
+			await this.securityQueryRepository.getUserDevices(refreshTokenFromCookie)
 		res.status(HTTP_STATUSES.OK_200).send(userDevices)
 	}
 
 	// Terminate all other (exclude current) device's sessions
 	async terminateUserDevicesExceptOne(req: Request, res: Response) {
-		const refreshTokenFromCookie = requestService.getDeviceRefreshStrTokenFromReq(req)
-		await securityService.terminateAllDeviceRefreshTokensApartThis(refreshTokenFromCookie)
+		const refreshTokenFromCookie = this.requestService.getDeviceRefreshStrTokenFromReq(req)
+		await this.securityService.terminateAllDeviceRefreshTokensApartThis(refreshTokenFromCookie)
 
 		res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
 	}
 
 	// Terminate specified device session
 	async terminateUserDevice(req: ReqWithParams<{ deviceId: string }>, res: Response) {
-		const refreshTokenFromCookie = requestService.getDeviceRefreshStrTokenFromReq(req)
-		const terminateDeviceRes = await securityService.terminateSpecifiedDeviceRefreshToken(
+		const refreshTokenFromCookie = this.requestService.getDeviceRefreshStrTokenFromReq(req)
+		const terminateDeviceRes = await this.securityService.terminateSpecifiedDeviceRefreshToken(
 			refreshTokenFromCookie,
 			req.params.deviceId,
 		)
@@ -51,20 +62,24 @@ function getSecurityRouter() {
 	const securityRouter = new SecurityRouter()
 
 	// Returns all devices with active sessions for current user
-	router.get('/devices', checkDeviceRefreshTokenMiddleware, securityRouter.getUserDevices)
+	router.get(
+		'/devices',
+		checkDeviceRefreshTokenMiddleware,
+		securityRouter.getUserDevices.bind(securityRouter),
+	)
 
 	// Terminate all other (exclude current) device's sessions
 	router.delete(
 		'/devices',
 		checkDeviceRefreshTokenMiddleware,
-		securityRouter.terminateUserDevicesExceptOne,
+		securityRouter.terminateUserDevicesExceptOne.bind(securityRouter),
 	)
 
 	// Terminate specified device session
 	router.delete(
 		'/devices/:deviceId',
 		checkDeviceRefreshTokenMiddleware,
-		securityRouter.terminateUserDevice,
+		securityRouter.terminateUserDevice.bind(securityRouter),
 	)
 
 	return router

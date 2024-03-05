@@ -1,9 +1,8 @@
 import express, { Response } from 'express'
 import { HTTP_STATUSES } from '../config/config'
 import { adminAuthMiddleware } from '../middlewares/adminAuth.middleware'
-import requestsLimiter from '../middlewares/requestsLimitter'
-import { commentsQueryRepository } from '../repositories/comments.queryRepository'
-import { postsService } from '../services/posts.service'
+import { CommentsQueryRepository } from '../repositories/comments.queryRepository'
+import { PostsService } from '../services/posts.service'
 import { checkAccessTokenMiddleware } from '../middlewares/checkAccessTokenMiddleware'
 import {
 	ReqWithBody,
@@ -19,24 +18,34 @@ import {
 	GetPostsQueries,
 	UpdatePostDtoModel,
 } from '../models/input/posts.input.model'
-import { postsQueryRepository } from '../repositories/posts.queryRepository'
+import { PostsQueryRepository } from '../repositories/posts.queryRepository'
 import { createPostCommentValidation } from '../validators/posts/createPostComment.validator'
 import { getPostCommentsValidation } from '../validators/posts/getPostComments.validator'
 import { getPostsValidation } from '../validators/posts/getPosts.validator'
 import { postValidation } from '../validators/posts/post.validator'
 
 class PostsRouter {
+	postsQueryRepository: PostsQueryRepository
+	postsService: PostsService
+	commentsQueryRepository: CommentsQueryRepository
+
+	constructor() {
+		this.postsQueryRepository = new PostsQueryRepository()
+		this.postsService = new PostsService()
+		this.commentsQueryRepository = new CommentsQueryRepository()
+	}
+
 	// Returns all posts
 	async getPosts(req: ReqWithQuery<GetPostsQueries>, res: Response) {
-		const posts = await postsQueryRepository.getPosts(req.query)
+		const posts = await this.postsQueryRepository.getPosts(req.query)
 
 		res.status(HTTP_STATUSES.OK_200).send(posts)
 	}
 
 	async createNewPost(req: ReqWithBody<CreatePostDtoModel>, res: Response) {
-		const createPostId = await postsService.createPost(req.body)
+		const createPostId = await this.postsService.createPost(req.body)
 
-		const getPostRes = await postsQueryRepository.getPost(createPostId)
+		const getPostRes = await this.postsQueryRepository.getPost(createPostId)
 
 		res.status(HTTP_STATUSES.CREATED_201).send(getPostRes)
 	}
@@ -45,7 +54,7 @@ class PostsRouter {
 	async getPost(req: ReqWithParams<{ postId: string }>, res: Response) {
 		const postId = req.params.postId
 
-		const post = await postsQueryRepository.getPost(postId)
+		const post = await this.postsQueryRepository.getPost(postId)
 
 		if (!post) {
 			res.sendStatus(HTTP_STATUSES.NOT_FOUNT_404)
@@ -62,7 +71,7 @@ class PostsRouter {
 	) {
 		const postId = req.params.postId
 
-		const isPostUpdated = await postsService.updatePost(postId, req.body)
+		const isPostUpdated = await this.postsService.updatePost(postId, req.body)
 
 		if (!isPostUpdated) {
 			res.sendStatus(HTTP_STATUSES.NOT_FOUNT_404)
@@ -76,7 +85,7 @@ class PostsRouter {
 	async deletePost(req: ReqWithParams<{ postId: string }>, res: Response) {
 		const postId = req.params.postId
 
-		const isPostDeleted = await postsService.deletePost(postId)
+		const isPostDeleted = await this.postsService.deletePost(postId)
 
 		if (!isPostDeleted) {
 			res.sendStatus(HTTP_STATUSES.NOT_FOUNT_404)
@@ -92,7 +101,7 @@ class PostsRouter {
 		res: Response,
 	) {
 		const postId = req.params.postId
-		const postComments = await commentsQueryRepository.getPostComments(postId, req.query)
+		const postComments = await this.commentsQueryRepository.getPostComments(postId, req.query)
 
 		if (postComments.status === 'postNotValid' || postComments.status === 'postNotFound') {
 			res.sendStatus(HTTP_STATUSES.NOT_FOUNT_404)
@@ -109,14 +118,18 @@ class PostsRouter {
 	) {
 		const postId = req.params.postId
 
-		const createdCommentId = await postsService.createPostComment(postId, req.body, req.user!)
+		const createdCommentId = await this.postsService.createPostComment(
+			postId,
+			req.body,
+			req.user!,
+		)
 
 		if (createdCommentId === 'postNotExist') {
 			res.sendStatus(HTTP_STATUSES.NOT_FOUNT_404)
 			return
 		}
 
-		const getCommentRes = await commentsQueryRepository.getComment(createdCommentId)
+		const getCommentRes = await this.commentsQueryRepository.getComment(createdCommentId)
 
 		res.status(HTTP_STATUSES.CREATED_201).send(getCommentRes)
 	}
@@ -127,29 +140,43 @@ function getPostsRouter() {
 	const postsRouter = new PostsRouter()
 
 	// Returns all posts
-	router.get('/', getPostsValidation(), postsRouter.getPosts)
+	router.get('/', getPostsValidation(), postsRouter.getPosts.bind(postsRouter))
 
 	// Create new post
-	router.post('/', adminAuthMiddleware, postValidation(), postsRouter.createNewPost)
+	router.post(
+		'/',
+		adminAuthMiddleware,
+		postValidation(),
+		postsRouter.createNewPost.bind(postsRouter),
+	)
 
 	// Return post by id
-	router.get('/:postId', postsRouter.getPost)
+	router.get('/:postId', postsRouter.getPost.bind(postsRouter))
 
 	// Update existing post by id with InputModel
-	router.put('/:postId', adminAuthMiddleware, postValidation(), postsRouter.updatePost)
+	router.put(
+		'/:postId',
+		adminAuthMiddleware,
+		postValidation(),
+		postsRouter.updatePost.bind(postsRouter),
+	)
 
 	// Delete post specified by id
-	router.delete('/:postId', adminAuthMiddleware, postsRouter.deletePost)
+	router.delete('/:postId', adminAuthMiddleware, postsRouter.deletePost.bind(postsRouter))
 
 	// Returns comments for specified post
-	router.get('/:postId/comments', getPostCommentsValidation(), postsRouter.getPostComments)
+	router.get(
+		'/:postId/comments',
+		getPostCommentsValidation(),
+		postsRouter.getPostComments.bind(postsRouter),
+	)
 
 	// Create new comment
 	router.post(
 		'/:postId/comments',
 		checkAccessTokenMiddleware,
 		createPostCommentValidation(),
-		postsRouter.createComment,
+		postsRouter.createComment.bind(postsRouter),
 	)
 
 	return router

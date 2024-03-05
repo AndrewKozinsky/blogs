@@ -1,6 +1,6 @@
 import { DeviceTokenModel } from '../db/dbMongoose'
 
-class SecurityRepository {
+export class SecurityRepository {
 	async terminateAllDeviceRefreshTokensApartThis(currentDeviceId: string) {
 		const result = await DeviceTokenModel.deleteMany({ deviceId: { $ne: currentDeviceId } })
 
@@ -13,4 +13,3 @@ class SecurityRepository {
 		return result.deletedCount === 1
 	}
 }
-export const securityRepository = new SecurityRepository()

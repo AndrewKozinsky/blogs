@@ -1,21 +1,25 @@
 import { CreateUserDtoModel } from '../models/input/users.input.model'
-import { usersRepository } from '../repositories/users.repository'
+import { UsersRepository } from '../repositories/users.repository'
 import { commonService } from './common'
 
-class UsersService {
+export class UsersService {
+	usersRepository: UsersRepository
+
+	constructor() {
+		this.usersRepository = new UsersRepository()
+	}
+
 	async getUser(userId: string) {
-		return usersRepository.getUserById(userId)
+		return this.usersRepository.getUserById(userId)
 	}
 
 	async createUserByAdmin(dto: CreateUserDtoModel) {
 		const newUserDto = await commonService.getCreateUserDto(dto, true)
 
-		return usersRepository.createUser(newUserDto)
+		return this.usersRepository.createUser(newUserDto)
 	}
 
 	async deleteUser(userId: string): Promise<boolean> {
-		return usersRepository.deleteUser(userId)
+		return this.usersRepository.deleteUser(userId)
 	}
 }
-
-export const usersService = new UsersService()

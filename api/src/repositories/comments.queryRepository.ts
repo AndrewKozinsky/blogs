@@ -22,7 +22,7 @@ type GetPostCommentsResult =
 			}
 	  }
 
-class CommentsQueryRepository {
+export class CommentsQueryRepository {
 	async getComment(commentId: string): Promise<null | GetCommentOutModel> {
 		if (!ObjectId.isValid(commentId)) {
 			return null
@@ -90,4 +90,3 @@ class CommentsQueryRepository {
 		}
 	}
 }
-export const commentsQueryRepository = new CommentsQueryRepository()

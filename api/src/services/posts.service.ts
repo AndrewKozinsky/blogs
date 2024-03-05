@@ -6,13 +6,23 @@ import {
 } from '../models/input/posts.input.model'
 import { PostOutModel } from '../models/output/posts.output.model'
 import { UserServiceModel } from '../models/service/users.service.model'
-import { blogsRepository } from '../repositories/blogs.repository'
-import { commentsRepository } from '../repositories/comments.repository'
-import { postsRepository } from '../repositories/posts.repository'
+import { BlogsRepository } from '../repositories/blogs.repository'
+import { CommentsRepository } from '../repositories/comments.repository'
+import { PostsRepository } from '../repositories/posts.repository'
 
-class PostsService {
+export class PostsService {
+	blogsRepository: BlogsRepository
+	commentsRepository: CommentsRepository
+	postsRepository: PostsRepository
+
+	constructor() {
+		this.blogsRepository = new BlogsRepository()
+		this.commentsRepository = new CommentsRepository()
+		this.postsRepository = new PostsRepository()
+	}
+
 	async createPost(dto: CreatePostDtoModel): Promise<string> {
-		const blog = await blogsRepository.getBlogById(dto.blogId)
+		const blog = await this.blogsRepository.getBlogById(dto.blogId)
 
 		const newPostDto: PostOutModel = {
 			id: new Date().toISOString(),
@@ -24,13 +34,13 @@ class PostsService {
 			createdAt: new Date().toISOString(),
 		}
 
-		return await postsRepository.createPost(newPostDto)
+		return await this.postsRepository.createPost(newPostDto)
 	}
 	async updatePost(postId: string, updatePostDto: UpdatePostDtoModel) {
-		return postsRepository.updatePost(postId, updatePostDto)
+		return this.postsRepository.updatePost(postId, updatePostDto)
 	}
 	async deletePost(postId: string): Promise<boolean> {
-		return postsRepository.deletePost(postId)
+		return this.postsRepository.deletePost(postId)
 	}
 	async createPostComment(
 		postId: string,
@@ -41,11 +51,9 @@ class PostsService {
 			return 'postNotExist'
 		}
 
-		const post = await postsRepository.getPostById(postId)
+		const post = await this.postsRepository.getPostById(postId)
 		if (!post) return 'postNotExist'
 
-		return await commentsRepository.createPostComment(user, postId, commentDto)
+		return await this.commentsRepository.createPostComment(user, postId, commentDto)
 	}
 }
-
-export const postsService = new PostsService()

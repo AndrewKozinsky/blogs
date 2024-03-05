@@ -1,8 +1,12 @@
 import { Request, Response, NextFunction } from 'express'
-import { jwtService } from '../application/jwt.service'
-import { requestService } from '../application/request.service'
+import { JwtService } from '../application/jwt.service'
+import { RequestService } from '../application/request.service'
 import { HTTP_STATUSES } from '../config/config'
-import { authRepository } from '../repositories/auth.repository'
+import { AuthRepository } from '../repositories/auth.repository'
+
+const authRepository = new AuthRepository()
+const requestService = new RequestService()
+const jwtService = new JwtService()
 
 export async function checkDeviceRefreshTokenMiddleware(
 	req: Request,

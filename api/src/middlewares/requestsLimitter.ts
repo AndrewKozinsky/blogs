@@ -1,10 +1,11 @@
 import { addMilliseconds } from 'date-fns'
 import { NextFunction, Request, Response } from 'express'
-import { browserService } from '../application/browser.service'
+import { BrowserService } from '../application/browser.service'
 import { config, HTTP_STATUSES } from '../config/config'
 import { RateLimitModel } from '../db/dbMongoose'
-import DbNames from '../db/dbNames'
 import { DBTypes } from '../db/dbTypes'
+
+const browserService = new BrowserService()
 
 async function requestsLimiter(req: Request, res: Response, next: NextFunction) {
 	const ip = browserService.getClientIP(req)

@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express'
-import { requestService } from '../application/request.service'
+import { RequestService } from '../application/request.service'
 import { config, HTTP_STATUSES } from '../config/config'
 import { checkAccessTokenMiddleware } from '../middlewares/checkAccessTokenMiddleware'
 import { checkDeviceRefreshTokenMiddleware } from '../middlewares/checkDeviceRefreshTokenMiddleware'
@@ -11,8 +11,8 @@ import { AuthRegistrationConfirmationDtoModel } from '../models/input/authRegist
 import { AuthRegistrationEmailResendingDtoModel } from '../models/input/authRegistrationEmailResending.input.model'
 import { AuthNewPasswordDtoModel } from '../models/input/newPassword.input.model'
 import { AuthPasswordRecoveryDtoModel } from '../models/input/passwordRecovery.input.model'
-import { authService } from '../services/auth.service'
-import { jwtService } from '../application/jwt.service'
+import { AuthService } from '../services/auth.service'
+import { JwtService } from '../application/jwt.service'
 import { LayerResultCode } from '../types/resultCodes'
 import { authLoginValidation } from '../validators/auth/authLogin.validator'
 import { authNewPasswordValidation } from '../validators/auth/authNewPassword.validator'
@@ -22,8 +22,18 @@ import { authRegistrationConfirmationValidation } from '../validators/auth/authR
 import { authRegistrationEmailResending } from '../validators/auth/authRegistrationEmailResending.validator'
 
 class AuthRouter {
+	authService: AuthService
+	requestService: RequestService
+	jwtService: JwtService
+
+	constructor() {
+		this.authService = new AuthService()
+		this.requestService = new RequestService()
+		this.jwtService = new JwtService()
+	}
+
 	async login(req: ReqWithBody<AuthLoginDtoModel>, res: Response) {
-		const loginServiceRes = await authService.login(req)
+		const loginServiceRes = await this.authService.login(req)
 
 		if (loginServiceRes.code === LayerResultCode.Unauthorized || !loginServiceRes.data) {
 			res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401)
@@ -37,12 +47,12 @@ class AuthRouter {
 		})
 
 		res.status(HTTP_STATUSES.OK_200).send({
-			accessToken: jwtService.createAccessTokenStr(loginServiceRes.data.user.id),
+			accessToken: this.jwtService.createAccessTokenStr(loginServiceRes.data.user.id),
 		})
 	}
 
 	async refreshToken(req: Request, res: Response) {
-		const generateTokensRes = await authService.refreshToken(req)
+		const generateTokensRes = await this.authService.refreshToken(req)
 
 		if (generateTokensRes.code === LayerResultCode.Unauthorized) {
 			res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401)
@@ -63,7 +73,7 @@ class AuthRouter {
 	}
 
 	async registration(req: ReqWithBody<AuthRegistrationDtoModel>, res: Response) {
-		const regStatus = await authService.registration(req.body)
+		const regStatus = await this.authService.registration(req.body)
 
 		if (regStatus.code === LayerResultCode.BadRequest) {
 			res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400)
@@ -77,7 +87,7 @@ class AuthRouter {
 		req: ReqWithBody<AuthRegistrationEmailResendingDtoModel>,
 		res: Response,
 	) {
-		const resendingStatus = await authService.resendEmailConfirmationCode(req.body)
+		const resendingStatus = await this.authService.resendEmailConfirmationCode(req.body)
 
 		if (resendingStatus.code === LayerResultCode.BadRequest) {
 			res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400)
@@ -91,7 +101,7 @@ class AuthRouter {
 		req: ReqWithBody<AuthRegistrationConfirmationDtoModel>,
 		res: Response,
 	) {
-		const confirmationStatus = await authService.confirmEmail(req.body.code)
+		const confirmationStatus = await this.authService.confirmEmail(req.body.code)
 
 		if (confirmationStatus.status === 'fail') {
 			res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400)
@@ -102,13 +112,13 @@ class AuthRouter {
 	}
 
 	async getInformationAboutCurrentUser(req: Request, res: Response) {
-		const user = authService.getCurrentUser(req.user!)
+		const user = this.authService.getCurrentUser(req.user!)
 		res.status(HTTP_STATUSES.OK_200).send(user)
 	}
 
 	async logout(req: Request, res: Response) {
-		const refreshTokenFromCookie = requestService.getDeviceRefreshStrTokenFromReq(req)
-		const logoutServiceRes = await authService.logout(refreshTokenFromCookie)
+		const refreshTokenFromCookie = this.requestService.getDeviceRefreshStrTokenFromReq(req)
+		const logoutServiceRes = await this.authService.logout(refreshTokenFromCookie)
 
 		if (logoutServiceRes.code === LayerResultCode.Unauthorized) {
 			res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401)
@@ -120,7 +130,7 @@ class AuthRouter {
 	}
 
 	async passwordRecovery(req: ReqWithBody<AuthPasswordRecoveryDtoModel>, res: Response) {
-		const passwordRecoveryServiceRes = await authService.passwordRecovery(req.body.email)
+		const passwordRecoveryServiceRes = await this.authService.passwordRecovery(req.body.email)
 
 		if (passwordRecoveryServiceRes.code !== LayerResultCode.Success) {
 			res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400)
@@ -132,7 +142,7 @@ class AuthRouter {
 	}
 
 	async newPassword(req: ReqWithBody<AuthNewPasswordDtoModel>, res: Response) {
-		const passwordRecoveryServiceRes = await authService.newPassword(
+		const passwordRecoveryServiceRes = await this.authService.newPassword(
 			req.body.recoveryCode,
 			req.body.newPassword,
 		)
@@ -152,10 +162,14 @@ function getAuthRouter() {
 	const authRouter = new AuthRouter()
 
 	// User login
-	router.post('/login', requestsLimiter, authLoginValidation(), authRouter.login)
+	router.post('/login', requestsLimiter, authLoginValidation(), authRouter.login.bind(authRouter))
 
 	// Generate the new pair of access and refresh tokens (in cookie client must send correct refreshToken that will be revoked after refreshing)
-	router.post('/refresh-token', checkDeviceRefreshTokenMiddleware, authRouter.refreshToken)
+	router.post(
+		'/refresh-token',
+		checkDeviceRefreshTokenMiddleware,
+		authRouter.refreshToken.bind(authRouter),
+	)
 
 	// Registration in the system.
 	// Email with confirmation code will be sent to passed email address.
@@ -163,7 +177,7 @@ function getAuthRouter() {
 		'/registration',
 		requestsLimiter,
 		authRegistrationValidation(),
-		authRouter.registration,
+		authRouter.registration.bind(authRouter),
 	)
 
 	// Registration email resending.
@@ -171,7 +185,7 @@ function getAuthRouter() {
 		'/registration-email-resending',
 		requestsLimiter,
 		authRegistrationEmailResending(),
-		authRouter.registrationEmailResending,
+		authRouter.registrationEmailResending.bind(authRouter),
 	)
 
 	// Confirm registration
@@ -179,21 +193,25 @@ function getAuthRouter() {
 		'/registration-confirmation',
 		requestsLimiter,
 		authRegistrationConfirmationValidation(),
-		authRouter.registrationConfirmation,
+		authRouter.registrationConfirmation.bind(authRouter),
 	)
 
 	// Get information about current user
-	router.get('/me', checkAccessTokenMiddleware, authRouter.getInformationAboutCurrentUser)
+	router.get(
+		'/me',
+		checkAccessTokenMiddleware,
+		authRouter.getInformationAboutCurrentUser.bind(authRouter),
+	)
 
 	// In cookie client must send correct refreshToken that will be revoked
-	router.post('/logout', checkDeviceRefreshTokenMiddleware, authRouter.logout)
+	router.post('/logout', checkDeviceRefreshTokenMiddleware, authRouter.logout.bind(authRouter))
 
 	// Password recovery via Email confirmation. Email should be sent with RecoveryCode inside
 	router.post(
 		'/password-recovery',
 		requestsLimiter,
 		authPasswordRecoveryValidation(),
-		authRouter.passwordRecovery,
+		authRouter.passwordRecovery.bind(authRouter),
 	)
 
 	// Confirm Password recovery
@@ -201,7 +219,7 @@ function getAuthRouter() {
 		'/new-password',
 		requestsLimiter,
 		authNewPasswordValidation(),
-		authRouter.newPassword,
+		authRouter.newPassword.bind(authRouter),
 	)
 
 	return router

@@ -1,17 +1,25 @@
 import express, { Response } from 'express'
 import { HTTP_STATUSES } from '../config/config'
 import { UpdateCommentDtoModel } from '../models/input/comments.input.model'
-import { commentsQueryRepository } from '../repositories/comments.queryRepository'
-import { commentsService } from '../services/comments.service'
+import { CommentsQueryRepository } from '../repositories/comments.queryRepository'
+import { CommentsService } from '../services/comments.service'
 import { checkAccessTokenMiddleware } from '../middlewares/checkAccessTokenMiddleware'
 import { ReqWithParams, ReqWithParamsAndBody } from '../models/common'
 import { updateCommentValidation } from '../validators/comments/updateComment.validator'
 
 class CommentsRouter {
+	commentsService: CommentsService
+	commentsQueryRepository: CommentsQueryRepository
+
+	constructor() {
+		this.commentsQueryRepository = new CommentsQueryRepository()
+		this.commentsService = new CommentsService()
+	}
+
 	async getComment(req: ReqWithParams<{ commentId: string }>, res: Response) {
 		const { commentId } = req.params
 
-		const comment = await commentsQueryRepository.getComment(commentId)
+		const comment = await this.commentsQueryRepository.getComment(commentId)
 
 		if (!comment) {
 			res.sendStatus(HTTP_STATUSES.NOT_FOUNT_404)
@@ -27,7 +35,7 @@ class CommentsRouter {
 	) {
 		const commentId = req.params.commentId
 
-		const updateCommentStatus = await commentsService.updateComment(
+		const updateCommentStatus = await this.commentsService.updateComment(
 			req.user!,
 			commentId,
 			req.body,
@@ -49,7 +57,7 @@ class CommentsRouter {
 	async deleteComment(req: ReqWithParams<{ commentId: string }>, res: Response) {
 		const commentId = req.params.commentId
 
-		const deleteCommentStatus = await commentsService.deleteComment(req.user!, commentId)
+		const deleteCommentStatus = await this.commentsService.deleteComment(req.user!, commentId)
 
 		if (deleteCommentStatus === 'notOwner') {
 			res.sendStatus(HTTP_STATUSES.FORBIDDEN_403)
@@ -70,18 +78,22 @@ function getCommentsRouter() {
 	const commentsRouter = new CommentsRouter()
 
 	// Return comment by id
-	router.get('/:commentId', commentsRouter.getComment)
+	router.get('/:commentId', commentsRouter.getComment.bind(commentsRouter))
 
 	// Update existing comment by id with InputModel
 	router.put(
 		'/:commentId',
 		checkAccessTokenMiddleware,
 		updateCommentValidation(),
-		commentsRouter.updateComment,
+		commentsRouter.updateComment.bind(commentsRouter),
 	)
 
 	// Delete comment specified by id
-	router.delete('/:commentId', checkAccessTokenMiddleware, commentsRouter.deleteComment)
+	router.delete(
+		'/:commentId',
+		checkAccessTokenMiddleware,
+		commentsRouter.deleteComment.bind(commentsRouter),
+	)
 
 	return router
 }
