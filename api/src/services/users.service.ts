@@ -3,11 +3,7 @@ import { UsersRepository } from '../repositories/users.repository'
 import { commonService } from './common'
 
 export class UsersService {
-	usersRepository: UsersRepository
-
-	constructor() {
-		this.usersRepository = new UsersRepository()
-	}
+	constructor(protected usersRepository: UsersRepository) {}
 
 	async getUser(userId: string) {
 		return this.usersRepository.getUserById(userId)

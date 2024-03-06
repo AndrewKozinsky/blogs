@@ -9,13 +9,10 @@ import { BlogsRepository } from '../repositories/blogs.repository'
 import { PostsService } from './posts.service'
 
 export class BlogsService {
-	postsService: PostsService
-	blogsRepository: BlogsRepository
-
-	constructor() {
-		this.postsService = new PostsService()
-		this.blogsRepository = new BlogsRepository()
-	}
+	constructor(
+		private postsService: PostsService,
+		private blogsRepository: BlogsRepository,
+	) {}
 
 	async createBlog(dto: CreateBlogDtoModel) {
 		const newBlog: CreateBlogOutModel = {

@@ -1,4 +1,5 @@
 import express, { Response } from 'express'
+import { usersRouter } from '../compositionRoot'
 import { HTTP_STATUSES } from '../config/config'
 import { adminAuthMiddleware } from '../middlewares/adminAuth.middleware'
 import { CreateUserDtoModel, GetUsersQueries } from '../models/input/users.input.model'
@@ -8,12 +9,10 @@ import { UsersService } from '../services/users.service'
 import { getUsersValidation } from '../validators/users/getUsers.validator'
 import { userValidation } from '../validators/users/user.validator'
 
-class UsersRouter {
-	usersService: UsersService
+export class UsersRouter {
 	usersQueryRepository: UsersQueryRepository
 
-	constructor() {
-		this.usersService = new UsersService()
+	constructor(protected usersService: UsersService) {
 		this.usersQueryRepository = new UsersQueryRepository()
 	}
 
@@ -48,7 +47,6 @@ class UsersRouter {
 
 function getUsersRouter() {
 	const router = express.Router()
-	const usersRouter = new UsersRouter()
 
 	// Returns all users
 	router.get(

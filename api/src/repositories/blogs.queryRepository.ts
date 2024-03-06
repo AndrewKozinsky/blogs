@@ -13,11 +13,7 @@ import { PostOutModel } from '../models/output/posts.output.model'
 import { PostsQueryRepository } from './posts.queryRepository'
 
 export class BlogsQueryRepository {
-	postsQueryRepository: PostsQueryRepository
-
-	constructor() {
-		this.postsQueryRepository = new PostsQueryRepository()
-	}
+	constructor(private postsQueryRepository: PostsQueryRepository) {}
 
 	async getBlogs(query: GetBlogsQueries): Promise<GetBlogsOutModel> {
 		const filter: FilterQuery<DBTypes.Blog> = {}

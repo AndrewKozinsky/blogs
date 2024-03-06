@@ -1,11 +1,10 @@
 // @ts-ignore
 import request from 'supertest'
 import { app } from '../../src/app'
-import { JwtService } from '../../src/application/jwt.service'
+import { authRepository, jwtService } from '../../src/compositionRoot'
 import { HTTP_STATUSES, config } from '../../src/config/config'
 import RouteNames from '../../src/config/routeNames'
 import { DBTypes } from '../../src/db/dbTypes'
-import { AuthRepository } from '../../src/repositories/auth.repository'
 import { createUniqString, parseCookieStringToObj } from '../../src/utils/stringUtils'
 import { resetDbEveryTest } from './utils/common'
 import {
@@ -18,9 +17,6 @@ import {
 	userPassword,
 } from './utils/utils'
 import * as jwt from 'jsonwebtoken'
-
-const authRepository = new AuthRepository()
-const jwtService = new JwtService()
 
 resetDbEveryTest()
 

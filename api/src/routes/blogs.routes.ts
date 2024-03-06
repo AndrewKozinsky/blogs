@@ -1,4 +1,5 @@
 import express, { Response } from 'express'
+import { blogsRouter } from '../compositionRoot'
 import { HTTP_STATUSES } from '../config/config'
 import { adminAuthMiddleware } from '../middlewares/adminAuth.middleware'
 import { BlogsRepository } from '../repositories/blogs.repository'
@@ -24,18 +25,14 @@ import { createBlogPostsValidation } from '../validators/blogs/createBlogPost.va
 import { getBlogPostsValidation } from '../validators/blogs/getBlogPosts.validator'
 import { getBlogsValidation } from '../validators/blogs/getBlogs.validator'
 
-class BlogsRouter {
-	blogsService: BlogsService
-	blogsRepository: BlogsRepository
-	blogsQueryRepository: BlogsQueryRepository
-	postsQueryRepository: PostsQueryRepository
+export class BlogsRouter {
+	constructor(
+		private blogsService: BlogsService,
+		private blogsRepository: BlogsRepository,
+		private blogsQueryRepository: BlogsQueryRepository,
+		private postsQueryRepository: PostsQueryRepository,
+	) {}
 
-	constructor() {
-		this.blogsService = new BlogsService()
-		this.blogsRepository = new BlogsRepository()
-		this.blogsQueryRepository = new BlogsQueryRepository()
-		this.postsQueryRepository = new PostsQueryRepository()
-	}
 	async getBlogs(req: ReqWithQuery<GetBlogsQueries>, res: Response) {
 		const blogs = await this.blogsQueryRepository.getBlogs(req.query)
 
@@ -135,7 +132,6 @@ class BlogsRouter {
 
 function getBlogsRouter() {
 	const router = express.Router()
-	const blogsRouter = new BlogsRouter()
 
 	// Returns blogs with paging
 	router.get('/', getBlogsValidation(), blogsRouter.getBlogs.bind(blogsRouter))

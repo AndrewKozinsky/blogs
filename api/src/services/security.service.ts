@@ -4,15 +4,11 @@ import { SecurityRepository } from '../repositories/security.repository'
 import { LayerResult, LayerResultCode } from '../types/resultCodes'
 
 export class SecurityService {
-	securityRepository: SecurityRepository
-	authRepository: AuthRepository
-	jwtService: JwtService
-
-	constructor() {
-		this.securityRepository = new SecurityRepository()
-		this.authRepository = new AuthRepository()
-		this.jwtService = new JwtService()
-	}
+	constructor(
+		private securityRepository: SecurityRepository,
+		private authRepository: AuthRepository,
+		private jwtService: JwtService,
+	) {}
 
 	async terminateAllDeviceRefreshTokensApartThis(refreshTokenStr: string) {
 		const refreshToken = this.jwtService.getRefreshTokenDataFromTokenStr(refreshTokenStr)

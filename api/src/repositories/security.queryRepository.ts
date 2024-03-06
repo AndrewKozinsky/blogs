@@ -5,11 +5,7 @@ import { GetUserDevicesOutModel, UserDeviceOutModel } from '../models/output/sec
 import { AuthRepository } from './auth.repository'
 
 export class SecurityQueryRepository {
-	authRepository: AuthRepository
-
-	constructor() {
-		this.authRepository = new AuthRepository()
-	}
+	constructor(private authRepository: AuthRepository) {}
 
 	async getUserDevices(refreshToken: string): Promise<GetUserDevicesOutModel> {
 		const user = await this.authRepository.getUserByRefreshToken(refreshToken)

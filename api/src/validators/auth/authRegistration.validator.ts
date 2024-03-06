@@ -1,8 +1,6 @@
 import { body } from 'express-validator'
+import { authRepository } from '../../compositionRoot'
 import { inputValidation } from '../../middlewares/input.validation'
-import { AuthRepository } from '../../repositories/auth.repository'
-
-const authRepository = new AuthRepository()
 
 export const loginValidation = body('login')
 	.isString()

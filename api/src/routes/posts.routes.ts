@@ -1,4 +1,5 @@
 import express, { Response } from 'express'
+import { postsRouter } from '../compositionRoot'
 import { HTTP_STATUSES } from '../config/config'
 import { adminAuthMiddleware } from '../middlewares/adminAuth.middleware'
 import { CommentsQueryRepository } from '../repositories/comments.queryRepository'
@@ -24,16 +25,12 @@ import { getPostCommentsValidation } from '../validators/posts/getPostComments.v
 import { getPostsValidation } from '../validators/posts/getPosts.validator'
 import { postValidation } from '../validators/posts/post.validator'
 
-class PostsRouter {
-	postsQueryRepository: PostsQueryRepository
-	postsService: PostsService
-	commentsQueryRepository: CommentsQueryRepository
-
-	constructor() {
-		this.postsQueryRepository = new PostsQueryRepository()
-		this.postsService = new PostsService()
-		this.commentsQueryRepository = new CommentsQueryRepository()
-	}
+export class PostsRouter {
+	constructor(
+		private postsQueryRepository: PostsQueryRepository,
+		private postsService: PostsService,
+		private commentsQueryRepository: CommentsQueryRepository,
+	) {}
 
 	// Returns all posts
 	async getPosts(req: ReqWithQuery<GetPostsQueries>, res: Response) {
@@ -137,7 +134,6 @@ class PostsRouter {
 
 function getPostsRouter() {
 	const router = express.Router()
-	const postsRouter = new PostsRouter()
 
 	// Returns all posts
 	router.get('/', getPostsValidation(), postsRouter.getPosts.bind(postsRouter))

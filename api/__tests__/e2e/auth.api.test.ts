@@ -2,11 +2,10 @@ import * as jwt from 'jsonwebtoken'
 // @ts-ignore
 import request from 'supertest'
 import { app } from '../../src/app'
+import { authRepository, usersRepository } from '../../src/compositionRoot'
 import { HTTP_STATUSES, config } from '../../src/config/config'
 import { DBTypes } from '../../src/db/dbTypes'
-import { AuthRepository } from '../../src/repositories/auth.repository'
 import RouteNames from '../../src/config/routeNames'
-import { UsersRepository } from '../../src/repositories/users.repository'
 import { settings } from '../../src/settings'
 import { wait } from '../../src/utils/promise'
 import { createUniqString, parseCookieStringToObj } from '../../src/utils/stringUtils'
@@ -20,12 +19,9 @@ import {
 
 resetDbEveryTest()
 
-/*it('123', async () => {
+it.skip('123', async () => {
 	expect(2).toBe(2)
-})*/
-
-const authRepository = new AuthRepository()
-const usersRepository = new UsersRepository()
+})
 
 describe('Login user', () => {
 	it.skip('should return 400 if to pass wrong dto', async () => {

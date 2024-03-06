@@ -11,15 +11,11 @@ import { CommentsRepository } from '../repositories/comments.repository'
 import { PostsRepository } from '../repositories/posts.repository'
 
 export class PostsService {
-	blogsRepository: BlogsRepository
-	commentsRepository: CommentsRepository
-	postsRepository: PostsRepository
-
-	constructor() {
-		this.blogsRepository = new BlogsRepository()
-		this.commentsRepository = new CommentsRepository()
-		this.postsRepository = new PostsRepository()
-	}
+	constructor(
+		private blogsRepository: BlogsRepository,
+		private commentsRepository: CommentsRepository,
+		private postsRepository: PostsRepository,
+	) {}
 
 	async createPost(dto: CreatePostDtoModel): Promise<string> {
 		const blog = await this.blogsRepository.getBlogById(dto.blogId)

@@ -17,23 +17,15 @@ import { commonService } from './common'
 import { UsersService } from './users.service'
 
 export class AuthService {
-	private authRepository: AuthRepository
-	private usersService: UsersService
-	private usersRepository: UsersRepository
-	private browserService: BrowserService
-	private jwtService: JwtService
-	private requestService: RequestService
-	private emailManager: EmailManager
-
-	constructor() {
-		this.authRepository = new AuthRepository()
-		this.usersService = new UsersService()
-		this.usersRepository = new UsersRepository()
-		this.browserService = new BrowserService()
-		this.jwtService = new JwtService()
-		this.requestService = new RequestService()
-		this.emailManager = new EmailManager()
-	}
+	constructor(
+		private usersService: UsersService,
+		private authRepository: AuthRepository,
+		private usersRepository: UsersRepository,
+		private browserService: BrowserService,
+		private jwtService: JwtService,
+		private requestService: RequestService,
+		private emailManager: EmailManager,
+	) {}
 
 	async login(
 		req: ReqWithBody<AuthLoginDtoModel>,

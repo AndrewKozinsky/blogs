@@ -12,11 +12,7 @@ import { LayerResult, LayerResultCode } from '../types/resultCodes'
 import { createUniqString } from '../utils/stringUtils'
 
 export class AuthRepository {
-	jwtService: JwtService
-
-	constructor() {
-		this.jwtService = new JwtService()
-	}
+	constructor(private jwtService: JwtService) {}
 
 	async getUserByRefreshToken(refreshTokenStr: string) {
 		const refreshTokenData = this.jwtService.getRefreshTokenDataFromTokenStr(refreshTokenStr)

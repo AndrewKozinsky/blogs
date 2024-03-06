@@ -1,11 +1,12 @@
 import express, { Request, Response } from 'express'
+import { testRouter } from '../compositionRoot'
 import { HTTP_STATUSES } from '../config/config'
 import { dbService } from '../db/dbService'
 import dotenv from 'dotenv'
 
 dotenv.config()
 
-class TestRouter {
+export class TestRouter {
 	async deleteAllData(req: Request, res: Response) {
 		const isDropped = await dbService.drop()
 
@@ -20,7 +21,6 @@ class TestRouter {
 
 function getTestRouter() {
 	const router = express.Router()
-	const testRouter = new TestRouter()
 
 	router.delete('/all-data', testRouter.deleteAllData.bind(testRouter))
 

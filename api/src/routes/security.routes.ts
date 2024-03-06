@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express'
 import { RequestService } from '../application/request.service'
+import { securityRouter } from '../compositionRoot'
 import { HTTP_STATUSES } from '../config/config'
 import { checkDeviceRefreshTokenMiddleware } from '../middlewares/checkDeviceRefreshTokenMiddleware'
 import { ReqWithParams } from '../models/common'
@@ -7,16 +8,12 @@ import { SecurityQueryRepository } from '../repositories/security.queryRepositor
 import { SecurityService } from '../services/security.service'
 import { LayerResultCode } from '../types/resultCodes'
 
-class SecurityRouter {
-	securityQueryRepository: SecurityQueryRepository
-	securityService: SecurityService
-	requestService: RequestService
-
-	constructor() {
-		this.securityQueryRepository = new SecurityQueryRepository()
-		this.securityService = new SecurityService()
-		this.requestService = new RequestService()
-	}
+export class SecurityRouter {
+	constructor(
+		private securityQueryRepository: SecurityQueryRepository,
+		private securityService: SecurityService,
+		private requestService: RequestService,
+	) {}
 
 	// Returns all devices with active sessions for current user
 	async getUserDevices(req: Request, res: Response) {
@@ -59,7 +56,6 @@ class SecurityRouter {
 
 function getSecurityRouter() {
 	const router = express.Router()
-	const securityRouter = new SecurityRouter()
 
 	// Returns all devices with active sessions for current user
 	router.get(

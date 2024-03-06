@@ -1,4 +1,5 @@
 import express, { Response } from 'express'
+import { commentsRouter } from '../compositionRoot'
 import { HTTP_STATUSES } from '../config/config'
 import { UpdateCommentDtoModel } from '../models/input/comments.input.model'
 import { CommentsQueryRepository } from '../repositories/comments.queryRepository'
@@ -7,14 +8,11 @@ import { checkAccessTokenMiddleware } from '../middlewares/checkAccessTokenMiddl
 import { ReqWithParams, ReqWithParamsAndBody } from '../models/common'
 import { updateCommentValidation } from '../validators/comments/updateComment.validator'
 
-class CommentsRouter {
-	commentsService: CommentsService
-	commentsQueryRepository: CommentsQueryRepository
-
-	constructor() {
-		this.commentsQueryRepository = new CommentsQueryRepository()
-		this.commentsService = new CommentsService()
-	}
+export class CommentsRouter {
+	constructor(
+		private commentsQueryRepository: CommentsQueryRepository,
+		private commentsService: CommentsService,
+	) {}
 
 	async getComment(req: ReqWithParams<{ commentId: string }>, res: Response) {
 		const { commentId } = req.params
@@ -75,7 +73,6 @@ class CommentsRouter {
 
 function getCommentsRouter() {
 	const router = express.Router()
-	const commentsRouter = new CommentsRouter()
 
 	// Return comment by id
 	router.get('/:commentId', commentsRouter.getComment.bind(commentsRouter))

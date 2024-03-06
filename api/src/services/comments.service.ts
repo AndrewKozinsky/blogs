@@ -4,11 +4,7 @@ import { UserServiceModel } from '../models/service/users.service.model'
 import { CommentsRepository } from '../repositories/comments.repository'
 
 export class CommentsService {
-	commentsRepository: CommentsRepository
-
-	constructor() {
-		this.commentsRepository = new CommentsRepository()
-	}
+	constructor(private commentsRepository: CommentsRepository) {}
 
 	async getComment(commentId: string): Promise<null | CommentServiceModel> {
 		return this.commentsRepository.getComment(commentId)

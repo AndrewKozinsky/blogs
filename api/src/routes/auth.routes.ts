@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express'
 import { RequestService } from '../application/request.service'
+import { authRouter } from '../compositionRoot'
 import { config, HTTP_STATUSES } from '../config/config'
 import { checkAccessTokenMiddleware } from '../middlewares/checkAccessTokenMiddleware'
 import { checkDeviceRefreshTokenMiddleware } from '../middlewares/checkDeviceRefreshTokenMiddleware'
@@ -21,16 +22,12 @@ import { authRegistrationValidation } from '../validators/auth/authRegistration.
 import { authRegistrationConfirmationValidation } from '../validators/auth/authRegistrationConfirmation.validator'
 import { authRegistrationEmailResending } from '../validators/auth/authRegistrationEmailResending.validator'
 
-class AuthRouter {
-	authService: AuthService
-	requestService: RequestService
-	jwtService: JwtService
-
-	constructor() {
-		this.authService = new AuthService()
-		this.requestService = new RequestService()
-		this.jwtService = new JwtService()
-	}
+export class AuthRouter {
+	constructor(
+		private authService: AuthService,
+		private requestService: RequestService,
+		private jwtService: JwtService,
+	) {}
 
 	async login(req: ReqWithBody<AuthLoginDtoModel>, res: Response) {
 		const loginServiceRes = await this.authService.login(req)
@@ -159,7 +156,6 @@ class AuthRouter {
 
 function getAuthRouter() {
 	const router = express.Router()
-	const authRouter = new AuthRouter()
 
 	// User login
 	router.post('/login', requestsLimiter, authLoginValidation(), authRouter.login.bind(authRouter))
