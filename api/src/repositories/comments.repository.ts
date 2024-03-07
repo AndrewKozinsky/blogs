@@ -5,6 +5,7 @@ import { UpdateCommentDtoModel } from '../models/input/comments.input.model'
 import { CreatePostCommentDtoModel } from '../models/input/posts.input.model'
 import { CommentServiceModel } from '../models/service/comments.service.model'
 import { UserServiceModel } from '../models/service/users.service.model'
+import { createUniqString } from '../utils/stringUtils'
 
 export class CommentsRepository {
 	async getComment(commentId: string) {
@@ -23,6 +24,7 @@ export class CommentsRepository {
 		commentDto: CreatePostCommentDtoModel,
 	) {
 		const newPostComment = {
+			id: createUniqString(),
 			postId,
 			content: commentDto.content,
 			commentatorInfo: {

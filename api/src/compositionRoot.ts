@@ -5,6 +5,7 @@ import { EmailManager } from './managers/email.manager'
 import { AuthRepository } from './repositories/auth.repository'
 import { BlogsQueryRepository } from './repositories/blogs.queryRepository'
 import { BlogsRepository } from './repositories/blogs.repository'
+import { CommentLikesRepository } from './repositories/commentLikes.repository'
 import { CommentsQueryRepository } from './repositories/comments.queryRepository'
 import { CommentsRepository } from './repositories/comments.repository'
 import { PostsQueryRepository } from './repositories/posts.queryRepository'
@@ -33,7 +34,8 @@ export const browserService = new BrowserService()
 export const usersRepository = new UsersRepository()
 export const authRepository = new AuthRepository(jwtService)
 const postsQueryRepository = new PostsQueryRepository()
-const commentsQueryRepository = new CommentsQueryRepository()
+const commentLikesRepository = new CommentLikesRepository()
+const commentsQueryRepository = new CommentsQueryRepository(commentLikesRepository)
 const blogsRepository = new BlogsRepository()
 const commentsRepository = new CommentsRepository()
 const postsRepository = new PostsRepository()
@@ -55,7 +57,7 @@ const authService = new AuthService(
 )
 const securityService = new SecurityService(securityRepository, authRepository, jwtService)
 const blogsService = new BlogsService(postsService, blogsRepository)
-const commentsService = new CommentsService(commentsRepository)
+const commentsService = new CommentsService(commentsRepository, commentLikesRepository)
 
 export const usersRouter = new UsersRouter(usersService)
 export const authRouter = new AuthRouter(authService, requestService, jwtService)

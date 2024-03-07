@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+import mongoose, { Schema } from 'mongoose'
 import DbNames from './dbNames'
 import { DBTypes } from './dbTypes'
 
@@ -47,6 +47,7 @@ export const UserModel = mongoose.model<DBTypes.User>(DbNames.users, UserSchema)
 // --------
 
 export const CommentSchema = new mongoose.Schema<DBTypes.Comment>({
+	id: { type: String, require: true },
 	postId: { type: String, require: true },
 	content: { type: String, require: true },
 	commentatorInfo: {
@@ -57,6 +58,19 @@ export const CommentSchema = new mongoose.Schema<DBTypes.Comment>({
 })
 
 export const CommentModel = mongoose.model<DBTypes.Comment>(DbNames.comments, CommentSchema)
+
+// --------
+
+export const CommentLikeSchema = new mongoose.Schema<DBTypes.CommentLike>({
+	commentId: { type: String, require: true },
+	userId: { type: String, require: true },
+	status: { type: String, enum: ['None', 'Like', 'Dislike'], require: true },
+})
+
+export const CommentLikeModel = mongoose.model<DBTypes.CommentLike>(
+	DbNames.commentLike,
+	CommentLikeSchema,
+)
 
 // --------
 

@@ -3,6 +3,7 @@ import { CommentModel, PostModel } from '../db/dbMongoose'
 import { DBTypes } from '../db/dbTypes'
 import { GetPostCommentsQueries } from '../models/input/posts.input.model'
 import { CommentOutModel, GetCommentOutModel } from '../models/output/comments.output.model'
+import { CommentLikesRepository } from './commentLikes.repository'
 
 type GetPostCommentsResult =
 	| {
@@ -23,16 +24,32 @@ type GetPostCommentsResult =
 	  }
 
 export class CommentsQueryRepository {
-	async getComment(commentId: string): Promise<null | GetCommentOutModel> {
+	constructor(private commentLikesRepository: CommentLikesRepository) {}
+
+	async getComment(userId: string, commentId: string): Promise<null | GetCommentOutModel> {
 		if (!ObjectId.isValid(commentId)) {
 			return null
 		}
 
 		const getCommentRes = await CommentModel.findOne({ _id: new ObjectId(commentId) }).lean()
 
-		return getCommentRes ? this.mapDbCommentToOutputComment(getCommentRes) : null
+		const commentLikesStatsRes =
+			await this.commentLikesRepository.getCommentLikesStats(commentId)
+
+		const currentUserCommentLikeStatus =
+			await this.commentLikesRepository.getUserCommentLikeStatus(userId, commentId)
+
+		return getCommentRes
+			? this.mapDbCommentToOutputComment(
+					getCommentRes,
+					commentLikesStatsRes.likesCount,
+					commentLikesStatsRes.dislikesCount,
+					currentUserCommentLikeStatus,
+				)
+			: null
 	}
 	async getPostComments(
+		userId: string,
 		postId: string,
 		queries: GetPostCommentsQueries,
 	): Promise<GetPostCommentsResult> {
@@ -66,6 +83,24 @@ export class CommentsQueryRepository {
 			.limit(pageSize)
 			.lean()
 
+		const items = await Promise.all(
+			getPostCommentsRes.map(async (comment) => {
+				const commentLikesStatsRes = await this.commentLikesRepository.getCommentLikesStats(
+					comment.id,
+				)
+
+				const currentUserCommentLikeStatus =
+					await this.commentLikesRepository.getUserCommentLikeStatus(userId, comment.id)
+
+				return this.mapDbCommentToOutputComment(
+					comment,
+					commentLikesStatsRes.likesCount,
+					commentLikesStatsRes.dislikesCount,
+					currentUserCommentLikeStatus,
+				)
+			}),
+		)
+
 		return {
 			status: 'success',
 			data: {
@@ -73,12 +108,17 @@ export class CommentsQueryRepository {
 				page: pageNumber,
 				pageSize,
 				totalCount: totalPostCommentsCount,
-				items: getPostCommentsRes.map(this.mapDbCommentToOutputComment),
+				items,
 			},
 		}
 	}
 
-	mapDbCommentToOutputComment(DbComment: WithId<DBTypes.Comment>): CommentOutModel {
+	mapDbCommentToOutputComment(
+		DbComment: WithId<DBTypes.Comment>,
+		likesCount: number,
+		dislikesCount: number,
+		currentUserCommentLikeStatus: DBTypes.LikeStatuses,
+	): CommentOutModel {
 		return {
 			id: DbComment._id.toString(),
 			content: DbComment.content,
@@ -87,6 +127,11 @@ export class CommentsQueryRepository {
 				userLogin: DbComment.commentatorInfo.userLogin,
 			},
 			createdAt: DbComment.createdAt,
+			likesInfo: {
+				likesCount,
+				dislikesCount,
+				myStatus: currentUserCommentLikeStatus,
+			},
 		}
 	}
 }

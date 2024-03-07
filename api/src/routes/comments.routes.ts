@@ -1,11 +1,14 @@
 import express, { Response } from 'express'
 import { commentsRouter } from '../compositionRoot'
 import { HTTP_STATUSES } from '../config/config'
+import { CommentLikeOperationsDtoModel } from '../models/input/commentLikeOperations.input.model'
 import { UpdateCommentDtoModel } from '../models/input/comments.input.model'
 import { CommentsQueryRepository } from '../repositories/comments.queryRepository'
 import { CommentsService } from '../services/comments.service'
 import { checkAccessTokenMiddleware } from '../middlewares/checkAccessTokenMiddleware'
 import { ReqWithParams, ReqWithParamsAndBody } from '../models/common'
+import { LayerResultCode } from '../types/resultCodes'
+import { commentLikeOperationsValidation } from '../validators/comments/commentLikeOperationsValidation.validator'
 import { updateCommentValidation } from '../validators/comments/updateComment.validator'
 
 export class CommentsRouter {
@@ -16,8 +19,9 @@ export class CommentsRouter {
 
 	async getComment(req: ReqWithParams<{ commentId: string }>, res: Response) {
 		const { commentId } = req.params
+		const { user } = req
 
-		const comment = await this.commentsQueryRepository.getComment(commentId)
+		const comment = await this.commentsQueryRepository.getComment(user!.id, commentId)
 
 		if (!comment) {
 			res.sendStatus(HTTP_STATUSES.NOT_FOUNT_404)
@@ -69,6 +73,26 @@ export class CommentsRouter {
 
 		res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
 	}
+
+	async setCommentLikeStatus(
+		req: ReqWithParamsAndBody<{ commentId: string }, CommentLikeOperationsDtoModel>,
+		res: Response,
+	) {
+		const commentId = req.params.commentId
+
+		const setLikeStatus = await this.commentsService.setCommentLikeStatus(
+			req.user!,
+			commentId,
+			req.body.likeStatus,
+		)
+
+		if (setLikeStatus.code === LayerResultCode.NotFound) {
+			res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401)
+			return
+		}
+
+		res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
+	}
 }
 
 function getCommentsRouter() {
@@ -90,6 +114,14 @@ function getCommentsRouter() {
 		'/:commentId',
 		checkAccessTokenMiddleware,
 		commentsRouter.deleteComment.bind(commentsRouter),
+	)
+
+	// Make like/unlike/dislike/undislike operation
+	router.put(
+		'/:commentId/like-status',
+		checkAccessTokenMiddleware,
+		commentLikeOperationsValidation(),
+		commentsRouter.setCommentLikeStatus.bind(commentsRouter),
 	)
 
 	return router

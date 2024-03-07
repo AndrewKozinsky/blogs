@@ -3,6 +3,7 @@ const DbNames = {
 	posts: 'posts',
 	users: 'users',
 	comments: 'comments',
+	commentLike: 'commentLike',
 	deviceRefreshTokens: 'deviceRefreshTokens',
 	rateLimit: 'rateLimit',
 }

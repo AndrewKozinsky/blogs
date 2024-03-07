@@ -98,7 +98,13 @@ export class PostsRouter {
 		res: Response,
 	) {
 		const postId = req.params.postId
-		const postComments = await this.commentsQueryRepository.getPostComments(postId, req.query)
+		const { user } = req
+
+		const postComments = await this.commentsQueryRepository.getPostComments(
+			user!.id,
+			postId,
+			req.query,
+		)
 
 		if (postComments.status === 'postNotValid' || postComments.status === 'postNotFound') {
 			res.sendStatus(HTTP_STATUSES.NOT_FOUNT_404)
@@ -114,6 +120,7 @@ export class PostsRouter {
 		res: Response,
 	) {
 		const postId = req.params.postId
+		const { user } = req
 
 		const createdCommentId = await this.postsService.createPostComment(
 			postId,
@@ -126,7 +133,10 @@ export class PostsRouter {
 			return
 		}
 
-		const getCommentRes = await this.commentsQueryRepository.getComment(createdCommentId)
+		const getCommentRes = await this.commentsQueryRepository.getComment(
+			user!.id,
+			createdCommentId,
+		)
 
 		res.status(HTTP_STATUSES.CREATED_201).send(getCommentRes)
 	}

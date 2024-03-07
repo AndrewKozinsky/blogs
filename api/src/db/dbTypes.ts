@@ -32,6 +32,7 @@ export namespace DBTypes {
 	}
 
 	export type Comment = {
+		id: string
 		postId: string
 		content: string
 		commentatorInfo: {
@@ -39,6 +40,18 @@ export namespace DBTypes {
 			userLogin: string
 		}
 		createdAt: string
+	}
+
+	export enum LikeStatuses {
+		None = 'None',
+		Like = 'Like',
+		Dislike = 'Dislike',
+	}
+
+	export type CommentLike = {
+		commentId: string
+		userId: string
+		status: LikeStatuses
 	}
 
 	export type DeviceToken = {
