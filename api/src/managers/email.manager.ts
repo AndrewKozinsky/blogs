@@ -1,3 +1,5 @@
+import { EmailAdapter } from '../adapters/email.adapter'
+
 export class EmailManager {
 	constructor(private emailAdapter: EmailAdapter) {}
 

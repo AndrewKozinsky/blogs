@@ -1,3 +1,4 @@
+import { EmailAdapter } from './adapters/email.adapter'
 import { HashService } from './adapters/hash.adapter'
 import { BrowserService } from './application/browser.service'
 import { JwtService } from './application/jwt.service'
@@ -31,7 +32,7 @@ import { SecurityService } from './services/security.service'
 import { UsersService } from './services/users.service'
 
 export const jwtService = new JwtService()
-export const emailAdapter = new EmailAdapter()
+const emailAdapter = new EmailAdapter()
 const emailManager = new EmailManager(emailAdapter)
 export const browserService = new BrowserService()
 export const hashService = new HashService()

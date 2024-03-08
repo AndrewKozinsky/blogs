@@ -1,6 +1,6 @@
 const sendpulse = require('sendpulse-api')
 
-class EmailAdapter {
+export class EmailAdapter {
 	async sendEmail(toEmail: string, subject: string, textMessage: string, htmlMessage: string) {
 		return new Promise((resolve, reject) => {
 			/*
