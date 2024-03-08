@@ -1,6 +1,6 @@
-import { emailAdapter } from '../adapters/email.adapter'
-
 export class EmailManager {
+	constructor(private emailAdapter: EmailAdapter) {}
+
 	async sendEmailConfirmationMessage(userEmail: string, confirmationCode: string) {
 		const subject = 'Registration at our web-site'
 		const textMessage = 'Registration at our web-site'
@@ -14,7 +14,7 @@ export class EmailManager {
 </p>`
 
 		// Send an email
-		await emailAdapter.sendEmail(userEmail, subject, textMessage, htmlMessage)
+		await this.emailAdapter.sendEmail(userEmail, subject, textMessage, htmlMessage)
 	}
 
 	async sendPasswordRecoveryMessage(userEmail: string, recoveryCode: string) {
@@ -27,6 +27,6 @@ export class EmailManager {
 </p>`
 
 		// Send an email
-		await emailAdapter.sendEmail(userEmail, subject, textMessage, htmlMessage)
+		await this.emailAdapter.sendEmail(userEmail, subject, textMessage, htmlMessage)
 	}
 }

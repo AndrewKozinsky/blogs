@@ -1,6 +1,8 @@
+import { HashService } from './adapters/hash.adapter'
 import { BrowserService } from './application/browser.service'
 import { JwtService } from './application/jwt.service'
 import { RequestService } from './application/request.service'
+import { DbService } from './db/dbService'
 import { EmailManager } from './managers/email.manager'
 import { AuthRepository } from './repositories/auth.repository'
 import { BlogsQueryRepository } from './repositories/blogs.queryRepository'
@@ -23,16 +25,21 @@ import { UsersRouter } from './routes/users.routes'
 import { AuthService } from './services/auth.service'
 import { BlogsService } from './services/blogs.service'
 import { CommentsService } from './services/comments.service'
+import { CommonService } from './services/common'
 import { PostsService } from './services/posts.service'
 import { SecurityService } from './services/security.service'
 import { UsersService } from './services/users.service'
 
 export const jwtService = new JwtService()
-const emailManager = new EmailManager()
+export const emailAdapter = new EmailAdapter()
+const emailManager = new EmailManager(emailAdapter)
 export const browserService = new BrowserService()
+export const hashService = new HashService()
+export const dbService = new DbService()
 
-export const usersRepository = new UsersRepository()
-export const authRepository = new AuthRepository(jwtService)
+export const commonService = new CommonService(hashService)
+export const usersRepository = new UsersRepository(hashService, commonService)
+export const authRepository = new AuthRepository(jwtService, hashService, commonService)
 const postsQueryRepository = new PostsQueryRepository()
 const commentLikesRepository = new CommentLikesRepository()
 const commentsQueryRepository = new CommentsQueryRepository(commentLikesRepository)
@@ -43,7 +50,7 @@ const securityQueryRepository = new SecurityQueryRepository(authRepository)
 const securityRepository = new SecurityRepository()
 const blogsQueryRepository = new BlogsQueryRepository(postsQueryRepository)
 
-const usersService = new UsersService(usersRepository)
+const usersService = new UsersService(usersRepository, commonService)
 export const requestService = new RequestService()
 const postsService = new PostsService(blogsRepository, commentsRepository, postsRepository)
 const authService = new AuthService(
@@ -54,6 +61,7 @@ const authService = new AuthService(
 	jwtService,
 	requestService,
 	emailManager,
+	commonService,
 )
 const securityService = new SecurityService(securityRepository, authRepository, jwtService)
 const blogsService = new BlogsService(postsService, blogsRepository)

@@ -1,18 +1,20 @@
 import { add } from 'date-fns'
 import { ObjectId, WithId } from 'mongodb'
-import { hashService } from '../adapters/hash.adapter'
+import { HashService } from '../adapters/hash.adapter'
 import { UserModel } from '../db/dbMongoose'
 import { DBTypes } from '../db/dbTypes'
 import { UserServiceModel } from '../models/service/users.service.model'
 import { createUniqString } from '../utils/stringUtils'
 
-class CommonService {
+export class CommonService {
+	constructor(private hashService: HashService) {}
+
 	// Return object which can be save in DB to create a new user
 	async getCreateUserDto(
 		dto: { login: string; email: string; password: string },
 		isEmailConfirmed: boolean,
 	): Promise<DBTypes.User> {
-		const passwordHash = await hashService.hashString(dto.password)
+		const passwordHash = await this.hashService.hashString(dto.password)
 
 		return {
 			account: {
@@ -63,5 +65,3 @@ class CommonService {
 		}
 	}
 }
-
-export const commonService = new CommonService()

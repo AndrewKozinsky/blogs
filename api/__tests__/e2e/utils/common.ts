@@ -1,5 +1,6 @@
 import { app } from '../../../src/app'
-import { dbService } from '../../../src/db/dbService'
+import { dbService } from '../../../src/compositionRoot'
+
 import { clearAllDB } from './db'
 
 export function resetDbEveryTest() {

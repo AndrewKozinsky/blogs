@@ -13,7 +13,7 @@ import { AuthRepository } from '../repositories/auth.repository'
 import { UsersRepository } from '../repositories/users.repository'
 import { LayerResult, LayerResultCode } from '../types/resultCodes'
 import { createUniqString } from '../utils/stringUtils'
-import { commonService } from './common'
+import { CommonService } from './common'
 import { UsersService } from './users.service'
 
 export class AuthService {
@@ -25,6 +25,7 @@ export class AuthService {
 		private jwtService: JwtService,
 		private requestService: RequestService,
 		private emailManager: EmailManager,
+		private commonService: CommonService,
 	) {}
 
 	async login(
@@ -103,7 +104,7 @@ export class AuthService {
 			return { code: LayerResultCode.BadRequest }
 		}
 
-		const newUserDto = await commonService.getCreateUserDto(dto, false)
+		const newUserDto = await this.commonService.getCreateUserDto(dto, false)
 
 		const userId = await this.authRepository.createUser(newUserDto)
 

@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt'
 
-class HashService {
+export class HashService {
 	generateSalt() {
 		return bcrypt.genSalt()
 	}
@@ -15,5 +15,3 @@ class HashService {
 		return bcrypt.compare(str, hashedStr)
 	}
 }
-
-export const hashService = new HashService()

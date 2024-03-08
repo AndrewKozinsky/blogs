@@ -1,7 +1,6 @@
 import express, { Request, Response } from 'express'
-import { testRouter } from '../compositionRoot'
+import { dbService, testRouter } from '../compositionRoot'
 import { HTTP_STATUSES } from '../config/config'
-import { dbService } from '../db/dbService'
 import dotenv from 'dotenv'
 
 dotenv.config()

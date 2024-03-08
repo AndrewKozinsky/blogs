@@ -1,11 +1,16 @@
 import { ObjectId, WithId } from 'mongodb'
-import { hashService } from '../adapters/hash.adapter'
+import { HashService } from '../adapters/hash.adapter'
 import { UserModel } from '../db/dbMongoose'
 import { DBTypes } from '../db/dbTypes'
 import { UserServiceModel } from '../models/service/users.service.model'
-import { commonService } from '../services/common'
+import { CommonService } from '../services/common'
 
 export class UsersRepository {
+	constructor(
+		private hashService: HashService,
+		private commonService: CommonService,
+	) {}
+
 	async getUserById(userId: string) {
 		if (!ObjectId.isValid(userId)) {
 			return null
@@ -29,15 +34,15 @@ export class UsersRepository {
 	}
 
 	async createUser(dto: DBTypes.User) {
-		return commonService.createUser(dto)
+		return this.commonService.createUser(dto)
 	}
 
 	async deleteUser(userId: string): Promise<boolean> {
-		return commonService.deleteUser(userId)
+		return this.commonService.deleteUser(userId)
 	}
 
 	mapDbUserToServiceUser(dbUser: WithId<DBTypes.User>): UserServiceModel {
-		return commonService.mapDbUserToServiceUser(dbUser)
+		return this.commonService.mapDbUserToServiceUser(dbUser)
 	}
 
 	async setPasswordRecoveryCodeToUser(userId: string, recoveryCode: null | string) {
@@ -48,7 +53,7 @@ export class UsersRepository {
 	}
 
 	async setNewPasswordToUser(userId: string, newPassword: string) {
-		const passwordHash = await hashService.hashString(newPassword)
+		const passwordHash = await this.hashService.hashString(newPassword)
 
 		await UserModel.updateOne(
 			{ _id: new ObjectId(userId) },

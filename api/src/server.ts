@@ -1,6 +1,6 @@
 import { app } from './app'
+import { dbService } from './compositionRoot'
 import { config } from './config/config'
-import { dbService } from './db/dbService'
 
 async function startApp() {
 	try {

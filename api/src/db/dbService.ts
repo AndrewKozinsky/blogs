@@ -5,7 +5,7 @@ dotenv.config()
 
 const mongoURI = process.env.MONGO_URL
 
-class DbService {
+export class DbService {
 	async runDb() {
 		try {
 			await mongoose.connect(mongoURI, { dbName: process.env.MONGO_DB_NAME })
@@ -39,5 +39,3 @@ class DbService {
 		}
 	}
 }
-
-export const dbService = new DbService()

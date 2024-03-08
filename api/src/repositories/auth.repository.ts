@@ -1,18 +1,22 @@
 import { addMilliseconds } from 'date-fns'
 import { ObjectId, WithId } from 'mongodb'
-import { hashService } from '../adapters/hash.adapter'
+import { HashService } from '../adapters/hash.adapter'
 import { JwtService } from '../application/jwt.service'
 import { config } from '../config/config'
 import { DeviceTokenModel, UserModel } from '../db/dbMongoose'
 import { DBTypes } from '../db/dbTypes'
 import { DeviceRefreshTokenServiceModel } from '../models/service/auth.service.model'
 import { UserServiceModel } from '../models/service/users.service.model'
-import { commonService } from '../services/common'
+import { CommonService } from '../services/common'
 import { LayerResult, LayerResultCode } from '../types/resultCodes'
 import { createUniqString } from '../utils/stringUtils'
 
 export class AuthRepository {
-	constructor(private jwtService: JwtService) {}
+	constructor(
+		private jwtService: JwtService,
+		private hashService: HashService,
+		private commonService: CommonService,
+	) {}
 
 	async getUserByRefreshToken(refreshTokenStr: string) {
 		const refreshTokenData = this.jwtService.getRefreshTokenDataFromTokenStr(refreshTokenStr)
@@ -72,7 +76,7 @@ export class AuthRepository {
 			return null
 		}
 
-		const isPasswordMath = await hashService.compare(
+		const isPasswordMath = await this.hashService.compare(
 			loginDto.password,
 			getUserRes.account.password,
 		)
@@ -115,7 +119,7 @@ export class AuthRepository {
 	}
 
 	async createUser(dto: DBTypes.User) {
-		return commonService.createUser(dto)
+		return this.commonService.createUser(dto)
 	}
 
 	async makeUserEmailConfirmed(userId: string) {
@@ -139,7 +143,7 @@ export class AuthRepository {
 	}
 
 	async deleteUser(userId: string): Promise<boolean> {
-		return commonService.deleteUser(userId)
+		return this.commonService.deleteUser(userId)
 	}
 
 	async insertDeviceRefreshToken(deviceRefreshToken: DBTypes.DeviceToken) {
@@ -213,7 +217,7 @@ export class AuthRepository {
 	}
 
 	mapDbUserToServiceUser(dbUser: WithId<DBTypes.User>): UserServiceModel {
-		return commonService.mapDbUserToServiceUser(dbUser)
+		return this.commonService.mapDbUserToServiceUser(dbUser)
 	}
 
 	mapDbDeviceRefreshTokenToServiceDeviceRefreshToken(

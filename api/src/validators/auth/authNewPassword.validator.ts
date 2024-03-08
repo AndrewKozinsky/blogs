@@ -1,8 +1,6 @@
 import { body } from 'express-validator'
 import { inputValidation } from '../../middlewares/input.validation'
-import { UsersRepository } from '../../repositories/users.repository'
-
-const usersRepository = new UsersRepository()
+import { usersRepository } from '../../compositionRoot'
 
 export const newPasswordValidation = body('newPassword')
 	.isString()
