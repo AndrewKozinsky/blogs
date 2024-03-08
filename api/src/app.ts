@@ -1,14 +1,13 @@
 import express from 'express'
 import cookieParser from 'cookie-parser'
 import RouteNames from './config/routeNames'
-import requestsLimiter from './middlewares/requestsLimitter'
-import getAuthRouter from './routes/auth.routes'
-import getBlogsRouter from './routes/blogs.routes'
-import getCommentsRouter from './routes/comments.routes'
-import getPostsRouter from './routes/posts.routes'
-import getSecurityRouter from './routes/security.routes'
-import getTestRouter from './routes/test.routes'
-import getUsersRouter from './routes/users.routes'
+import getAuthRouter from './routes/auth.getRouter'
+import getBlogsRouter from './routes/blogs.getRouter'
+import getCommentsRouter from './routes/comments.getRouter'
+import getPostsRouter from './routes/posts.getRouter'
+import getSecurityRouter from './routes/security.getRouter'
+import getTestRouter from './routes/test.getRouter'
+import getUsersRouter from './routes/users.getRouter'
 
 export const app = express()
 app.use(express.json())

@@ -1,8 +1,6 @@
-import express, { Request, Response } from 'express'
+import { Request, Response } from 'express'
 import { RequestService } from '../application/request.service'
-import { securityRouter } from '../compositionRoot'
 import { HTTP_STATUSES } from '../config/config'
-import { checkDeviceRefreshTokenMiddleware } from '../middlewares/checkDeviceRefreshTokenMiddleware'
 import { ReqWithParams } from '../models/common'
 import { SecurityQueryRepository } from '../repositories/security.queryRepository'
 import { SecurityService } from '../services/security.service'
@@ -53,32 +51,3 @@ export class SecurityRouter {
 		res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
 	}
 }
-
-function getSecurityRouter() {
-	const router = express.Router()
-
-	// Returns all devices with active sessions for current user
-	router.get(
-		'/devices',
-		checkDeviceRefreshTokenMiddleware,
-		securityRouter.getUserDevices.bind(securityRouter),
-	)
-
-	// Terminate all other (exclude current) device's sessions
-	router.delete(
-		'/devices',
-		checkDeviceRefreshTokenMiddleware,
-		securityRouter.terminateUserDevicesExceptOne.bind(securityRouter),
-	)
-
-	// Terminate specified device session
-	router.delete(
-		'/devices/:deviceId',
-		checkDeviceRefreshTokenMiddleware,
-		securityRouter.terminateUserDevice.bind(securityRouter),
-	)
-
-	return router
-}
-
-export default getSecurityRouter

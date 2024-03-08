@@ -1,15 +1,11 @@
-import express, { Response } from 'express'
-import { commentsRouter } from '../compositionRoot'
+import { Response } from 'express'
 import { HTTP_STATUSES } from '../config/config'
 import { CommentLikeOperationsDtoModel } from '../models/input/commentLikeOperations.input.model'
 import { UpdateCommentDtoModel } from '../models/input/comments.input.model'
 import { CommentsQueryRepository } from '../repositories/comments.queryRepository'
 import { CommentsService } from '../services/comments.service'
-import { checkAccessTokenMiddleware } from '../middlewares/checkAccessTokenMiddleware'
 import { ReqWithParams, ReqWithParamsAndBody } from '../models/common'
 import { LayerResultCode } from '../types/resultCodes'
-import { commentLikeOperationsValidation } from '../validators/comments/commentLikeOperationsValidation.validator'
-import { updateCommentValidation } from '../validators/comments/updateComment.validator'
 
 export class CommentsRouter {
 	constructor(
@@ -94,37 +90,3 @@ export class CommentsRouter {
 		res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
 	}
 }
-
-function getCommentsRouter() {
-	const router = express.Router()
-
-	// Return comment by id
-	router.get('/:commentId', commentsRouter.getComment.bind(commentsRouter))
-
-	// Update existing comment by id with InputModel
-	router.put(
-		'/:commentId',
-		checkAccessTokenMiddleware,
-		updateCommentValidation(),
-		commentsRouter.updateComment.bind(commentsRouter),
-	)
-
-	// Delete comment specified by id
-	router.delete(
-		'/:commentId',
-		checkAccessTokenMiddleware,
-		commentsRouter.deleteComment.bind(commentsRouter),
-	)
-
-	// Make like/unlike/dislike/undislike operation
-	router.put(
-		'/:commentId/like-status',
-		checkAccessTokenMiddleware,
-		commentLikeOperationsValidation(),
-		commentsRouter.setCommentLikeStatus.bind(commentsRouter),
-	)
-
-	return router
-}
-
-export default getCommentsRouter
