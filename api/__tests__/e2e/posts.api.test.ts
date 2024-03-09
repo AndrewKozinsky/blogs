@@ -3,6 +3,7 @@ import request from 'supertest'
 import { app } from '../../src/app'
 import { HTTP_STATUSES } from '../../src/config/config'
 import RouteNames from '../../src/config/routeNames'
+import { DBTypes } from '../../src/db/dbTypes'
 import { CreatePostDtoModel } from '../../src/models/input/posts.input.model'
 import { GetPostCommentsOutModel } from '../../src/models/output/comments.output.model'
 import { GetPostsOutModel } from '../../src/models/output/posts.output.model'
@@ -85,11 +86,17 @@ describe('Getting post comments', () => {
 			getPostCommentsRes.body.items[0],
 			createdUserRes.body.id,
 			createdUserRes.body.login,
+			0,
+			0,
+			DBTypes.LikeStatuses.Dislike,
 		)
 		checkCommentObj(
 			getPostCommentsRes.body.items[1],
 			createdUserRes.body.id,
 			createdUserRes.body.login,
+			0,
+			0,
+			DBTypes.LikeStatuses.Dislike,
 		)
 	})
 
@@ -194,6 +201,9 @@ describe('Creating a comment', () => {
 			createdCommentOneRes.body,
 			createdUserRes.body.id,
 			createdUserRes.body.login,
+			0,
+			0,
+			DBTypes.LikeStatuses.Dislike,
 		)
 
 		// Check if there are 2 posts after adding another one

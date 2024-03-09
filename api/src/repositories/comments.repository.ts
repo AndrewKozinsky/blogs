@@ -24,7 +24,6 @@ export class CommentsRepository {
 		commentDto: CreatePostCommentDtoModel,
 	) {
 		const newPostComment = {
-			id: createUniqString(),
 			postId,
 			content: commentDto.content,
 			commentatorInfo: {
@@ -35,7 +34,8 @@ export class CommentsRepository {
 		}
 
 		const createdPostCommentRes = await CommentModel.create(newPostComment)
-		return createdPostCommentRes.id
+		const postClientComment = this.mapDbCommentToClientComment(createdPostCommentRes)
+		return postClientComment.id
 	}
 
 	async updateComment(

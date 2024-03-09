@@ -3,6 +3,7 @@ import { Express } from 'express'
 import request from 'supertest'
 import { HTTP_STATUSES } from '../../../src/config/config'
 import RouteNames from '../../../src/config/routeNames'
+import { DBTypes } from '../../../src/db/dbTypes'
 import {
 	CreateBlogDtoModel,
 	CreateBlogPostDtoModel,
@@ -187,7 +188,14 @@ export function createDtoAddPostComment(
 	)
 }
 
-export function checkCommentObj(commentObj: any, userId: string, userLogin: string) {
+export function checkCommentObj(
+	commentObj: any,
+	userId: string,
+	userLogin: string,
+	likesCount: number,
+	dislikesCount: number,
+	currentUserLikeStatus: DBTypes.LikeStatuses,
+) {
 	expect(commentObj).toEqual({
 		id: commentObj.id,
 		content: commentObj.content,
@@ -196,6 +204,11 @@ export function checkCommentObj(commentObj: any, userId: string, userLogin: stri
 			userLogin,
 		},
 		createdAt: expect.any(String),
+		likesInfo: {
+			likesCount,
+			dislikesCount,
+			myStatus: currentUserLikeStatus,
+		},
 	})
 
 	expect(commentObj.createdAt).toMatch(

@@ -3,6 +3,7 @@ import request from 'supertest'
 import { app } from '../../src/app'
 import { HTTP_STATUSES } from '../../src/config/config'
 import RouteNames from '../../src/config/routeNames'
+import { DBTypes } from '../../src/db/dbTypes'
 import { resetDbEveryTest } from './utils/common'
 import {
 	addBlogRequest,
@@ -49,7 +50,14 @@ describe('Getting a comment', () => {
 			.get(RouteNames.comment(commentId))
 			.expect(HTTP_STATUSES.OK_200)
 
-		checkCommentObj(getCommentRes.body, createdUserRes.body.id, createdUserRes.body.login)
+		checkCommentObj(
+			getCommentRes.body,
+			createdUserRes.body.id,
+			createdUserRes.body.login,
+			0,
+			0,
+			DBTypes.LikeStatuses.None,
+		)
 	})
 })
 
@@ -243,5 +251,87 @@ describe('Deleting a comment', () => {
 			.delete(RouteNames.comment(commentId))
 			.set('authorization', 'Bearer ' + userToken)
 			.expect(HTTP_STATUSES.NO_CONTENT_204)
+	})
+})
+
+describe('Make a comment like status', () => {
+	it.skip('should forbid a request from an unauthorized user', async () => {
+		await request(app)
+			.put(RouteNames.commentLikeStatus('999'))
+			.expect(HTTP_STATUSES.UNAUTHORIZED_401)
+	})
+
+	it.skip('should return 404 if a comment does not exists', async () => {
+		// User will create a comment
+		const createdUserRes = await addUserByAdminRequest(app)
+		expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
+		const loginUserRes = await loginRequest(app, userEmail, userPassword)
+		const userToken = loginUserRes.body.accessToken
+
+		await request(app)
+			.put(RouteNames.commentLikeStatus('999'))
+			.set('authorization', 'Bearer ' + userToken)
+			.send(JSON.stringify({ likeStatus: 'None' }))
+			.set('Content-Type', 'application/json')
+			.set('Accept', 'application/json')
+			.expect(HTTP_STATUSES.NOT_FOUNT_404)
+	})
+
+	it.skip('should return 400 if requst body does not exist', async () => {
+		// User will create a comment
+		const createdUserRes = await addUserByAdminRequest(app)
+		expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
+		const loginUserRes = await loginRequest(app, userEmail, userPassword)
+		const userToken = loginUserRes.body.accessToken
+
+		await request(app)
+			.put(RouteNames.commentLikeStatus('999'))
+			.set('authorization', 'Bearer ' + userToken)
+			.expect(HTTP_STATUSES.BAD_REQUEST_400)
+	})
+
+	it('should return 204 if pass right body data to right address', async () => {
+		// Create a blog
+		const createdBlogRes = await addBlogRequest(app)
+		expect(createdBlogRes.status).toBe(HTTP_STATUSES.CREATED_201)
+		const blogId = createdBlogRes.body.id
+
+		// Create a post in the blog
+		const createdPostRes = await addPostRequest(app, blogId)
+		expect(createdPostRes.status).toBe(HTTP_STATUSES.CREATED_201)
+		const postId = createdPostRes.body.id
+
+		// Create a user on behalf of which requests will be made
+		const createdUserRes = await addUserByAdminRequest(app)
+		expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
+		const loginUserRes = await loginRequest(app, userEmail, userPassword)
+		const userToken = loginUserRes.body.accessToken
+
+		// Create a comment
+		const createdCommentRes = await addPostCommentRequest(app, userToken, postId)
+		const commentId = createdCommentRes.body.id
+
+		// Set a like status to the comment
+		await request(app)
+			.put(RouteNames.commentLikeStatus(commentId))
+			.set('authorization', 'Bearer ' + userToken)
+			.send(JSON.stringify({ likeStatus: DBTypes.LikeStatuses.Like }))
+			.set('Content-Type', 'application/json')
+			.set('Accept', 'application/json')
+			.expect(HTTP_STATUSES.NO_CONTENT_204)
+
+		// Get the comment again to check a returned object
+		const getCommentRes = await request(app)
+			.get(RouteNames.comment(commentId))
+			.expect(HTTP_STATUSES.OK_200)
+
+		checkCommentObj(
+			getCommentRes.body,
+			createdUserRes.body.id,
+			createdUserRes.body.login,
+			1,
+			0,
+			DBTypes.LikeStatuses.None,
+		)
 	})
 })

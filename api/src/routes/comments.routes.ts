@@ -17,7 +17,7 @@ export class CommentsRouter {
 		const { commentId } = req.params
 		const { user } = req
 
-		const comment = await this.commentsQueryRepository.getComment(user!.id, commentId)
+		const comment = await this.commentsQueryRepository.getComment(user?.id, commentId)
 
 		if (!comment) {
 			res.sendStatus(HTTP_STATUSES.NOT_FOUNT_404)
@@ -83,7 +83,7 @@ export class CommentsRouter {
 		)
 
 		if (setLikeStatus.code === LayerResultCode.NotFound) {
-			res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401)
+			res.sendStatus(HTTP_STATUSES.NOT_FOUNT_404)
 			return
 		}
 

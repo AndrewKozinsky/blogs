@@ -26,7 +26,10 @@ type GetPostCommentsResult =
 export class CommentsQueryRepository {
 	constructor(private commentLikesRepository: CommentLikesRepository) {}
 
-	async getComment(userId: string, commentId: string): Promise<null | GetCommentOutModel> {
+	async getComment(
+		userId: undefined | string,
+		commentId: string,
+	): Promise<null | GetCommentOutModel> {
 		if (!ObjectId.isValid(commentId)) {
 			return null
 		}
@@ -36,8 +39,11 @@ export class CommentsQueryRepository {
 		const commentLikesStatsRes =
 			await this.commentLikesRepository.getCommentLikesStats(commentId)
 
-		const currentUserCommentLikeStatus =
-			await this.commentLikesRepository.getUserCommentLikeStatus(userId, commentId)
+		let currentUserCommentLikeStatus = DBTypes.LikeStatuses.None
+		if (userId) {
+			currentUserCommentLikeStatus =
+				await this.commentLikesRepository.getUserCommentLikeStatus(userId, commentId)
+		}
 
 		return getCommentRes
 			? this.mapDbCommentToOutputComment(

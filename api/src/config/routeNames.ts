@@ -33,6 +33,9 @@ const RouteNames = {
 	comment(commentId: string) {
 		return '/comments/' + commentId
 	},
+	commentLikeStatus(commentId: string) {
+		return '/comments/' + commentId + '/like-status'
+	},
 	security: '/security',
 	securityDevices: '/security/devices',
 	securityDevice(deviceId: string) {
