@@ -38,7 +38,7 @@ function getPostsRouter() {
 	// Returns comments for specified post
 	router.get(
 		'/:postId/comments',
-		getPostCommentsValidation(),
+		// getPostCommentsValidation(),
 		postsRouter.getPostComments.bind(postsRouter),
 	)
 

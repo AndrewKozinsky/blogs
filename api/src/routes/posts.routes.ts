@@ -94,7 +94,7 @@ export class PostsRouter {
 		const { user } = req
 
 		const postComments = await this.commentsQueryRepository.getPostComments(
-			user!.id,
+			user?.id,
 			postId,
 			req.query,
 		)

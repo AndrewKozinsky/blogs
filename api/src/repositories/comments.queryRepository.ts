@@ -55,7 +55,7 @@ export class CommentsQueryRepository {
 			: null
 	}
 	async getPostComments(
-		userId: string,
+		userId: undefined | string,
 		postId: string,
 		queries: GetPostCommentsQueries,
 	): Promise<GetPostCommentsResult> {
@@ -95,8 +95,14 @@ export class CommentsQueryRepository {
 					comment.id,
 				)
 
-				const currentUserCommentLikeStatus =
-					await this.commentLikesRepository.getUserCommentLikeStatus(userId, comment.id)
+				let currentUserCommentLikeStatus = DBTypes.LikeStatuses.None
+				if (userId) {
+					currentUserCommentLikeStatus =
+						await this.commentLikesRepository.getUserCommentLikeStatus(
+							userId,
+							comment.id,
+						)
+				}
 
 				return this.mapDbCommentToOutputComment(
 					comment,

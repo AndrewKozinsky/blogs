@@ -100,7 +100,7 @@ describe('Login user', () => {
 		expect(refreshToken.cookieName).toBe('refreshToken')
 		expect(refreshToken.HttpOnly).toBe(true)
 		expect(refreshToken.Secure).toBe(true)
-		expect(refreshToken['Max-Age']).toBe(20)
+		expect(refreshToken['Max-Age']).toBe(config.refreshToken.lifeDurationInMs / 1000)
 	})
 
 	it.skip('should return 429 if too many requests were made', async () => {
@@ -174,7 +174,7 @@ describe('Refresh token', () => {
 
 		const newRefreshTokenStr = refreshTokenRes.headers['set-cookie'][0]
 		const newRefreshTokenObj = parseCookieStringToObj(newRefreshTokenStr)
-		expect(newRefreshTokenObj['Max-Age']).toBe(20)
+		expect(newRefreshTokenObj['Max-Age']).toBe(config.refreshToken.lifeDurationInMs / 1000)
 		expect(newRefreshTokenObj.Secure).toBe(true)
 		expect(newRefreshTokenObj.HttpOnly).toBe(true)
 	})

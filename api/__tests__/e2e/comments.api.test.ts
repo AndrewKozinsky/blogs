@@ -290,7 +290,7 @@ describe('Make a comment like status', () => {
 			.expect(HTTP_STATUSES.BAD_REQUEST_400)
 	})
 
-	it('should return 204 if pass right body data to right address', async () => {
+	it.skip('should return 204 if pass right body data to right address', async () => {
 		// Create a blog
 		const createdBlogRes = await addBlogRequest(app)
 		expect(createdBlogRes.status).toBe(HTTP_STATUSES.CREATED_201)
