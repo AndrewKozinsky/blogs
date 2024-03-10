@@ -1,6 +1,7 @@
 import express from 'express'
 import { blogsRouter } from '../compositionRoot'
 import { adminAuthMiddleware } from '../middlewares/adminAuth.middleware'
+import { setReqUserMiddleware } from '../middlewares/setReqUser.middleware'
 import { blogValidation } from '../validators/blogs/blog.validator'
 import { createBlogPostsValidation } from '../validators/blogs/createBlogPost.validator'
 import { getBlogPostsValidation } from '../validators/blogs/getBlogPosts.validator'
@@ -10,11 +11,17 @@ function getBlogsRouter() {
 	const router = express.Router()
 
 	// Returns blogs with paging
-	router.get('/', getBlogsValidation(), blogsRouter.getBlogs.bind(blogsRouter))
+	router.get(
+		'/',
+		setReqUserMiddleware,
+		getBlogsValidation(),
+		blogsRouter.getBlogs.bind(blogsRouter),
+	)
 
 	// Create new blog
 	router.post(
 		'/',
+		setReqUserMiddleware,
 		adminAuthMiddleware,
 		blogValidation(),
 		blogsRouter.createNewBlog.bind(blogsRouter),
@@ -23,6 +30,7 @@ function getBlogsRouter() {
 	// Returns all posts for specified blog
 	router.get(
 		'/:blogId/posts',
+		setReqUserMiddleware,
 		getBlogPostsValidation(),
 		blogsRouter.getBlogPosts.bind(blogsRouter),
 	)
@@ -30,6 +38,7 @@ function getBlogsRouter() {
 	// Create new post for specific blog
 	router.post(
 		'/:blogId/posts',
+		setReqUserMiddleware,
 		adminAuthMiddleware,
 		createBlogPostsValidation(),
 		blogsRouter.createNewPostForSpecificBlog.bind(blogsRouter),
@@ -41,13 +50,19 @@ function getBlogsRouter() {
 	// Update existing Blog by id with InputModel
 	router.put(
 		'/:blogId',
+		setReqUserMiddleware,
 		adminAuthMiddleware,
 		blogValidation(),
 		blogsRouter.updateBlog.bind(blogsRouter),
 	)
 
 	// Delete blog specified by id
-	router.delete('/:blogId', adminAuthMiddleware, blogsRouter.deleteBlog.bind(blogsRouter))
+	router.delete(
+		'/:blogId',
+		setReqUserMiddleware,
+		adminAuthMiddleware,
+		blogsRouter.deleteBlog.bind(blogsRouter),
+	)
 
 	return router
 }

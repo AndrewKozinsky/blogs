@@ -48,6 +48,7 @@ describe('Getting a comment', () => {
 
 		const getCommentRes = await request(app)
 			.get(RouteNames.comment(commentId))
+			.set('authorization', 'Bearer ' + userToken)
 			.expect(HTTP_STATUSES.OK_200)
 
 		checkCommentObj(
@@ -320,7 +321,7 @@ describe('Make a comment like status', () => {
 			.set('Accept', 'application/json')
 			.expect(HTTP_STATUSES.NO_CONTENT_204)
 
-		// Get the comment again to check a returned object
+		// Get the comment again by an unauthorized user to check a returned object
 		const getCommentRes = await request(app)
 			.get(RouteNames.comment(commentId))
 			.expect(HTTP_STATUSES.OK_200)
@@ -332,6 +333,21 @@ describe('Make a comment like status', () => {
 			1,
 			0,
 			DBTypes.LikeStatuses.None,
+		)
+
+		// Get the comment again by an authorized user to check a returned object
+		const getComment2Res = await request(app)
+			.get(RouteNames.comment(commentId))
+			.set('authorization', 'Bearer ' + userToken)
+			.expect(HTTP_STATUSES.OK_200)
+
+		checkCommentObj(
+			getComment2Res.body,
+			createdUserRes.body.id,
+			createdUserRes.body.login,
+			1,
+			0,
+			DBTypes.LikeStatuses.Like,
 		)
 	})
 })

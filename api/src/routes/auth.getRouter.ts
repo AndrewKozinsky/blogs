@@ -3,6 +3,7 @@ import { authRouter } from '../compositionRoot'
 import { checkAccessTokenMiddleware } from '../middlewares/checkAccessTokenMiddleware'
 import { checkDeviceRefreshTokenMiddleware } from '../middlewares/checkDeviceRefreshTokenMiddleware'
 import requestsLimiter from '../middlewares/requestsLimitter'
+import { setReqUserMiddleware } from '../middlewares/setReqUser.middleware'
 import { authLoginValidation } from '../validators/auth/authLogin.validator'
 import { authNewPasswordValidation } from '../validators/auth/authNewPassword.validator'
 import { authPasswordRecoveryValidation } from '../validators/auth/authPasswordRecoveryValidation.validator'
@@ -19,6 +20,7 @@ function getAuthRouter() {
 	// Generate the new pair of access and refresh tokens (in cookie client must send correct refreshToken that will be revoked after refreshing)
 	router.post(
 		'/refresh-token',
+		setReqUserMiddleware,
 		checkDeviceRefreshTokenMiddleware,
 		authRouter.refreshToken.bind(authRouter),
 	)
@@ -28,6 +30,7 @@ function getAuthRouter() {
 	router.post(
 		'/registration',
 		requestsLimiter,
+		setReqUserMiddleware,
 		authRegistrationValidation(),
 		authRouter.registration.bind(authRouter),
 	)
@@ -36,6 +39,7 @@ function getAuthRouter() {
 	router.post(
 		'/registration-email-resending',
 		requestsLimiter,
+		setReqUserMiddleware,
 		authRegistrationEmailResending(),
 		authRouter.registrationEmailResending.bind(authRouter),
 	)
@@ -44,6 +48,7 @@ function getAuthRouter() {
 	router.post(
 		'/registration-confirmation',
 		requestsLimiter,
+		setReqUserMiddleware,
 		authRegistrationConfirmationValidation(),
 		authRouter.registrationConfirmation.bind(authRouter),
 	)
@@ -51,6 +56,7 @@ function getAuthRouter() {
 	// Get information about current user
 	router.get(
 		'/me',
+		setReqUserMiddleware,
 		checkAccessTokenMiddleware,
 		authRouter.getInformationAboutCurrentUser.bind(authRouter),
 	)
@@ -62,6 +68,7 @@ function getAuthRouter() {
 	router.post(
 		'/password-recovery',
 		requestsLimiter,
+		setReqUserMiddleware,
 		authPasswordRecoveryValidation(),
 		authRouter.passwordRecovery.bind(authRouter),
 	)
@@ -70,6 +77,7 @@ function getAuthRouter() {
 	router.post(
 		'/new-password',
 		requestsLimiter,
+		setReqUserMiddleware,
 		authNewPasswordValidation(),
 		authRouter.newPassword.bind(authRouter),
 	)

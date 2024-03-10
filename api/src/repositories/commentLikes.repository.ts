@@ -77,7 +77,6 @@ export class CommentLikesRepository {
 		commentId: string,
 	): Promise<DBTypes.LikeStatuses> {
 		const commentLikeRes = await this.getCommentLikeByUser(userId, commentId)
-
 		if (!commentLikeRes) {
 			return DBTypes.LikeStatuses.None
 		}
