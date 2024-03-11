@@ -98,6 +98,8 @@ export class PostsRouter {
 			postId,
 			req.query,
 		)
+		// @ts-ignore
+		// console.log(postComments.data.items[0])
 
 		if (postComments.status === 'postNotValid' || postComments.status === 'postNotFound') {
 			res.sendStatus(HTTP_STATUSES.NOT_FOUNT_404)

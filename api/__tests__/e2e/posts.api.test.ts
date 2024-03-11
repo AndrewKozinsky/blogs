@@ -45,10 +45,9 @@ describe('Getting post comments', () => {
 			items: [],
 		}
 
-		/*await request(app)
+		await request(app)
 			.get(RouteNames.postComments(postId))
-			.expect(HTTP_STATUSES.OK_200, successAnswer)*/
-		await request(app).get(RouteNames.postComments(postId)).expect(HTTP_STATUSES.OK_200)
+			.expect(HTTP_STATUSES.OK_200, successAnswer)
 	})
 
 	it.skip('should return an object with property items contains array with 2 items after creating 2 comments', async () => {
@@ -68,8 +67,8 @@ describe('Getting post comments', () => {
 		const loginUserRes = await loginRequest(app, userEmail, userPassword)
 		const userToken = loginUserRes.body.accessToken
 
-		const createdCommentOneRes = await addPostCommentRequest(app, userToken, postId)
-		const createdCommentTwoRes = await addPostCommentRequest(app, userToken, postId)
+		await addPostCommentRequest(app, userToken, postId)
+		await addPostCommentRequest(app, userToken, postId)
 
 		const getPostCommentsRes = await request(app)
 			.get(RouteNames.postComments(postId))
@@ -139,6 +138,176 @@ describe('Getting post comments', () => {
 		})
 
 		expect(getPostCommentsRes.body.items.length).toBe(2)
+	})
+
+	it('create 6 comments then: like comment 1 by user 1, user 2; like comment 2 by user 2, user 3; dislike comment 3 by user 1; like comment 4 by user 1, user 4, user 2, user 3; like comment 5 by user 2, dislike by user 3; like comment 6 by user 1, dislike by user 2.', async () => {
+		// Create a blog
+		const createdBlogRes = await addBlogRequest(app)
+		expect(createdBlogRes.status).toBe(HTTP_STATUSES.CREATED_201)
+		const blogId = createdBlogRes.body.id
+
+		// Create a post
+		const createdPostRes = await addPostRequest(app, blogId)
+		expect(createdPostRes.status).toBe(HTTP_STATUSES.CREATED_201)
+		const postId = createdPostRes.body.id
+
+		// Users and their tokens
+		let user1Token = ''
+		let user1Id = ''
+		let user1Login = ''
+		let user2Token = ''
+		let user2Id = ''
+		let user3Token = ''
+		let user3Id = ''
+		let user4Token = ''
+		let user4Id = ''
+
+		for (let i = 1; i <= 4; i++) {
+			const login = 'login-' + i
+			const password = 'password-' + i
+			const email = `email-${i}@mail.com`
+
+			const createdUserRes = await addUserByAdminRequest(app, {
+				login,
+				password,
+				email,
+			})
+			expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
+			const loginUserRes = await loginRequest(app, email, password)
+			const token = loginUserRes.body.accessToken
+
+			if (i == 1) {
+				user1Token = token
+				user1Id = createdUserRes.body.id
+				user1Login = createdUserRes.body.login
+			} else if (i == 2) {
+				user2Token = token
+				user2Id = createdUserRes.body.id
+			} else if (i == 3) {
+				user3Token = token
+				user3Id = createdUserRes.body.id
+			} else if (i == 4) {
+				user4Token = token
+				user4Id = createdUserRes.body.id
+			}
+		}
+
+		// Create post comments
+		const comment1Res = await addPostCommentRequest(app, user1Token, postId, {
+			content: 'new content min 20 characters 1',
+		})
+		const comment1Id = comment1Res.body.id
+		const comment2Res = await addPostCommentRequest(app, user1Token, postId, {
+			content: 'new content min 20 characters 2',
+		})
+		const comment2Id = comment2Res.body.id
+		const comment3Res = await addPostCommentRequest(app, user1Token, postId, {
+			content: 'new content min 20 characters 3',
+		})
+		const comment3Id = comment3Res.body.id
+		const comment4Res = await addPostCommentRequest(app, user1Token, postId, {
+			content: 'new content min 20 characters 4',
+		})
+		const comment4Id = comment4Res.body.id
+		const comment5Res = await addPostCommentRequest(app, user1Token, postId, {
+			content: 'new content min 20 characters 5',
+		})
+		const comment5Id = comment5Res.body.id
+		const comment6Res = await addPostCommentRequest(app, user1Token, postId, {
+			content: 'new content min 20 characters 6',
+		})
+		const comment6Id = comment6Res.body.id
+
+		async function setLikeStatus(
+			userToken: string,
+			commentId: string,
+			likeStatus: DBTypes.LikeStatuses,
+		) {
+			await request(app)
+				.put(RouteNames.commentLikeStatus(commentId))
+				.set('authorization', 'Bearer ' + userToken)
+				.send(JSON.stringify({ likeStatus }))
+				.set('Content-Type', 'application/json')
+				.set('Accept', 'application/json')
+				.expect(HTTP_STATUSES.NO_CONTENT_204)
+		}
+
+		// Set a like statuses to the comments
+		await setLikeStatus(user1Token, comment1Id, DBTypes.LikeStatuses.Like)
+		await setLikeStatus(user2Token, comment1Id, DBTypes.LikeStatuses.Like)
+		await setLikeStatus(user2Token, comment2Id, DBTypes.LikeStatuses.Like)
+		await setLikeStatus(user3Token, comment2Id, DBTypes.LikeStatuses.Like)
+		await setLikeStatus(user1Token, comment3Id, DBTypes.LikeStatuses.Dislike)
+		await setLikeStatus(user1Token, comment4Id, DBTypes.LikeStatuses.Like)
+		await setLikeStatus(user4Token, comment4Id, DBTypes.LikeStatuses.Like)
+		await setLikeStatus(user2Token, comment4Id, DBTypes.LikeStatuses.Like)
+		await setLikeStatus(user3Token, comment4Id, DBTypes.LikeStatuses.Like)
+		await setLikeStatus(user2Token, comment5Id, DBTypes.LikeStatuses.Like)
+		await setLikeStatus(user3Token, comment5Id, DBTypes.LikeStatuses.Dislike)
+		await setLikeStatus(user1Token, comment6Id, DBTypes.LikeStatuses.Like)
+		await setLikeStatus(user2Token, comment6Id, DBTypes.LikeStatuses.Dislike)
+
+		const getPostCommentsRes = await request(app)
+			.get(RouteNames.postComments(postId, '?sortDirection=asc'))
+			.set('authorization', 'Bearer ' + user1Token)
+			.expect(HTTP_STATUSES.OK_200)
+
+		expect(getPostCommentsRes.body).toMatchObject({
+			pagesCount: 1,
+			page: 1,
+			pageSize: 10,
+			totalCount: 6,
+			items: expect.any(Array),
+		})
+
+		checkCommentObj(
+			getPostCommentsRes.body.items[0],
+			user1Id,
+			user1Login,
+			2,
+			0,
+			DBTypes.LikeStatuses.Like,
+		)
+		checkCommentObj(
+			getPostCommentsRes.body.items[1],
+			user1Id,
+			user1Login,
+			2,
+			0,
+			DBTypes.LikeStatuses.None,
+		)
+		checkCommentObj(
+			getPostCommentsRes.body.items[2],
+			user1Id,
+			user1Login,
+			0,
+			1,
+			DBTypes.LikeStatuses.Dislike,
+		)
+		checkCommentObj(
+			getPostCommentsRes.body.items[3],
+			user1Id,
+			user1Login,
+			4,
+			0,
+			DBTypes.LikeStatuses.Like,
+		)
+		checkCommentObj(
+			getPostCommentsRes.body.items[4],
+			user1Id,
+			user1Login,
+			1,
+			1,
+			DBTypes.LikeStatuses.None,
+		)
+		checkCommentObj(
+			getPostCommentsRes.body.items[5],
+			user1Id,
+			user1Login,
+			1,
+			1,
+			DBTypes.LikeStatuses.Like,
+		)
 	})
 })
 

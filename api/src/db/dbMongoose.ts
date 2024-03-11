@@ -47,7 +47,6 @@ export const UserModel = mongoose.model<DBTypes.User>(DbNames.users, UserSchema)
 // --------
 
 export const CommentSchema = new mongoose.Schema<DBTypes.Comment>({
-	id: { type: String, require: true },
 	postId: { type: String, require: true },
 	content: { type: String, require: true },
 	commentatorInfo: {

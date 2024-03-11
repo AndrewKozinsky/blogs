@@ -32,7 +32,6 @@ export namespace DBTypes {
 	}
 
 	export type Comment = {
-		id: string
 		postId: string
 		content: string
 		commentatorInfo: {

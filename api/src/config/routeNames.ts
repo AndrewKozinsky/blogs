@@ -10,8 +10,8 @@ const RouteNames = {
 	post(postId: string) {
 		return '/posts/' + postId
 	},
-	postComments(postId: string) {
-		return '/posts/' + postId + '/comments'
+	postComments(postId: string, tail: string = '') {
+		return '/posts/' + postId + '/comments' + tail
 	},
 	users: '/users',
 	user(id: string) {

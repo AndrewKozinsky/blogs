@@ -92,7 +92,7 @@ export class CommentsQueryRepository {
 		const items = await Promise.all(
 			getPostCommentsRes.map(async (comment) => {
 				const commentLikesStatsRes = await this.commentLikesRepository.getCommentLikesStats(
-					comment.id,
+					comment._id.toString(),
 				)
 
 				let currentUserCommentLikeStatus = DBTypes.LikeStatuses.None
@@ -100,7 +100,7 @@ export class CommentsQueryRepository {
 					currentUserCommentLikeStatus =
 						await this.commentLikesRepository.getUserCommentLikeStatus(
 							userId,
-							comment.id,
+							comment._id.toString(),
 						)
 				}
 
