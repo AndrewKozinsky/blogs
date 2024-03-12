@@ -1,6 +1,14 @@
 import { Request, Response, NextFunction } from 'express'
-import { authRepository, jwtService, requestService } from '../compositionRoot'
+import { JwtService } from '../application/jwt.service'
+import { RequestService } from '../application/request.service'
+import { ClassNames } from '../composition/classNames'
+import { myContainer } from '../composition/inversify.config'
 import { HTTP_STATUSES } from '../config/config'
+import { AuthRepository } from '../repositories/auth.repository'
+
+const authRepository = myContainer.get<AuthRepository>(ClassNames.AuthRepository)
+const jwtService = myContainer.get<JwtService>(ClassNames.JwtService)
+const requestService = myContainer.get<RequestService>(ClassNames.RequestService)
 
 export async function checkDeviceRefreshTokenMiddleware(
 	req: Request,

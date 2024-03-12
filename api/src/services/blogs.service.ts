@@ -1,3 +1,5 @@
+import { inject, injectable } from 'inversify'
+import { ClassNames } from '../composition/classNames'
 import {
 	CreateBlogDtoModel,
 	CreateBlogPostDtoModel,
@@ -8,11 +10,10 @@ import { CreateBlogOutModel } from '../models/output/blogs.output.model'
 import { BlogsRepository } from '../repositories/blogs.repository'
 import { PostsService } from './posts.service'
 
+@injectable()
 export class BlogsService {
-	constructor(
-		private postsService: PostsService,
-		private blogsRepository: BlogsRepository,
-	) {}
+	@inject(ClassNames.PostsService) private postsService: PostsService
+	@inject(ClassNames.BlogsRepository) private blogsRepository: BlogsRepository
 
 	async createBlog(dto: CreateBlogDtoModel) {
 		const newBlog: CreateBlogOutModel = {

@@ -1,17 +1,19 @@
 import { Request, Response } from 'express'
+import { inject, injectable } from 'inversify'
 import { RequestService } from '../application/request.service'
+import { ClassNames } from '../composition/classNames'
 import { HTTP_STATUSES } from '../config/config'
 import { ReqWithParams } from '../models/common'
 import { SecurityQueryRepository } from '../repositories/security.queryRepository'
 import { SecurityService } from '../services/security.service'
 import { LayerResultCode } from '../types/resultCodes'
 
+@injectable()
 export class SecurityRouter {
-	constructor(
-		private securityQueryRepository: SecurityQueryRepository,
-		private securityService: SecurityService,
-		private requestService: RequestService,
-	) {}
+	@inject(ClassNames.SecurityQueryRepository)
+	private securityQueryRepository: SecurityQueryRepository
+	@inject(ClassNames.SecurityService) private securityService: SecurityService
+	@inject(ClassNames.RequestService) private requestService: RequestService
 
 	// Returns all devices with active sessions for current user
 	async getUserDevices(req: Request, res: Response) {

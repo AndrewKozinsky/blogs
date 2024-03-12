@@ -1,3 +1,4 @@
+import { injectable } from 'inversify'
 import { Filter, ObjectId, WithId } from 'mongodb'
 import { FilterQuery } from 'mongoose'
 import { UserModel } from '../db/dbMongoose'
@@ -9,6 +10,7 @@ import {
 	UserOutModel,
 } from '../models/output/users.output.model'
 
+@injectable()
 export class UsersQueryRepository {
 	async getUsers(queries: GetUsersQueries): Promise<GetUsersOutModel> {
 		const filter: FilterQuery<DBTypes.User> = {

@@ -1,11 +1,14 @@
+import { inject, injectable } from 'inversify'
 import { WithId } from 'mongodb'
+import { ClassNames } from '../composition/classNames'
 import { DeviceTokenModel } from '../db/dbMongoose'
 import { DBTypes } from '../db/dbTypes'
 import { GetUserDevicesOutModel, UserDeviceOutModel } from '../models/output/security.output.model'
 import { AuthRepository } from './auth.repository'
 
+@injectable()
 export class SecurityQueryRepository {
-	constructor(private authRepository: AuthRepository) {}
+	@inject(ClassNames.CommentLikesRepository) private authRepository: AuthRepository
 
 	async getUserDevices(refreshToken: string): Promise<GetUserDevicesOutModel> {
 		const user = await this.authRepository.getUserByRefreshToken(refreshToken)

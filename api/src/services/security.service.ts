@@ -1,14 +1,15 @@
+import { inject, injectable } from 'inversify'
 import { JwtService } from '../application/jwt.service'
+import { ClassNames } from '../composition/classNames'
 import { AuthRepository } from '../repositories/auth.repository'
 import { SecurityRepository } from '../repositories/security.repository'
 import { LayerResult, LayerResultCode } from '../types/resultCodes'
 
+@injectable()
 export class SecurityService {
-	constructor(
-		private securityRepository: SecurityRepository,
-		private authRepository: AuthRepository,
-		private jwtService: JwtService,
-	) {}
+	@inject(ClassNames.SecurityRepository) private securityRepository: SecurityRepository
+	@inject(ClassNames.AuthRepository) private authRepository: AuthRepository
+	@inject(ClassNames.JwtService) private jwtService: JwtService
 
 	async terminateAllDeviceRefreshTokensApartThis(refreshTokenStr: string) {
 		const refreshToken = this.jwtService.getRefreshTokenDataFromTokenStr(refreshTokenStr)

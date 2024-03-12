@@ -1,11 +1,14 @@
 import express from 'express'
-import { testRouter } from '../compositionRoot'
+import { ClassNames } from '../composition/classNames'
 import dotenv from 'dotenv'
+import { myContainer } from '../composition/inversify.config'
+import { TestRouter } from './test.routes'
 
 dotenv.config()
 
 function getTestRouter() {
 	const router = express.Router()
+	const testRouter = myContainer.get<TestRouter>(ClassNames.TestRouter)
 
 	router.delete('/all-data', testRouter.deleteAllData.bind(testRouter))
 

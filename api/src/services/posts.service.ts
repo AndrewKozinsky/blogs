@@ -1,4 +1,6 @@
+import { inject, injectable } from 'inversify'
 import { ObjectId } from 'mongodb'
+import { ClassNames } from '../composition/classNames'
 import {
 	CreatePostCommentDtoModel,
 	CreatePostDtoModel,
@@ -10,12 +12,11 @@ import { BlogsRepository } from '../repositories/blogs.repository'
 import { CommentsRepository } from '../repositories/comments.repository'
 import { PostsRepository } from '../repositories/posts.repository'
 
+@injectable()
 export class PostsService {
-	constructor(
-		private blogsRepository: BlogsRepository,
-		private commentsRepository: CommentsRepository,
-		private postsRepository: PostsRepository,
-	) {}
+	@inject(ClassNames.BlogsRepository) private blogsRepository: BlogsRepository
+	@inject(ClassNames.CommentsRepository) private commentsRepository: CommentsRepository
+	@inject(ClassNames.PostsRepository) private postsRepository: PostsRepository
 
 	async createPost(dto: CreatePostDtoModel): Promise<string> {
 		const blog = await this.blogsRepository.getBlogById(dto.blogId)

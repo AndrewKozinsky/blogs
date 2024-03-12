@@ -1,4 +1,6 @@
 import { Response } from 'express'
+import { inject, injectable } from 'inversify'
+import { ClassNames } from '../composition/classNames'
 import { HTTP_STATUSES } from '../config/config'
 import { CommentsQueryRepository } from '../repositories/comments.queryRepository'
 import { PostsService } from '../services/posts.service'
@@ -18,12 +20,12 @@ import {
 } from '../models/input/posts.input.model'
 import { PostsQueryRepository } from '../repositories/posts.queryRepository'
 
+@injectable()
 export class PostsRouter {
-	constructor(
-		private postsQueryRepository: PostsQueryRepository,
-		private postsService: PostsService,
-		private commentsQueryRepository: CommentsQueryRepository,
-	) {}
+	@inject(ClassNames.PostsQueryRepository) private postsQueryRepository: PostsQueryRepository
+	@inject(ClassNames.PostsService) private postsService: PostsService
+	@inject(ClassNames.CommentsQueryRepository)
+	private commentsQueryRepository: CommentsQueryRepository
 
 	// Returns all posts
 	async getPosts(req: ReqWithQuery<GetPostsQueries>, res: Response) {

@@ -1,7 +1,9 @@
 import { Request } from 'express'
+import { inject, injectable } from 'inversify'
 import { BrowserService } from '../application/browser.service'
 import { JwtService } from '../application/jwt.service'
 import { RequestService } from '../application/request.service'
+import { ClassNames } from '../composition/classNames'
 import { EmailManager } from '../managers/email.manager'
 import { ReqWithBody } from '../models/common'
 import { AuthLoginDtoModel } from '../models/input/authLogin.input.model'
@@ -16,17 +18,16 @@ import { createUniqString } from '../utils/stringUtils'
 import { CommonService } from './common'
 import { UsersService } from './users.service'
 
+@injectable()
 export class AuthService {
-	constructor(
-		private usersService: UsersService,
-		private authRepository: AuthRepository,
-		private usersRepository: UsersRepository,
-		private browserService: BrowserService,
-		private jwtService: JwtService,
-		private requestService: RequestService,
-		private emailManager: EmailManager,
-		private commonService: CommonService,
-	) {}
+	@inject(ClassNames.UsersService) private usersService: UsersService
+	@inject(ClassNames.AuthRepository) private authRepository: AuthRepository
+	@inject(ClassNames.UsersRepository) private usersRepository: UsersRepository
+	@inject(ClassNames.BrowserService) private browserService: BrowserService
+	@inject(ClassNames.JwtService) private jwtService: JwtService
+	@inject(ClassNames.RequestService) private requestService: RequestService
+	@inject(ClassNames.EmailManager) private emailManager: EmailManager
+	@inject(ClassNames.CommonService) private commonService: CommonService
 
 	async login(
 		req: ReqWithBody<AuthLoginDtoModel>,

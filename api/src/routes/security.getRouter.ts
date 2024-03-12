@@ -1,10 +1,13 @@
 import express from 'express'
-import { securityRouter } from '../compositionRoot'
+import { ClassNames } from '../composition/classNames'
+import { myContainer } from '../composition/inversify.config'
 import { checkDeviceRefreshTokenMiddleware } from '../middlewares/checkDeviceRefreshTokenMiddleware'
 import { setReqUserMiddleware } from '../middlewares/setReqUser.middleware'
+import { SecurityRouter } from './security.routes'
 
 function getSecurityRouter() {
 	const router = express.Router()
+	const securityRouter = myContainer.get<SecurityRouter>(ClassNames.SecurityRouter)
 
 	// Returns all devices with active sessions for current user
 	router.get(

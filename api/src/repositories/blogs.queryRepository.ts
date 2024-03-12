@@ -1,5 +1,7 @@
+import { inject, injectable } from 'inversify'
 import { ObjectId, WithId } from 'mongodb'
 import { FilterQuery } from 'mongoose'
+import { ClassNames } from '../composition/classNames'
 import { BlogModel, PostModel } from '../db/dbMongoose'
 import { DBTypes } from '../db/dbTypes'
 import { GetBlogPostsQueries, GetBlogsQueries } from '../models/input/blogs.input.model'
@@ -12,8 +14,9 @@ import {
 import { PostOutModel } from '../models/output/posts.output.model'
 import { PostsQueryRepository } from './posts.queryRepository'
 
+@injectable()
 export class BlogsQueryRepository {
-	constructor(private postsQueryRepository: PostsQueryRepository) {}
+	@inject(ClassNames.PostsQueryRepository) private postsQueryRepository: PostsQueryRepository
 
 	async getBlogs(query: GetBlogsQueries): Promise<GetBlogsOutModel> {
 		const filter: FilterQuery<DBTypes.Blog> = {}

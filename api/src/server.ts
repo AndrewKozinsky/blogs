@@ -1,8 +1,12 @@
 import { app } from './app'
-import { dbService } from './compositionRoot'
+import { ClassNames } from './composition/classNames'
+import { myContainer } from './composition/inversify.config'
 import { config } from './config/config'
+import { DbService } from './db/dbService'
 
 async function startApp() {
+	const dbService = myContainer.get<DbService>(ClassNames.DbService)
+
 	try {
 		await dbService.runDb()
 

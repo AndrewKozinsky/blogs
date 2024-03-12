@@ -1,3 +1,4 @@
+import { injectable } from 'inversify'
 import { ObjectId, WithId } from 'mongodb'
 import { BlogModel } from '../db/dbMongoose'
 import { DBTypes } from '../db/dbTypes'
@@ -5,6 +6,7 @@ import { UpdateBlogDtoModel } from '../models/input/blogs.input.model'
 import { CreateBlogOutModel } from '../models/output/blogs.output.model'
 import { BlogServiceModel } from '../models/service/blogs.service.model'
 
+@injectable()
 export class BlogsRepository {
 	async getBlogs() {
 		const getBlogsRes = await BlogModel.find({}).lean()

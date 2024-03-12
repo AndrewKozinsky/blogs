@@ -1,14 +1,17 @@
 import express from 'express'
-import { blogsRouter } from '../compositionRoot'
+import { ClassNames } from '../composition/classNames'
+import { myContainer } from '../composition/inversify.config'
 import { adminAuthMiddleware } from '../middlewares/adminAuth.middleware'
 import { setReqUserMiddleware } from '../middlewares/setReqUser.middleware'
 import { blogValidation } from '../validators/blogs/blog.validator'
 import { createBlogPostsValidation } from '../validators/blogs/createBlogPost.validator'
 import { getBlogPostsValidation } from '../validators/blogs/getBlogPosts.validator'
 import { getBlogsValidation } from '../validators/blogs/getBlogs.validator'
+import { BlogsRouter } from './blogs.routes'
 
 function getBlogsRouter() {
 	const router = express.Router()
+	const blogsRouter = myContainer.get<BlogsRouter>(ClassNames.BlogsRouter)
 
 	// Returns blogs with paging
 	router.get(

@@ -1,15 +1,16 @@
+import { inject, injectable } from 'inversify'
 import { ObjectId, WithId } from 'mongodb'
 import { HashService } from '../adapters/hash.adapter'
+import { ClassNames } from '../composition/classNames'
 import { UserModel } from '../db/dbMongoose'
 import { DBTypes } from '../db/dbTypes'
 import { UserServiceModel } from '../models/service/users.service.model'
 import { CommonService } from '../services/common'
 
+@injectable()
 export class UsersRepository {
-	constructor(
-		private hashService: HashService,
-		private commonService: CommonService,
-	) {}
+	@inject(ClassNames.CommentLikesRepository) hashService: HashService
+	@inject(ClassNames.CommentLikesRepository) private commonService: CommonService
 
 	async getUserById(userId: string) {
 		if (!ObjectId.isValid(userId)) {

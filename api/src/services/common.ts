@@ -1,13 +1,16 @@
 import { add } from 'date-fns'
+import { inject, injectable } from 'inversify'
 import { ObjectId, WithId } from 'mongodb'
 import { HashService } from '../adapters/hash.adapter'
+import { ClassNames } from '../composition/classNames'
 import { UserModel } from '../db/dbMongoose'
 import { DBTypes } from '../db/dbTypes'
 import { UserServiceModel } from '../models/service/users.service.model'
 import { createUniqString } from '../utils/stringUtils'
 
+@injectable()
 export class CommonService {
-	constructor(private hashService: HashService) {}
+	@inject(ClassNames.HashService) private hashService: HashService
 
 	// Return object which can be save in DB to create a new user
 	async getCreateUserDto(

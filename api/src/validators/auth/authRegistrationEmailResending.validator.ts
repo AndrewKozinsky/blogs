@@ -1,6 +1,10 @@
 import { body } from 'express-validator'
-import { authRepository } from '../../compositionRoot'
+import { ClassNames } from '../../composition/classNames'
+import { myContainer } from '../../composition/inversify.config'
 import { inputValidation } from '../../middlewares/input.validation'
+import { AuthRepository } from '../../repositories/auth.repository'
+
+const authRepository = myContainer.get<AuthRepository>(ClassNames.AuthRepository)
 
 export const emailValidation = body('email')
 	.isString()

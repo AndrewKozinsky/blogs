@@ -1,6 +1,10 @@
 import { body } from 'express-validator'
+import { ClassNames } from '../../composition/classNames'
+import { myContainer } from '../../composition/inversify.config'
 import { inputValidation } from '../../middlewares/input.validation'
-import { usersRepository } from '../../compositionRoot'
+import { UsersRepository } from '../../repositories/users.repository'
+
+const usersRepository = myContainer.get<UsersRepository>(ClassNames.UsersRepository)
 
 export const newPasswordValidation = body('newPassword')
 	.isString()

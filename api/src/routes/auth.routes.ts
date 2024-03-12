@@ -1,5 +1,7 @@
 import { Request, Response } from 'express'
+import { inject, injectable } from 'inversify'
 import { RequestService } from '../application/request.service'
+import { ClassNames } from '../composition/classNames'
 import { config, HTTP_STATUSES } from '../config/config'
 import { AuthLoginDtoModel } from '../models/input/authLogin.input.model'
 import { ReqWithBody } from '../models/common'
@@ -12,12 +14,11 @@ import { AuthService } from '../services/auth.service'
 import { JwtService } from '../application/jwt.service'
 import { LayerResultCode } from '../types/resultCodes'
 
+@injectable()
 export class AuthRouter {
-	constructor(
-		private authService: AuthService,
-		private requestService: RequestService,
-		private jwtService: JwtService,
-	) {}
+	@inject(ClassNames.AuthService) private authService: AuthService
+	@inject(ClassNames.RequestService) private requestService: RequestService
+	@inject(ClassNames.JwtService) private jwtService: JwtService
 
 	async login(req: ReqWithBody<AuthLoginDtoModel>, res: Response) {
 		const loginServiceRes = await this.authService.login(req)

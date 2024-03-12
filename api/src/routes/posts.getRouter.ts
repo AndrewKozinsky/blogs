@@ -1,5 +1,6 @@
 import express from 'express'
-import { postsRouter } from '../compositionRoot'
+import { ClassNames } from '../composition/classNames'
+import { myContainer } from '../composition/inversify.config'
 import { adminAuthMiddleware } from '../middlewares/adminAuth.middleware'
 import { checkAccessTokenMiddleware } from '../middlewares/checkAccessTokenMiddleware'
 import { setReqUserMiddleware } from '../middlewares/setReqUser.middleware'
@@ -7,9 +8,11 @@ import { createPostCommentValidation } from '../validators/posts/createPostComme
 import { getPostCommentsValidation } from '../validators/posts/getPostComments.validator'
 import { getPostsValidation } from '../validators/posts/getPosts.validator'
 import { postValidation } from '../validators/posts/post.validator'
+import { PostsRouter } from './posts.routes'
 
 function getPostsRouter() {
 	const router = express.Router()
+	const postsRouter = myContainer.get<PostsRouter>(ClassNames.PostsRouter)
 
 	// Returns all posts
 	router.get(

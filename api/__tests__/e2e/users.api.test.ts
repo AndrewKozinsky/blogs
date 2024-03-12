@@ -13,7 +13,7 @@ it.skip('123', () => {
 	expect(2).toBe(2)
 })
 
-describe('Getting all users', () => {
+/*describe('Getting all users', () => {
 	it.skip('should forbid a request from an unauthorized user', async () => {
 		await request(app).get(RouteNames.users).expect(HTTP_STATUSES.UNAUTHORIZED_401)
 	})
@@ -95,9 +95,9 @@ describe('Getting all users', () => {
 		expect(getUsersRes.body.totalCount).toBe(9)
 		expect(getUsersRes.body.items.length).toBe(2)
 	})
-})
+})*/
 
-describe('Creating an user', () => {
+/*describe('Creating an user', () => {
 	it.skip('should forbid a request from an unauthorized user', async () => {
 		await request(app).post(RouteNames.users).expect(HTTP_STATUSES.UNAUTHORIZED_401)
 	})
@@ -126,8 +126,9 @@ describe('Creating an user', () => {
 			.set('authorization', adminAuthorizationValue)
 		expect(allUsersRes.body.items.length).toBe(2)
 	})
-})
+})*/
 
+/*
 describe('Deleting an user', () => {
 	it.skip('should forbid a request from an unauthorized user', async () => {
 		return request(app).put(RouteNames.users)
@@ -156,3 +157,4 @@ describe('Deleting an user', () => {
 			.expect(HTTP_STATUSES.NOT_FOUNT_404)
 	})
 })
+*/

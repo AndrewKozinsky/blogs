@@ -1,12 +1,13 @@
+import { inject, injectable } from 'inversify'
+import { ClassNames } from '../composition/classNames'
 import { CreateUserDtoModel } from '../models/input/users.input.model'
 import { UsersRepository } from '../repositories/users.repository'
 import { CommonService } from './common'
 
+@injectable()
 export class UsersService {
-	constructor(
-		protected usersRepository: UsersRepository,
-		private commonService: CommonService,
-	) {}
+	@inject(ClassNames.UsersRepository) protected usersRepository: UsersRepository
+	@inject(ClassNames.CommonService) private commonService: CommonService
 
 	async getUser(userId: string) {
 		return this.usersRepository.getUserById(userId)

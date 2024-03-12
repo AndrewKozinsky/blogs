@@ -1,9 +1,13 @@
 import { addMilliseconds } from 'date-fns'
 import { NextFunction, Request, Response } from 'express'
-import { browserService } from '../compositionRoot'
+import { BrowserService } from '../application/browser.service'
+import { ClassNames } from '../composition/classNames'
+import { myContainer } from '../composition/inversify.config'
 import { config, HTTP_STATUSES } from '../config/config'
 import { RateLimitModel } from '../db/dbMongoose'
 import { DBTypes } from '../db/dbTypes'
+
+const browserService = myContainer.get<BrowserService>(ClassNames.BrowserService)
 
 async function requestsLimiter(req: Request, res: Response, next: NextFunction) {
 	const ip = browserService.getClientIP(req)

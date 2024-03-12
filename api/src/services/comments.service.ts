@@ -1,3 +1,5 @@
+import { inject, injectable } from 'inversify'
+import { ClassNames } from '../composition/classNames'
 import { DBTypes } from '../db/dbTypes'
 import { UpdateCommentDtoModel } from '../models/input/comments.input.model'
 import { CommentServiceModel } from '../models/service/comments.service.model'
@@ -6,11 +8,11 @@ import { CommentLikesRepository } from '../repositories/commentLikes.repository'
 import { CommentsRepository } from '../repositories/comments.repository'
 import { LayerResult, LayerResultCode } from '../types/resultCodes'
 
+@injectable()
 export class CommentsService {
-	constructor(
-		private commentsRepository: CommentsRepository,
-		private commentLikesRepository: CommentLikesRepository,
-	) {}
+	@inject(ClassNames.CommentsRepository) private commentsRepository: CommentsRepository
+	@inject(ClassNames.CommentLikesRepository)
+	private commentLikesRepository: CommentLikesRepository
 
 	async getComment(commentId: string): Promise<null | CommentServiceModel> {
 		return this.commentsRepository.getComment(commentId)

@@ -1,19 +1,21 @@
 import { addMilliseconds } from 'date-fns'
+import { injectable } from 'inversify'
 import jwt, { decode } from 'jsonwebtoken'
 import { config } from '../config/config'
 import { DBTypes } from '../db/dbTypes'
-import { settings } from '../settings'
+
 import { createUniqString } from '../utils/stringUtils'
 
+@injectable()
 export class JwtService {
 	createAccessTokenStr(userId: string) {
-		return jwt.sign({ userId }, settings.JWT_SECRET, {
+		return jwt.sign({ userId }, config.JWT_SECRET, {
 			expiresIn: config.accessToken.lifeDurationInMs / 1000 + 's',
 		})
 	}
 
 	createRefreshTokenStr(deviceId: string): string {
-		return jwt.sign({ deviceId }, settings.JWT_SECRET, {
+		return jwt.sign({ deviceId }, config.JWT_SECRET, {
 			expiresIn: config.refreshToken.lifeDurationInMs / 1000 + 's',
 		})
 	}
@@ -41,7 +43,7 @@ export class JwtService {
 
 	getUserIdByAccessTokenStr(accessToken: string): null | string {
 		try {
-			const result: any = jwt.verify(accessToken, settings.JWT_SECRET)
+			const result: any = jwt.verify(accessToken, config.JWT_SECRET)
 			return result.userId
 		} catch (error) {
 			return null
@@ -50,7 +52,7 @@ export class JwtService {
 
 	getRefreshTokenDataFromTokenStr(refreshTokenStr: string) {
 		try {
-			const payload = jwt.verify(refreshTokenStr, settings.JWT_SECRET)
+			const payload = jwt.verify(refreshTokenStr, config.JWT_SECRET)
 			return payload as { deviceId: string }
 		} catch (error) {
 			console.log(error)
@@ -60,7 +62,7 @@ export class JwtService {
 
 	isRefreshTokenStrValid(refreshTokenStr: string) {
 		try {
-			jwt.verify(refreshTokenStr, settings.JWT_SECRET)
+			jwt.verify(refreshTokenStr, config.JWT_SECRET)
 			return true
 		} catch (error) {
 			console.log(error)

@@ -1,12 +1,15 @@
 import express from 'express'
-import { commentsRouter } from '../compositionRoot'
+import { ClassNames } from '../composition/classNames'
+import { myContainer } from '../composition/inversify.config'
 import { checkAccessTokenMiddleware } from '../middlewares/checkAccessTokenMiddleware'
 import { setReqUserMiddleware } from '../middlewares/setReqUser.middleware'
 import { commentLikeOperationsValidation } from '../validators/comments/commentLikeOperationsValidation.validator'
 import { updateCommentValidation } from '../validators/comments/updateComment.validator'
+import { CommentsRouter } from './comments.routes'
 
 function getCommentsRouter() {
 	const router = express.Router()
+	const commentsRouter = myContainer.get<CommentsRouter>(ClassNames.CommentsRouter)
 
 	// Return comment by id
 	router.get('/:commentId', setReqUserMiddleware, commentsRouter.getComment.bind(commentsRouter))

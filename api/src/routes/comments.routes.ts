@@ -1,4 +1,6 @@
 import { Response } from 'express'
+import { inject, injectable } from 'inversify'
+import { ClassNames } from '../composition/classNames'
 import { HTTP_STATUSES } from '../config/config'
 import { CommentLikeOperationsDtoModel } from '../models/input/commentLikeOperations.input.model'
 import { UpdateCommentDtoModel } from '../models/input/comments.input.model'
@@ -7,11 +9,11 @@ import { CommentsService } from '../services/comments.service'
 import { ReqWithParams, ReqWithParamsAndBody } from '../models/common'
 import { LayerResultCode } from '../types/resultCodes'
 
+@injectable()
 export class CommentsRouter {
-	constructor(
-		private commentsQueryRepository: CommentsQueryRepository,
-		private commentsService: CommentsService,
-	) {}
+	@inject(ClassNames.CommentsQueryRepository)
+	private commentsQueryRepository: CommentsQueryRepository
+	@inject(ClassNames.CommentsService) private commentsService: CommentsService
 
 	async getComment(req: ReqWithParams<{ commentId: string }>, res: Response) {
 		const { commentId } = req.params

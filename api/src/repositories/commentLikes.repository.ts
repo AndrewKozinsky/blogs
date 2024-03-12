@@ -1,3 +1,4 @@
+import { injectable } from 'inversify'
 import { ObjectId, WithId } from 'mongodb'
 import { CommentLikeModel, CommentModel } from '../db/dbMongoose'
 import { DBTypes } from '../db/dbTypes'
@@ -9,6 +10,7 @@ import { UserServiceModel } from '../models/service/users.service.model'
 import { LayerResult } from '../types/resultCodes'
 import { createUniqString } from '../utils/stringUtils'
 
+@injectable()
 export class CommentLikesRepository {
 	async getCommentLikeByUser(userId: string, commentId: string) {
 		if (!ObjectId.isValid(userId) || !ObjectId.isValid(commentId)) {

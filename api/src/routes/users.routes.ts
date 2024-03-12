@@ -1,16 +1,16 @@
 import { Response } from 'express'
+import { inject, injectable } from 'inversify'
+import { ClassNames } from '../composition/classNames'
 import { HTTP_STATUSES } from '../config/config'
 import { CreateUserDtoModel, GetUsersQueries } from '../models/input/users.input.model'
 import { ReqWithBody, ReqWithParams, ReqWithQuery } from '../models/common'
 import { UsersQueryRepository } from '../repositories/users.queryRepository'
 import { UsersService } from '../services/users.service'
 
+@injectable()
 export class UsersRouter {
-	usersQueryRepository: UsersQueryRepository
-
-	constructor(protected usersService: UsersService) {
-		this.usersQueryRepository = new UsersQueryRepository()
-	}
+	@inject(ClassNames.UsersQueryRepository) private usersQueryRepository: UsersQueryRepository
+	@inject(ClassNames.UsersService) private usersService: UsersService
 
 	async getUsers(req: ReqWithQuery<GetUsersQueries>, res: Response) {
 		const users = await this.usersQueryRepository.getUsers(req.query)

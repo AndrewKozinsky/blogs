@@ -1,3 +1,4 @@
+import { injectable } from 'inversify'
 import { ObjectId, WithId } from 'mongodb'
 import { CommentModel } from '../db/dbMongoose'
 import { DBTypes } from '../db/dbTypes'
@@ -7,6 +8,7 @@ import { CommentServiceModel } from '../models/service/comments.service.model'
 import { UserServiceModel } from '../models/service/users.service.model'
 import { createUniqString } from '../utils/stringUtils'
 
+@injectable()
 export class CommentsRepository {
 	async getComment(commentId: string) {
 		if (!ObjectId.isValid(commentId)) {

@@ -1,12 +1,15 @@
 import express from 'express'
-import { usersRouter } from '../compositionRoot'
+import { ClassNames } from '../composition/classNames'
+import { myContainer } from '../composition/inversify.config'
 import { adminAuthMiddleware } from '../middlewares/adminAuth.middleware'
 import { setReqUserMiddleware } from '../middlewares/setReqUser.middleware'
 import { getUsersValidation } from '../validators/users/getUsers.validator'
 import { userValidation } from '../validators/users/user.validator'
+import { UsersRouter } from './users.routes'
 
 function getUsersRouter() {
 	const router = express.Router()
+	const usersRouter = myContainer.get<UsersRouter>(ClassNames.UsersRouter)
 
 	// Returns all users
 	router.get(

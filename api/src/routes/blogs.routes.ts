@@ -1,4 +1,6 @@
 import { Response } from 'express'
+import { inject, injectable } from 'inversify'
+import { ClassNames } from '../composition/classNames'
 import { HTTP_STATUSES } from '../config/config'
 import { BlogsRepository } from '../repositories/blogs.repository'
 import { PostsQueryRepository } from '../repositories/posts.queryRepository'
@@ -19,13 +21,12 @@ import {
 } from '../models/input/blogs.input.model'
 import { BlogsQueryRepository } from '../repositories/blogs.queryRepository'
 
+@injectable()
 export class BlogsRouter {
-	constructor(
-		private blogsService: BlogsService,
-		private blogsRepository: BlogsRepository,
-		private blogsQueryRepository: BlogsQueryRepository,
-		private postsQueryRepository: PostsQueryRepository,
-	) {}
+	@inject(ClassNames.BlogsService) private blogsService: BlogsService
+	@inject(ClassNames.BlogsRepository) private blogsRepository: BlogsRepository
+	@inject(ClassNames.BlogsQueryRepository) private blogsQueryRepository: BlogsQueryRepository
+	@inject(ClassNames.PostsQueryRepository) private postsQueryRepository: PostsQueryRepository
 
 	async getBlogs(req: ReqWithQuery<GetBlogsQueries>, res: Response) {
 		const blogs = await this.blogsQueryRepository.getBlogs(req.query)

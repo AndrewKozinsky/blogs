@@ -1,6 +1,8 @@
 import { Request } from 'express'
 import useragent from 'express-useragent'
+import { injectable } from 'inversify'
 
+@injectable()
 export class BrowserService {
 	// Returns client's device IP
 	getClientIP(req: Request): string {

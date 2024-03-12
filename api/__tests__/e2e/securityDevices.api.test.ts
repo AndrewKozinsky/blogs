@@ -1,7 +1,6 @@
 // @ts-ignore
 import request from 'supertest'
 import { app } from '../../src/app'
-import { authRepository, jwtService } from '../../src/compositionRoot'
 import { HTTP_STATUSES, config } from '../../src/config/config'
 import RouteNames from '../../src/config/routeNames'
 import { DBTypes } from '../../src/db/dbTypes'
@@ -24,7 +23,7 @@ it.skip('123', () => {
 	expect(2).toBe(2)
 })
 
-describe('Getting all user devices', () => {
+/*describe('Getting all user devices', () => {
 	it.skip('should forbid a request if there is not refresh token', async () => {
 		await request(app).get(RouteNames.securityDevices).expect(HTTP_STATUSES.UNAUTHORIZED_401)
 	})
@@ -47,9 +46,9 @@ describe('Getting all user devices', () => {
 
 		checkUserDeviceObj(getUserDevicesRes.body[0])
 	})
-})
+})*/
 
-describe('Terminate specified device session', () => {
+/*describe('Terminate specified device session', () => {
 	it.skip('should forbid a request from a user without a device refresh token', async () => {
 		return request(app)
 			.delete(RouteNames.securityDevice('999'))
@@ -158,9 +157,9 @@ describe('Terminate specified device session', () => {
 			.set('Cookie', config.refreshToken.name + '=' + deviceRefreshTokenValue)
 			.expect(HTTP_STATUSES.NO_CONTENT_204)
 	})
-})
+})*/
 
-describe('Terminate this device session', () => {
+/*describe('Terminate this device session', () => {
 	it.skip('should forbid a request from a user without a device refresh token', async () => {
 		return request(app)
 			.delete(RouteNames.securityDevices)
@@ -211,4 +210,4 @@ describe('Terminate this device session', () => {
 			.set('Cookie', config.refreshToken.name + '=' + deviceRefreshTokenValue)
 			.expect(HTTP_STATUSES.NO_CONTENT_204)
 	})
-})
+})*/

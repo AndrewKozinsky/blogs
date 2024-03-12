@@ -1,7 +1,11 @@
 import { app } from '../../../src/app'
-import { dbService } from '../../../src/compositionRoot'
+import { ClassNames } from '../../../src/composition/classNames'
+import { myContainer } from '../../../src/composition/inversify.config'
+import { DbService } from '../../../src/db/dbService'
 
 import { clearAllDB } from './db'
+
+const dbService = myContainer.get<DbService>(ClassNames.DbService)
 
 export function resetDbEveryTest() {
 	beforeAll(async () => {

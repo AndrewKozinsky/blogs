@@ -1,3 +1,4 @@
+import { injectable } from 'inversify'
 import { ObjectId, WithId } from 'mongodb'
 import { PostModel } from '../db/dbMongoose'
 import { DBTypes } from '../db/dbTypes'
@@ -5,6 +6,7 @@ import { UpdatePostDtoModel } from '../models/input/posts.input.model'
 import { CreatePostOutModel } from '../models/output/posts.output.model'
 import { PostServiceModel } from '../models/service/posts.service.model'
 
+@injectable()
 export class PostsRepository {
 	/*async getPosts() {
 		const getPostsRes = await PostModel.find({}).lean()

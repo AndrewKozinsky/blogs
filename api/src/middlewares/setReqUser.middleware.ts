@@ -1,6 +1,11 @@
 import { Request, Response, NextFunction } from 'express'
-import { jwtService, usersRepository } from '../compositionRoot'
-import { HTTP_STATUSES } from '../config/config'
+import { JwtService } from '../application/jwt.service'
+import { ClassNames } from '../composition/classNames'
+import { myContainer } from '../composition/inversify.config'
+import { UsersRepository } from '../repositories/users.repository'
+
+const jwtService = myContainer.get<JwtService>(ClassNames.JwtService)
+const usersRepository = myContainer.get<UsersRepository>(ClassNames.UsersRepository)
 
 export async function setReqUserMiddleware(req: Request, res: Response, next: NextFunction) {
 	const authorizationHeader = req.headers['authorization']

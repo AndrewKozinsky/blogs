@@ -1,5 +1,8 @@
+import { injectable } from 'inversify'
+
 const sendpulse = require('sendpulse-api')
 
+@injectable()
 export class EmailAdapter {
 	async sendEmail(toEmail: string, subject: string, textMessage: string, htmlMessage: string) {
 		return new Promise((resolve, reject) => {

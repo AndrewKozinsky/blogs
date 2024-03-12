@@ -1,3 +1,4 @@
+import { injectable } from 'inversify'
 import { ObjectId, WithId } from 'mongodb'
 import { PostModel } from '../db/dbMongoose'
 import { DBTypes } from '../db/dbTypes'
@@ -8,6 +9,7 @@ import {
 	PostOutModel,
 } from '../models/output/posts.output.model'
 
+@injectable()
 export class PostsQueryRepository {
 	async getPosts(queries: GetPostsQueries): Promise<GetPostsOutModel> {
 		const sortBy = queries.sortBy ?? 'createdAt'

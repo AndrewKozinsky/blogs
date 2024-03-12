@@ -1,10 +1,12 @@
 import dotenv from 'dotenv'
+import { injectable } from 'inversify'
 import * as mongoose from 'mongoose'
 
 dotenv.config()
 
 const mongoURI = process.env.MONGO_URL
 
+@injectable()
 export class DbService {
 	async runDb() {
 		try {

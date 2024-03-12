@@ -1,4 +1,6 @@
+import { inject, injectable } from 'inversify'
 import { ObjectId, WithId } from 'mongodb'
+import { ClassNames } from '../composition/classNames'
 import { CommentModel, PostModel } from '../db/dbMongoose'
 import { DBTypes } from '../db/dbTypes'
 import { GetPostCommentsQueries } from '../models/input/posts.input.model'
@@ -23,8 +25,10 @@ type GetPostCommentsResult =
 			}
 	  }
 
+@injectable()
 export class CommentsQueryRepository {
-	constructor(private commentLikesRepository: CommentLikesRepository) {}
+	@inject(ClassNames.CommentLikesRepository)
+	private commentLikesRepository: CommentLikesRepository
 
 	async getComment(
 		userId: undefined | string,

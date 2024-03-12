@@ -12,6 +12,7 @@ export const config = {
 		max: 5,
 		durationInMs: 1000 * 10, // 10 seconds
 	},
+	JWT_SECRET: process.env.JWT_SECRET || '123',
 }
 
 export const HTTP_STATUSES = {

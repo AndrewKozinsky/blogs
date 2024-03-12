@@ -1,7 +1,9 @@
 import { addMilliseconds } from 'date-fns'
+import { inject, injectable } from 'inversify'
 import { ObjectId, WithId } from 'mongodb'
 import { HashService } from '../adapters/hash.adapter'
 import { JwtService } from '../application/jwt.service'
+import { ClassNames } from '../composition/classNames'
 import { config } from '../config/config'
 import { DeviceTokenModel, UserModel } from '../db/dbMongoose'
 import { DBTypes } from '../db/dbTypes'
@@ -11,12 +13,11 @@ import { CommonService } from '../services/common'
 import { LayerResult, LayerResultCode } from '../types/resultCodes'
 import { createUniqString } from '../utils/stringUtils'
 
+@injectable()
 export class AuthRepository {
-	constructor(
-		private jwtService: JwtService,
-		private hashService: HashService,
-		private commonService: CommonService,
-	) {}
+	@inject(ClassNames.JwtService) private jwtService: JwtService
+	@inject(ClassNames.HashService) private hashService: HashService
+	@inject(ClassNames.CommonService) private commonService: CommonService
 
 	async getUserByRefreshToken(refreshTokenStr: string) {
 		const refreshTokenData = this.jwtService.getRefreshTokenDataFromTokenStr(refreshTokenStr)

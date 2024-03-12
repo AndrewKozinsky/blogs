@@ -1,5 +1,6 @@
 import express from 'express'
-import { authRouter } from '../compositionRoot'
+import { ClassNames } from '../composition/classNames'
+import { myContainer } from '../composition/inversify.config'
 import { checkAccessTokenMiddleware } from '../middlewares/checkAccessTokenMiddleware'
 import { checkDeviceRefreshTokenMiddleware } from '../middlewares/checkDeviceRefreshTokenMiddleware'
 import requestsLimiter from '../middlewares/requestsLimitter'
@@ -10,9 +11,11 @@ import { authPasswordRecoveryValidation } from '../validators/auth/authPasswordR
 import { authRegistrationValidation } from '../validators/auth/authRegistration.validator'
 import { authRegistrationConfirmationValidation } from '../validators/auth/authRegistrationConfirmation.validator'
 import { authRegistrationEmailResending } from '../validators/auth/authRegistrationEmailResending.validator'
+import { AuthRouter } from './auth.routes'
 
 function getAuthRouter() {
 	const router = express.Router()
+	const authRouter = myContainer.get<AuthRouter>(ClassNames.AuthRouter)
 
 	// User login
 	router.post('/login', requestsLimiter, authLoginValidation(), authRouter.login.bind(authRouter))

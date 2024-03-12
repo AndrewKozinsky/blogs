@@ -1,7 +1,10 @@
+import { inject, injectable } from 'inversify'
 import { EmailAdapter } from '../adapters/email.adapter'
+import { ClassNames } from '../composition/classNames'
 
+@injectable()
 export class EmailManager {
-	constructor(private emailAdapter: EmailAdapter) {}
+	@inject(ClassNames.EmailAdapter) private emailAdapter: EmailAdapter
 
 	async sendEmailConfirmationMessage(userEmail: string, confirmationCode: string) {
 		const subject = 'Registration at our web-site'
