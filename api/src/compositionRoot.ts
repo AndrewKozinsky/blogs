@@ -88,3 +88,5 @@ export const blogsRouter = new BlogsRouter(
 	postsQueryRepository,
 )
 export const commentsRouter = new CommentsRouter(commentsQueryRepository, commentsService)
+
+export const ioc = {}
