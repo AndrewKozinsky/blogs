@@ -4,10 +4,12 @@ import { myContainer } from '../composition/inversify.config'
 import { adminAuthMiddleware } from '../middlewares/adminAuth.middleware'
 import { checkAccessTokenMiddleware } from '../middlewares/checkAccessTokenMiddleware'
 import { setReqUserMiddleware } from '../middlewares/setReqUser.middleware'
+import { commentLikeOperationsValidation } from '../validators/comments/commentLikeOperationsValidation.validator'
 import { createPostCommentValidation } from '../validators/posts/createPostComment.validator'
 import { getPostCommentsValidation } from '../validators/posts/getPostComments.validator'
 import { getPostsValidation } from '../validators/posts/getPosts.validator'
 import { postValidation } from '../validators/posts/post.validator'
+import { postLikeOperationsValidation } from '../validators/posts/postLikeOperationsValidation.validator'
 import { PostsRouter } from './posts.routes'
 
 function getPostsRouter() {
@@ -66,6 +68,15 @@ function getPostsRouter() {
 		checkAccessTokenMiddleware,
 		createPostCommentValidation(),
 		postsRouter.createComment.bind(postsRouter),
+	)
+
+	// Make like/unlike/dislike/undislike operation
+	router.put(
+		'/:postId/like-status',
+		setReqUserMiddleware,
+		checkAccessTokenMiddleware,
+		postLikeOperationsValidation(),
+		postsRouter.setPostLikeStatus.bind(postsRouter),
 	)
 
 	return router

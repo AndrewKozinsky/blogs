@@ -1,3 +1,4 @@
+import { DBTypes } from '../../db/dbTypes'
 import { ItemsOutModel } from './common'
 
 export type PostOutModel = {
@@ -8,6 +9,18 @@ export type PostOutModel = {
 	blogId: string
 	blogName: string
 	createdAt: string
+	extendedLikesInfo: {
+		likesCount: number
+		dislikesCount: number
+		myStatus: DBTypes.LikeStatuses
+		newestLikes: NewestLike[]
+	}
+}
+
+export type NewestLike = {
+	addedAt: string
+	userId: string
+	login: string
 }
 
 export type GetPostsOutModel = ItemsOutModel<PostOutModel>

@@ -51,6 +51,7 @@ export class BlogsQueryRepository {
 	}
 
 	async getBlogPosts(
+		userId: undefined | string,
 		blogId: string,
 		queries: GetBlogPostsQueries,
 	): Promise<GetBlogPostsOutModel> {
@@ -58,9 +59,9 @@ export class BlogsQueryRepository {
 			blogId,
 		}
 
-		const sortBy = queries.sortBy ?? 'createdAt'
-		const sortDirection = queries.sortDirection ?? 'desc'
-		const sort = { [sortBy]: sortDirection }
+		// const sortBy = queries.sortBy ?? 'createdAt'
+		// const sortDirection = queries.sortDirection ?? 'desc'
+		// const sort = { [sortBy]: sortDirection }
 
 		const pageNumber = queries.pageNumber ? +queries.pageNumber : 1
 		const pageSize = queries.pageSize ? +queries.pageSize : 10
@@ -68,18 +69,14 @@ export class BlogsQueryRepository {
 		const totalBlogPostsCount = await PostModel.countDocuments(filter)
 		const pagesCount = Math.ceil(totalBlogPostsCount / pageSize)
 
-		const getBlogPostsRes = await PostModel.find(filter)
-			.sort(sort)
-			.skip((pageNumber - 1) * pageSize)
-			.limit(pageSize)
-			.lean()
+		const blogPosts = await this.postsQueryRepository.getPosts(userId, queries, blogId)
 
 		return {
 			pagesCount,
 			page: pageNumber,
 			pageSize,
 			totalCount: totalBlogPostsCount,
-			items: getBlogPostsRes.map(this.postsQueryRepository.mapDbPostToOutputPost),
+			items: blogPosts.items,
 		}
 	}
 

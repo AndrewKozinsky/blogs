@@ -2,6 +2,7 @@ import { Response } from 'express'
 import { inject, injectable } from 'inversify'
 import { ClassNames } from '../composition/classNames'
 import { HTTP_STATUSES } from '../config/config'
+import { CommentLikeOperationsDtoModel } from '../models/input/commentLikeOperations.input.model'
 import { CommentsQueryRepository } from '../repositories/comments.queryRepository'
 import { PostsService } from '../services/posts.service'
 import {
@@ -19,6 +20,7 @@ import {
 	UpdatePostDtoModel,
 } from '../models/input/posts.input.model'
 import { PostsQueryRepository } from '../repositories/posts.queryRepository'
+import { LayerResultCode } from '../types/resultCodes'
 
 @injectable()
 export class PostsRouter {
@@ -29,24 +31,28 @@ export class PostsRouter {
 
 	// Returns all posts
 	async getPosts(req: ReqWithQuery<GetPostsQueries>, res: Response) {
-		const posts = await this.postsQueryRepository.getPosts(req.query)
+		const { user } = req
+
+		const posts = await this.postsQueryRepository.getPosts(user?.id, req.query)
 
 		res.status(HTTP_STATUSES.OK_200).send(posts)
 	}
 
 	async createNewPost(req: ReqWithBody<CreatePostDtoModel>, res: Response) {
+		const { user } = req
 		const createPostId = await this.postsService.createPost(req.body)
 
-		const getPostRes = await this.postsQueryRepository.getPost(createPostId)
+		const getPostRes = await this.postsQueryRepository.getPost(user?.id, createPostId)
 
 		res.status(HTTP_STATUSES.CREATED_201).send(getPostRes)
 	}
 
 	// Return post by id
 	async getPost(req: ReqWithParams<{ postId: string }>, res: Response) {
+		const { user } = req
 		const postId = req.params.postId
 
-		const post = await this.postsQueryRepository.getPost(postId)
+		const post = await this.postsQueryRepository.getPost(user?.id, postId)
 
 		if (!post) {
 			res.sendStatus(HTTP_STATUSES.NOT_FOUNT_404)
@@ -136,5 +142,25 @@ export class PostsRouter {
 		)
 
 		res.status(HTTP_STATUSES.CREATED_201).send(getCommentRes)
+	}
+
+	async setPostLikeStatus(
+		req: ReqWithParamsAndBody<{ postId: string }, CommentLikeOperationsDtoModel>,
+		res: Response,
+	) {
+		const postId = req.params.postId
+
+		const setLikeStatus = await this.postsService.setPostLikeStatus(
+			req.user!,
+			postId,
+			req.body.likeStatus,
+		)
+
+		if (setLikeStatus.code === LayerResultCode.NotFound) {
+			res.sendStatus(HTTP_STATUSES.NOT_FOUNT_404)
+			return
+		}
+
+		res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
 	}
 }

@@ -73,6 +73,18 @@ export const CommentLikeModel = mongoose.model<DBTypes.CommentLike>(
 
 // --------
 
+// --------
+
+export const PostLikeSchema = new mongoose.Schema<DBTypes.PostLike>({
+	postId: { type: String, require: true },
+	userId: { type: String, require: true },
+	status: { type: String, enum: ['None', 'Like', 'Dislike'], require: true },
+})
+
+export const PostLikeModel = mongoose.model<DBTypes.PostLike>(DbNames.postLike, PostLikeSchema)
+
+// --------
+
 export const DeviceTokenSchema = new mongoose.Schema<DBTypes.DeviceToken>({
 	issuedAt: { type: Date, require: true },
 	expirationDate: { type: Date, require: true },

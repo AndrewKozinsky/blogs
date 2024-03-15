@@ -53,6 +53,13 @@ export namespace DBTypes {
 		status: LikeStatuses
 	}
 
+	export type PostLike = {
+		postId: string
+		userId: string
+		status: LikeStatuses
+		addedAt: string
+	}
+
 	export type DeviceToken = {
 		issuedAt: Date
 		expirationDate: Date

@@ -1,6 +1,6 @@
 import { injectable } from 'inversify'
 import { ObjectId, WithId } from 'mongodb'
-import { CommentLikeModel, CommentModel } from '../db/dbMongoose'
+import { CommentModel, CommentLikeModel } from '../db/dbMongoose'
 import { DBTypes } from '../db/dbTypes'
 import { UpdateCommentDtoModel } from '../models/input/comments.input.model'
 import { CreatePostCommentDtoModel } from '../models/input/posts.input.model'

@@ -13,6 +13,7 @@ import { BlogsRepository } from '../repositories/blogs.repository'
 import { CommentLikesRepository } from '../repositories/commentLikes.repository'
 import { CommentsQueryRepository } from '../repositories/comments.queryRepository'
 import { CommentsRepository } from '../repositories/comments.repository'
+import { PostLikesRepository } from '../repositories/postLikes.repository'
 import { PostsQueryRepository } from '../repositories/posts.queryRepository'
 import { PostsRepository } from '../repositories/posts.repository'
 import { SecurityQueryRepository } from '../repositories/security.queryRepository'
@@ -52,6 +53,7 @@ myContainer.bind(ClassNames.CommentsQueryRepository).to(CommentsQueryRepository)
 myContainer.bind(ClassNames.BlogsRepository).to(BlogsRepository)
 myContainer.bind(ClassNames.CommentsRepository).to(CommentsRepository)
 myContainer.bind(ClassNames.PostsRepository).to(PostsRepository)
+myContainer.bind(ClassNames.PostLikesRepository).to(PostLikesRepository)
 myContainer.bind(ClassNames.SecurityQueryRepository).to(SecurityQueryRepository)
 myContainer.bind(ClassNames.SecurityRepository).to(SecurityRepository)
 myContainer.bind(ClassNames.BlogsQueryRepository).to(BlogsQueryRepository)

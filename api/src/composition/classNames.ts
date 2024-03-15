@@ -14,6 +14,7 @@ export const ClassNames = {
 	BlogsRepository: 'BlogsRepository',
 	CommentsRepository: 'CommentsRepository',
 	PostsRepository: 'PostsRepository',
+	PostLikesRepository: 'PostLikesRepository',
 	SecurityQueryRepository: 'SecurityQueryRepository',
 	SecurityRepository: 'SecurityRepository',
 	BlogsQueryRepository: 'BlogsQueryRepository',

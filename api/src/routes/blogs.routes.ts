@@ -46,6 +46,7 @@ export class BlogsRouter {
 		res: Response,
 	) {
 		const blogId = req.params.blogId
+		const { user } = req
 
 		const blog = await this.blogsRepository.getBlogById(blogId)
 		if (!blog) {
@@ -53,7 +54,7 @@ export class BlogsRouter {
 			return
 		}
 
-		const posts = await this.blogsQueryRepository.getBlogPosts(blogId, req.query)
+		const posts = await this.blogsQueryRepository.getBlogPosts(user?.id, blogId, req.query)
 
 		if (!posts) {
 			res.sendStatus(HTTP_STATUSES.NOT_FOUNT_404)
@@ -68,6 +69,7 @@ export class BlogsRouter {
 		res: Response,
 	) {
 		const blogId = req.params.blogId
+		const { user } = req
 
 		const blog = await this.blogsRepository.getBlogById(blogId)
 
@@ -78,7 +80,7 @@ export class BlogsRouter {
 
 		const createPostInsertedId = await this.blogsService.createBlogPost(blogId, req.body)
 
-		const createdPost = await this.postsQueryRepository.getPost(createPostInsertedId)
+		const createdPost = await this.postsQueryRepository.getPost(user?.id, createPostInsertedId)
 
 		res.status(HTTP_STATUSES.CREATED_201).send(createdPost)
 	}
