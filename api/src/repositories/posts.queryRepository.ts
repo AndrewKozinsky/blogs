@@ -104,7 +104,7 @@ export class PostsQueryRepository {
 
 	async getNewestPostLikes(postId: string): Promise<NewestLike[]> {
 		const getPostRes = await PostLikeModel.find({ postId, status: DBTypes.LikeStatuses.Like })
-			.sort({ createdAt: 'desc' })
+			.sort({ addedAt: 'desc' })
 			.limit(3)
 			.lean()
 

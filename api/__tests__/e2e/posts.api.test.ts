@@ -755,5 +755,10 @@ describe('Make a post like status', () => {
 
 		checkPostObj(getPostRes.body, 4, 0, DBTypes.LikeStatuses.Like)
 		expect(getPostRes.body.extendedLikesInfo.newestLikes.length).toBe(3)
+
+		// Check likes order
+		expect(getPostRes.body.extendedLikesInfo.newestLikes[0].userId).toBe(user4Id)
+		expect(getPostRes.body.extendedLikesInfo.newestLikes[1].userId).toBe(user3Id)
+		expect(getPostRes.body.extendedLikesInfo.newestLikes[2].userId).toBe(user2Id)
 	})
 })
