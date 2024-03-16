@@ -103,7 +103,10 @@ export class PostsQueryRepository {
 	}
 
 	async getNewestPostLikes(postId: string): Promise<NewestLike[]> {
-		const getPostRes = await PostLikeModel.find({ postId }).limit(3).lean()
+		const getPostRes = await PostLikeModel.find({ postId, status: DBTypes.LikeStatuses.Like })
+			.sort({ createdAt: 'desc' })
+			.limit(3)
+			.lean()
 
 		return await Promise.all(
 			getPostRes.map(async (postLike) => {

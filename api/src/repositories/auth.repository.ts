@@ -9,7 +9,7 @@ import { DeviceTokenModel, UserModel } from '../db/dbMongoose'
 import { DBTypes } from '../db/dbTypes'
 import { DeviceRefreshTokenServiceModel } from '../models/service/auth.service.model'
 import { UserServiceModel } from '../models/service/users.service.model'
-import { CommonService } from '../services/common'
+import { CommonService } from '../services/common.service'
 import { LayerResult, LayerResultCode } from '../types/resultCodes'
 import { createUniqString } from '../utils/stringUtils'
 

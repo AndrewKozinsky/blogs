@@ -587,3 +587,173 @@ it.skip('123', async () => {
 		await request(app).get(RouteNames.post(createdPostId)).expect(HTTP_STATUSES.NOT_FOUNT_404)
 	})
 })*/
+
+describe('Make a post like status', () => {
+	it.skip('should forbid a request from an unauthorized user', async () => {
+		await request(app)
+			.put(RouteNames.postLikeStatus('999'))
+			.expect(HTTP_STATUSES.UNAUTHORIZED_401)
+	})
+
+	it.skip('should return 404 if a post does not exists', async () => {
+		// User will create a post
+		const createdUserRes = await addUserByAdminRequest(app)
+		expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
+		const loginUserRes = await loginRequest(app, userEmail, userPassword)
+		const userToken = loginUserRes.body.accessToken
+
+		await request(app)
+			.put(RouteNames.postLikeStatus('999'))
+			.set('authorization', 'Bearer ' + userToken)
+			.send(JSON.stringify({ likeStatus: 'None' }))
+			.set('Content-Type', 'application/json')
+			.set('Accept', 'application/json')
+			.expect(HTTP_STATUSES.NOT_FOUNT_404)
+	})
+
+	it.skip('should return 400 if requst body does not exist', async () => {
+		// User will create a comment
+		const createdUserRes = await addUserByAdminRequest(app)
+		expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
+		const loginUserRes = await loginRequest(app, userEmail, userPassword)
+		const userToken = loginUserRes.body.accessToken
+
+		await request(app)
+			.put(RouteNames.postLikeStatus('999'))
+			.set('authorization', 'Bearer ' + userToken)
+			.expect(HTTP_STATUSES.BAD_REQUEST_400)
+	})
+
+	it.skip('should return 204 if pass right body data to right address', async () => {
+		// Create a blog
+		const createdBlogRes = await addBlogRequest(app)
+		expect(createdBlogRes.status).toBe(HTTP_STATUSES.CREATED_201)
+		const blogId = createdBlogRes.body.id
+
+		// Create a post in the blog
+		const createdPostRes = await addPostRequest(app, blogId)
+		expect(createdPostRes.status).toBe(HTTP_STATUSES.CREATED_201)
+		const postId = createdPostRes.body.id
+
+		// Create a user on behalf of which requests will be made
+		const createdUserRes = await addUserByAdminRequest(app)
+		expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
+		const loginUserRes = await loginRequest(app, userEmail, userPassword)
+		const userToken = loginUserRes.body.accessToken
+
+		// Set a like status to the post
+		await request(app)
+			.put(RouteNames.postLikeStatus(postId))
+			.set('authorization', 'Bearer ' + userToken)
+			.send(JSON.stringify({ likeStatus: DBTypes.LikeStatuses.Like }))
+			.set('Content-Type', 'application/json')
+			.set('Accept', 'application/json')
+			.expect(HTTP_STATUSES.NO_CONTENT_204)
+
+		// Get the post again to check a returned object
+		const getPostRes = await request(app)
+			.get(RouteNames.post(postId))
+			.expect(HTTP_STATUSES.OK_200)
+
+		checkPostObj(getPostRes.body, 1, 0, DBTypes.LikeStatuses.None)
+	})
+
+	it('create post and make a few likes from different users', async () => {
+		// Create a blog
+		const createdBlogRes = await addBlogRequest(app)
+		expect(createdBlogRes.status).toBe(HTTP_STATUSES.CREATED_201)
+		const blogId = createdBlogRes.body.id
+
+		// Create a post
+		const createdPostRes = await addPostRequest(app, blogId)
+		expect(createdPostRes.status).toBe(HTTP_STATUSES.CREATED_201)
+		const postId = createdPostRes.body.id
+
+		// Users and their tokens
+		let user1Token = ''
+		let user1Id = ''
+		let user1Login = ''
+		let user2Token = ''
+		let user2Id = ''
+		let user3Token = ''
+		let user3Id = ''
+		let user4Token = ''
+		let user4Id = ''
+
+		for (let i = 1; i <= 4; i++) {
+			const login = 'login-' + i
+			const password = 'password-' + i
+			const email = `email-${i}@mail.com`
+
+			const createdUserRes = await addUserByAdminRequest(app, {
+				login,
+				password,
+				email,
+			})
+			expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
+			const loginUserRes = await loginRequest(app, email, password)
+			const token = loginUserRes.body.accessToken
+
+			if (i == 1) {
+				user1Token = token
+				user1Id = createdUserRes.body.id
+				user1Login = createdUserRes.body.login
+			} else if (i == 2) {
+				user2Token = token
+				user2Id = createdUserRes.body.id
+			} else if (i == 3) {
+				user3Token = token
+				user3Id = createdUserRes.body.id
+			} else if (i == 4) {
+				user4Token = token
+				user4Id = createdUserRes.body.id
+			}
+		}
+
+		async function setLikeStatus(userToken: string, likeStatus: DBTypes.LikeStatuses) {
+			await request(app)
+				.put(RouteNames.postLikeStatus(postId))
+				.set('authorization', 'Bearer ' + userToken)
+				.send(JSON.stringify({ likeStatus }))
+				.set('Content-Type', 'application/json')
+				.set('Accept', 'application/json')
+				.expect(HTTP_STATUSES.NO_CONTENT_204)
+		}
+
+		// Set a like statuses to the post
+		await setLikeStatus(user1Token, DBTypes.LikeStatuses.Like)
+
+		// Get the post again by an unauthorized user to check a returned object
+		let getPostRes = await request(app)
+			.get(RouteNames.post(postId))
+			.expect(HTTP_STATUSES.OK_200)
+
+		checkPostObj(getPostRes.body, 1, 0, DBTypes.LikeStatuses.None)
+
+		// Get the post again by an authorized user to check a returned object
+		getPostRes = await request(app)
+			.get(RouteNames.post(postId))
+			.set('authorization', 'Bearer ' + user1Token)
+			.set('Content-Type', 'application/json')
+			.set('Accept', 'application/json')
+			.expect(HTTP_STATUSES.OK_200)
+
+		checkPostObj(getPostRes.body, 1, 0, DBTypes.LikeStatuses.Like)
+
+		// Set a like statuses to the post
+		await setLikeStatus(user2Token, DBTypes.LikeStatuses.Like)
+		await setLikeStatus(user3Token, DBTypes.LikeStatuses.Like)
+		await setLikeStatus(user4Token, DBTypes.LikeStatuses.Like)
+
+		// Get the post again by an authorized user to check a returned object
+		getPostRes = await request(app)
+			.get(RouteNames.post(postId))
+			.set('authorization', 'Bearer ' + user2Token)
+			.set('Content-Type', 'application/json')
+			.set('Accept', 'application/json')
+			.expect(HTTP_STATUSES.OK_200)
+
+		checkPostObj(getPostRes.body, 4, 0, DBTypes.LikeStatuses.Like)
+		expect(getPostRes.body.extendedLikesInfo.newestLikes.length).toBe(3)
+	})
+})

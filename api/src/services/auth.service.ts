@@ -15,7 +15,7 @@ import { AuthRepository } from '../repositories/auth.repository'
 import { UsersRepository } from '../repositories/users.repository'
 import { LayerResult, LayerResultCode } from '../types/resultCodes'
 import { createUniqString } from '../utils/stringUtils'
-import { CommonService } from './common'
+import { CommonService } from './common.service'
 import { UsersService } from './users.service'
 
 @injectable()

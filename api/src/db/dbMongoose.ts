@@ -79,6 +79,7 @@ export const PostLikeSchema = new mongoose.Schema<DBTypes.PostLike>({
 	postId: { type: String, require: true },
 	userId: { type: String, require: true },
 	status: { type: String, enum: ['None', 'Like', 'Dislike'], require: true },
+	addedAt: { type: String, require: true },
 })
 
 export const PostLikeModel = mongoose.model<DBTypes.PostLike>(DbNames.postLike, PostLikeSchema)

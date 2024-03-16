@@ -13,6 +13,9 @@ const RouteNames = {
 	postComments(postId: string, tail: string = '') {
 		return '/posts/' + postId + '/comments' + tail
 	},
+	postLikeStatus(postId: string) {
+		return '/posts/' + postId + '/like-status'
+	},
 	users: '/users',
 	user(id: string) {
 		return '/users/' + id

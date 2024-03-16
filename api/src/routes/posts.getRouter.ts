@@ -34,7 +34,7 @@ function getPostsRouter() {
 	)
 
 	// Return post by id
-	router.get('/:postId', postsRouter.getPost.bind(postsRouter))
+	router.get('/:postId', setReqUserMiddleware, postsRouter.getPost.bind(postsRouter))
 
 	// Update existing post by id with InputModel
 	router.put(

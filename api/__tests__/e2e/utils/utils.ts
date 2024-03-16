@@ -98,7 +98,12 @@ export function createDtoAddBlogPost(
 	)
 }
 
-export function checkPostObj(postObj: any) {
+export function checkPostObj(
+	postObj: any,
+	likesCount: number,
+	dislikesCount: number,
+	currentUserLikeStatus: DBTypes.LikeStatuses,
+) {
 	expect(postObj._id).toBe(undefined)
 	expect(typeof postObj.id).toBe('string')
 	expect(typeof postObj.title).toBe('string')
@@ -109,6 +114,20 @@ export function checkPostObj(postObj: any) {
 	expect(postObj.createdAt).toMatch(
 		/\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/,
 	)
+	expect(typeof postObj.extendedLikesInfo).toBe('object')
+	expect(postObj.extendedLikesInfo.likesCount).toBe(likesCount)
+	expect(postObj.extendedLikesInfo.dislikesCount).toBe(dislikesCount)
+	expect(postObj.extendedLikesInfo.myStatus).toBe(currentUserLikeStatus)
+	expect(typeof postObj.extendedLikesInfo).toBe('object')
+	expect({}.toString.call(postObj.extendedLikesInfo.newestLikes)).toBe('[object Array]')
+
+	if (postObj.extendedLikesInfo.newestLikes.length) {
+		expect(postObj.extendedLikesInfo.newestLikes[0].addedAt).toMatch(
+			/\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/,
+		)
+		expect(typeof postObj.extendedLikesInfo.newestLikes[0].userId).toBe('string')
+		expect(typeof postObj.extendedLikesInfo.newestLikes[0].login).toBe('string')
+	}
 }
 
 export async function addUserByAdminRequest(
