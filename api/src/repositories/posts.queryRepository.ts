@@ -1,5 +1,6 @@
 import { inject, injectable } from 'inversify'
 import { ObjectId, WithId } from 'mongodb'
+import { FilterQuery } from 'mongoose'
 import { ClassNames } from '../composition/classNames'
 import { PostLikeModel, PostLikeSchema, PostModel } from '../db/dbMongoose'
 import { DBTypes } from '../db/dbTypes'
@@ -23,6 +24,11 @@ export class PostsQueryRepository {
 		queries: GetPostsQueries,
 		blogId?: string,
 	): Promise<GetPostsOutModel> {
+		const filter: FilterQuery<DBTypes.Blog> = {}
+		if (blogId) {
+			filter.blogId = blogId
+		}
+
 		const sortBy = queries.sortBy ?? 'createdAt'
 		const sortDirection = queries.sortDirection ?? 'desc'
 		const sort = { [sortBy]: sortDirection }
@@ -33,7 +39,7 @@ export class PostsQueryRepository {
 		const totalPostsCount = await PostModel.countDocuments({})
 		const pagesCount = Math.ceil(totalPostsCount / pageSize)
 
-		const getPostsRes = await PostModel.find({ blogId })
+		const getPostsRes = await PostModel.find(filter)
 			.sort(sort)
 			.skip((pageNumber - 1) * pageSize)
 			.limit(pageSize)

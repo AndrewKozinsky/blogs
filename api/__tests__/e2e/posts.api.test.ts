@@ -756,9 +756,109 @@ describe('Make a post like status', () => {
 		checkPostObj(getPostRes.body, 4, 0, DBTypes.LikeStatuses.Like)
 		expect(getPostRes.body.extendedLikesInfo.newestLikes.length).toBe(3)
 
-		// Check likes order
+		// Check extendedLikesInfo order
 		expect(getPostRes.body.extendedLikesInfo.newestLikes[0].userId).toBe(user4Id)
 		expect(getPostRes.body.extendedLikesInfo.newestLikes[1].userId).toBe(user3Id)
 		expect(getPostRes.body.extendedLikesInfo.newestLikes[2].userId).toBe(user2Id)
+	})
+
+	it('create 6 posts then: like post 1 by user 1, user 2; like post 2 by user 2, user 3; dislike post 3 by user 1; like post 4 by user 1, user 4, user 2, user 3; like post 5 by user 2, dislike by user 3; like post 6 by user 1, dislike by user 2. Get the posts by user 1 after all likes NewestLikes should be sorted in descending', async () => {
+		// Create a blog
+		const createdBlogRes = await addBlogRequest(app)
+		expect(createdBlogRes.status).toBe(HTTP_STATUSES.CREATED_201)
+		const blogId = createdBlogRes.body.id
+
+		// Create posts
+		const createdPost1Res = await addPostRequest(app, blogId)
+		const createdPost2Res = await addPostRequest(app, blogId)
+		const createdPost3Res = await addPostRequest(app, blogId)
+		const createdPost4Res = await addPostRequest(app, blogId)
+		const createdPost5Res = await addPostRequest(app, blogId)
+		const createdPost6Res = await addPostRequest(app, blogId)
+		const postId1 = createdPost1Res.body.id
+		const postId2 = createdPost2Res.body.id
+		const postId3 = createdPost3Res.body.id
+		const postId4 = createdPost4Res.body.id
+		const postId5 = createdPost5Res.body.id
+		const postId6 = createdPost6Res.body.id
+
+		// Users and their tokens
+		let user1Token = ''
+		let user1Id = ''
+		let user1Login = ''
+		let user2Token = ''
+		let user2Id = ''
+		let user3Token = ''
+		let user3Id = ''
+		let user4Token = ''
+		let user4Id = ''
+
+		for (let i = 1; i <= 4; i++) {
+			const login = 'login-' + i
+			const password = 'password-' + i
+			const email = `email-${i}@mail.com`
+
+			const createdUserRes = await addUserByAdminRequest(app, {
+				login,
+				password,
+				email,
+			})
+			expect(createdUserRes.status).toBe(HTTP_STATUSES.CREATED_201)
+			const loginUserRes = await loginRequest(app, email, password)
+			const token = loginUserRes.body.accessToken
+
+			if (i == 1) {
+				user1Token = token
+				user1Id = createdUserRes.body.id
+				user1Login = createdUserRes.body.login
+			} else if (i == 2) {
+				user2Token = token
+				user2Id = createdUserRes.body.id
+			} else if (i == 3) {
+				user3Token = token
+				user3Id = createdUserRes.body.id
+			} else if (i == 4) {
+				user4Token = token
+				user4Id = createdUserRes.body.id
+			}
+		}
+
+		async function setLikeStatus(
+			userToken: string,
+			postId: string,
+			likeStatus: DBTypes.LikeStatuses,
+		) {
+			await request(app)
+				.put(RouteNames.postLikeStatus(postId))
+				.set('authorization', 'Bearer ' + userToken)
+				.send(JSON.stringify({ likeStatus }))
+				.set('Content-Type', 'application/json')
+				.set('Accept', 'application/json')
+				.expect(HTTP_STATUSES.NO_CONTENT_204)
+		}
+
+		// Set a like statuses to the posts
+		await setLikeStatus(user1Token, postId1, DBTypes.LikeStatuses.Like)
+		await setLikeStatus(user2Token, postId1, DBTypes.LikeStatuses.Like)
+		await setLikeStatus(user2Token, postId2, DBTypes.LikeStatuses.Like)
+		await setLikeStatus(user3Token, postId2, DBTypes.LikeStatuses.Like)
+		await setLikeStatus(user1Token, postId3, DBTypes.LikeStatuses.Dislike)
+		await setLikeStatus(user1Token, postId4, DBTypes.LikeStatuses.Like)
+		await setLikeStatus(user4Token, postId4, DBTypes.LikeStatuses.Like)
+		await setLikeStatus(user2Token, postId4, DBTypes.LikeStatuses.Like)
+		await setLikeStatus(user3Token, postId4, DBTypes.LikeStatuses.Like)
+		await setLikeStatus(user2Token, postId5, DBTypes.LikeStatuses.Like)
+		await setLikeStatus(user3Token, postId5, DBTypes.LikeStatuses.Dislike)
+		await setLikeStatus(user1Token, postId6, DBTypes.LikeStatuses.Like)
+
+		// Get the posts by user 1 after all likes NewestLikes should be sorted in descending
+		const getPostsRes = await request(app)
+			.get(RouteNames.posts)
+			.set('authorization', 'Bearer ' + user1Token)
+			.set('Content-Type', 'application/json')
+			.set('Accept', 'application/json')
+			.expect(HTTP_STATUSES.OK_200)
+
+		expect(getPostsRes.body.items.length).toBe(6)
 	})
 })
